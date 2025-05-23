@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>it.unipd.dei.softplat</groupId>
+
+    <artifactId>softplat_project</artifactId>
+
+    <version>1.0</version>
+    
+    <name>Software Platforms Project</name>
+    
+    <description>a platform for obtaining and retrieving articles from online newspapers.</description>
+    
+    <url>https://github.com/FrancescoChemello/Software-Platforms-Project</url>
+    
+    <inceptionYear>2025</inceptionYear>
+
+    <developers>
+            <developer>
+                <id>fc</id>
+                <name>Francesco Chemello</name>
+                <email>francesco.chemello.1@studenti.unipd.it</email>
+            </developer>
+    </developers>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+    
+        <defaultGoal>package</defaultGoal>
+
+        <!-- source code folder -->
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+
+        <!-- compiled code folder -->
+        <directory>${basedir}/target</directory>
+
+        <!-- name of the generated package -->
+        <finalName>${project.artifactId}-${project.version}</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+            </plugin>
+        </plugins>
+    
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>4.11.1</version> <!-- o versione più recente -->
+        </dependency>
+    </dependencies>
+
+</project>
