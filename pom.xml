@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>it.unipd.dei.softplat</groupId>
+    <artifactId>softplat-project</artifactId>
+    <version>1.0.0</version>
+    <name>Software Platforms Project</name>
+    <description>A platform for obtaining and retrieving articles from online newspapers.</description>
+    <url>https://github.com/FrancescoChemello/Software-Platforms-Project</url>
+    <inceptionYear>2025</inceptionYear>
+    <packaging>pom</packaging>
+
+    <developers>
+        <developer>
+            <id>fc</id>
+            <name>Francesco Chemello</name>
+            <email>francesco.chemello.1@studenti.unipd.it</email>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>client-service</module>
+        <module>monitoring-service</module>
+        <module>datamanager-service</module>
+        <module>mongodb-service</module>
+        <module>elasticsearch-service</module>
+        <module>mallet-service</module>
+        <module>query-service</module>
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+        <spring.boot.version>3.1.0</spring.boot.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <encoding>UTF-8</encoding>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>21</source>
+                        <target>21</target>
+                    </configuration>
+            </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
