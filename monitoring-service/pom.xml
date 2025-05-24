@@ -57,6 +57,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-    </dependencies>
 
+	    <dependency>
+            <groupId>com.github.matarrese</groupId>
+            <artifactId>content-api-the-guardian</artifactId>
+            <version>0d272f1</version>
+        </dependency>
+    </dependencies>
 </project>

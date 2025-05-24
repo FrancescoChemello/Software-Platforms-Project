@@ -1,0 +1,9 @@
+# Ignore all VS code file
+.vscode/
+
+# Enviroment variables
+.env
+.env.local
+
+# Ignore properties files
+*.properties
