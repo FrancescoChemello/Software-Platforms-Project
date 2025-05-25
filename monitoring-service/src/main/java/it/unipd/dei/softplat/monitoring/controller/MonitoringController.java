@@ -62,17 +62,4 @@ public class MonitoringController {
         monitoringService.startMonitoring(request);
         return ResponseEntity.ok("Monitoring for issue query \""+request.getIssueQuery()+"\" started successfully.");
     }
-
-    /**
-     * Test endpoint to check if the service is running.
-     * @return A simple message indicating the service is running.
-     */
-    @PostMapping("/testing/")
-    public ResponseEntity<String> testEndpoint(@RequestBody MonitoringRequest request) {
-        // Create a dummy request to test the service
-        MonitoringRequest dummyRequest = new MonitoringRequest("test", "testLabel", "01/01/2023", "31/12/2023");
-        monitoringService.startMonitoring(dummyRequest);
-        // Return a success message
-        return ResponseEntity.ok("Monitoring Service is running successfully.");
-    }
 }

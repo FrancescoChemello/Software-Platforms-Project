@@ -17,9 +17,9 @@ public class MonitoringRequest {
     private String issueQuery;
     @NotNull @NotEmpty
     private String label;
-    @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "Start date must be in the format DD/MM/YYYY")
+    @NotNull @NotEmpty @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "Start date must be in the format DD/MM/YYYY")
     private String startDate;
-    @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "End date must be in the format DD/MM/YYYY")
+    @NotNull @NotEmpty @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "End date must be in the format DD/MM/YYYY")
     private String endDate;
 
     public MonitoringRequest() {
@@ -88,6 +88,9 @@ public class MonitoringRequest {
      * @param startDate
      */
     public void setStartDate(String startDate) {
+        if(this.endDate != null && startDate.compareTo(this.endDate) > 0) {
+            throw new IllegalArgumentException("Start date cannot be after end date.");
+        }
         this.startDate = startDate;
     }
 
@@ -104,6 +107,9 @@ public class MonitoringRequest {
      * @param endDate
      */
     public void setEndDate(String endDate) {
+        if(this.startDate != null && this.startDate.compareTo(endDate) > 0) {
+            throw new IllegalArgumentException("End date cannot be before start date.");
+        }
         this.endDate = endDate;
     }
 }

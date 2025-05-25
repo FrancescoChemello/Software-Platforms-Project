@@ -55,6 +55,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite-engine</artifactId>
+            <version>1.9.0</version>
+            <scope>test</scope>
+        </dependency>
 	    <dependency>
             <groupId>com.github.matarrese</groupId>
             <artifactId>content-api-the-guardian</artifactId>
