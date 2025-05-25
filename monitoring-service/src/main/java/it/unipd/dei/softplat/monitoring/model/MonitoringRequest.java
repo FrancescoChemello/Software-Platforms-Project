@@ -8,10 +8,18 @@
 
 package it.unipd.dei.softplat.monitoring.model;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
 public class MonitoringRequest {
+    @NotNull @NotEmpty
     private String issueQuery;
+    @NotNull @NotEmpty
     private String label;
+    @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "Start date must be in the format DD/MM/YYYY")
     private String startDate;
+    @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "End date must be in the format DD/MM/YYYY")
     private String endDate;
 
     public MonitoringRequest() {
@@ -27,35 +35,7 @@ public class MonitoringRequest {
      * @param startDate the start date for the monitoring period
      * @param endDate the end date for the monitoring period
      */
-    public MonitoringRequest(String issueQuery, String label, String startDate, String endDate) {
-        // Check the validity of the input parameters
-        if(issueQuery == null || issueQuery.isEmpty()) {
-            throw new IllegalArgumentException("Issue query cannot be null or empty.");
-        }
-        if(label == null || label.isEmpty()) {
-            throw new IllegalArgumentException("Label cannot be null or empty.");
-        }
-        if(startDate == null || startDate.isEmpty()) {
-            throw new IllegalArgumentException("Start date cannot be null or empty.");
-        }else{
-            // Validate the date format (DD/MM/YYYY)
-            if(!startDate.matches("\\d{2}/\\d{2}/\\d{4}")) {
-                throw new IllegalArgumentException("Start date must be in the format DD/MM/YYYY.");
-            }
-        }
-        if(endDate == null || endDate.isEmpty()) {
-            throw new IllegalArgumentException("End date cannot be null or empty.");
-        }else{
-            // Validate the date format (DD/MM/YYYY)
-            if(!endDate.matches("\\d{2}/\\d{2}/\\d{4}")) {
-                throw new IllegalArgumentException("End date must be in the format DD/MM/YYYY.");
-            }
-        }
-        // Check if the start date is before the end date
-        if(startDate.compareTo(endDate) > 0) {
-            throw new IllegalArgumentException("Start date cannot be after end date.");
-        }
-        
+    public MonitoringRequest(String issueQuery, String label, String startDate, String endDate) {      
         // Initialize the fields with the provided values
         this.issueQuery = issueQuery;
         this.label = label;
@@ -68,7 +48,7 @@ public class MonitoringRequest {
      * @return the issue query string
      */
     public String getIssueQuery() {
-        return issueQuery;
+        return this.issueQuery;
     }
 
     /**
@@ -76,9 +56,6 @@ public class MonitoringRequest {
      * @param issueQuery
      */
     public void setIssueQuery(String issueQuery) {
-        if(issueQuery == null || issueQuery.isEmpty()) {
-            throw new IllegalArgumentException("Issue query cannot be null or empty.");
-        }
         this.issueQuery = issueQuery;
     }
 
@@ -87,7 +64,7 @@ public class MonitoringRequest {
      * @return the label string
      */
     public String getLabel() {
-        return label;
+        return this.label;
     }
 
     /**
@@ -95,9 +72,6 @@ public class MonitoringRequest {
      * @param label
      */
     public void setLabel(String label) {
-        if(label == null || label.isEmpty()) {
-            throw new IllegalArgumentException("Issue query cannot be null or empty.");
-        }
         this.label = label;
     }
 
@@ -106,7 +80,7 @@ public class MonitoringRequest {
      * @return the start date string in format (DD/MM/YYYY)
      */
     public String getStartDate() {
-        return startDate;
+        return this.startDate;
     }
 
     /**
@@ -114,18 +88,6 @@ public class MonitoringRequest {
      * @param startDate
      */
     public void setStartDate(String startDate) {
-        if(startDate == null || startDate.isEmpty()) {
-            throw new IllegalArgumentException("Start date cannot be null or empty.");
-        }else{
-            // Validate the date format (DD/MM/YYYY)
-            if(!startDate.matches("\\d{2}/\\d{2}/\\d{4}")) {
-                throw new IllegalArgumentException("Start date must be in the format DD/MM/YYYY.");
-            }
-        }
-        // Check if the start date is before the end date
-        if(startDate.compareTo(getEndDate()) > 0) {
-            throw new IllegalArgumentException("Start date cannot be after date: "+getEndDate()+".");
-        }
         this.startDate = startDate;
     }
 
@@ -134,7 +96,7 @@ public class MonitoringRequest {
      * @return the end date string in format (DD/MM/YYYY)
      */
     public String getEndDate() {
-        return endDate;
+        return this.endDate;
     }
 
     /**
@@ -142,18 +104,6 @@ public class MonitoringRequest {
      * @param endDate
      */
     public void setEndDate(String endDate) {
-        if(endDate == null || endDate.isEmpty()) {
-            throw new IllegalArgumentException("Start date cannot be null or empty.");
-        }else{
-            // Validate the date format (DD/MM/YYYY)
-            if(!endDate.matches("\\d{2}/\\d{2}/\\d{4}")) {
-                throw new IllegalArgumentException("Start date must be in the format DD/MM/YYYY.");
-            }
-        }
-        // Check if the start date is before the end date
-        if(getStartDate().compareTo(endDate) > 0) {
-            throw new IllegalArgumentException("End date cannot be before date: "+getStartDate()+".");
-        }
         this.endDate = endDate;
     }
 }

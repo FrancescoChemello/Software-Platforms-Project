@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
 import it.unipd.dei.softplat.monitoring.service.MonitoringService;
+import jakarta.validation.Valid;
 
 @RestController
 public class MonitoringController {
@@ -39,7 +40,7 @@ public class MonitoringController {
      * @return A ResponseEntity indicating the result of the operation.
      */
     @PostMapping("/monitoring/")
-    public ResponseEntity<String> startMonitoring(@RequestBody MonitoringRequest request){
+    public ResponseEntity<?> startMonitoring(@Valid @RequestBody MonitoringRequest request){
         // Validate the request
         if(request == null) {
             return ResponseEntity.badRequest().body("Request cannot be null.");
@@ -59,7 +60,7 @@ public class MonitoringController {
 
         // Start the monitoring process
         monitoringService.startMonitoring(request);
-        return ResponseEntity.ok("Monitoring for issue query "+request.getIssueQuery()+" started successfully.");
+        return ResponseEntity.ok("Monitoring for issue query \""+request.getIssueQuery()+"\" started successfully.");
     }
 
     /**
