@@ -9,4 +9,4 @@
 *.properties
 
 # Ignore Maven target directory
-/target/
+*/target/
