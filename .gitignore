@@ -7,3 +7,6 @@
 
 # Ignore properties files
 *.properties
+
+# Ignore Maven target directory
+/target/
