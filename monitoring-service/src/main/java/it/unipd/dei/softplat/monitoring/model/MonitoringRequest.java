@@ -22,11 +22,12 @@ public class MonitoringRequest {
     @NotNull @NotEmpty @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "End date must be in the format DD/MM/YYYY")
     private String endDate;
 
-    public MonitoringRequest() {
-        // Default constructor
-        // This is useful for frameworks that require a no-argument constructor
-        // such as Spring when deserializing JSON requests.
-    }
+    /**
+     * Default constructor for MonitoringRequest.
+     * This constructor is required for frameworks that require a no-argument constructor,
+     * such as Spring when deserializing JSON requests.
+     */
+    public MonitoringRequest() { }
 
     /**
      * Default constructor for MonitoringRequest.
