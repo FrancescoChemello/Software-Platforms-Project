@@ -21,6 +21,10 @@ import it.unipd.dei.softplat.datamanager.controller.DataManagerController;
 import it.unipd.dei.softplat.datamanager.service.DataManagerService;
 import it.unipd.dei.softplat.datamanager.model.Article;
 
+/**
+ * This class contains unit tests for the DataManagerController.
+ * It tests the getArticles method and the validation of the Article object.
+ */
 public class DataManagerTest {
     
     private final DataManagerController controller_test = new DataManagerController(new DataManagerService());

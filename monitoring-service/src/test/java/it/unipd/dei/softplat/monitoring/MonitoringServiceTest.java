@@ -18,15 +18,20 @@ import it.unipd.dei.softplat.monitoring.controller.MonitoringController;
 import it.unipd.dei.softplat.monitoring.service.MonitoringService;
 import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
 
+/**
+ * This class is intended to test the MonitoringService.
+ * It contains test methods to validate the functionality of the MonitoringController and the MonitoringRequest model.
+ */
 public class MonitoringServiceTest {
     
     private final MonitoringController controller_test = new MonitoringController(new MonitoringService(java.util.ResourceBundle.getBundle("application").getString("guardian.open.api.key")));
 
+    /**
+     * This test method is intended to test the startMonitoring method of the MonitoringController.
+     * It creates a valid and an invalid MonitoringRequest and calls the startMonitoring method.
+     */
     @Test
     public void testStartMonitoring() {
-        // This test method is intended to test the startMonitoring method of the MonitoringController.
-        // It creates a valid and an invalid MonitoringRequest and call the startMonitoring method.
-        
         // Example of a valid request
         MonitoringRequest request = new MonitoringRequest(
             "example issue query",
@@ -58,10 +63,12 @@ public class MonitoringServiceTest {
         assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
+    /**
+     * This test method is intended to test the validation of the MonitoringRequest object.
+     * It checks all the getters and setters of the MonitoringRequest class.
+     */
     @Test
     public void testRequestValidationGetterSetter() {
-        // This test method is intended to test the validation of the MonitoringRequest object.
-        // It checks all the getters and setters of the MonitoringRequest class.
         MonitoringRequest request = new MonitoringRequest();
 
         // Set the issue query
@@ -78,9 +85,13 @@ public class MonitoringServiceTest {
         assertEquals("31/12/2023", request.getEndDate(), "End date should match the set value");
     }
 
+    /**
+     * This test method is intended to test the validation of the MonitoringRequest object for null values.
+     * It checks if the issue query, label, start date, and end date are not null.
+     * If any of these values are null, it should throw an IllegalArgumentException.
+     */
     @Test
     public void testRequestValidationNullValues() {
-        // This test method is intended to test the validation of the MonitoringRequest object for null values.
         MonitoringRequest request = new MonitoringRequest();
         // Check if the request rejects null values, empty strings, or invalid formats
         // setIssueQuery with null value
@@ -113,9 +124,13 @@ public class MonitoringServiceTest {
         }
     }
 
+    /**
+     * This test method is intended to test the validation of the MonitoringRequest object for empty values.
+     * It checks if the issue query, label, start date, and end date are not empty strings.
+     * If any of these values are empty, it should throw an IllegalArgumentException.
+     */
     @Test
     public void testRequestValidationEmptyValues() {
-        // This test method is intended to test the validation of the MonitoringRequest object for empty values.
         MonitoringRequest request = new MonitoringRequest();
         // setIssueQuery with empty string
         try {
@@ -147,9 +162,13 @@ public class MonitoringServiceTest {
         }
     }
 
+    /**
+     * This test method is intended to test the validation of the MonitoringRequest object for patterns.
+     * It checks if the start date and end date follow the expected pattern of dd/MM/yyyy.
+     * If the dates do not match the expected pattern, it should throw an IllegalArgumentException.
+     */
     @Test
     public void testRequestValidationPatterns() {
-        // This test method is intended to test the validation of the MonitoringRequest object for patterns.
         MonitoringRequest request = new MonitoringRequest();
         // setStartDate with invalid pattern
         try {
@@ -166,9 +185,13 @@ public class MonitoringServiceTest {
         }
     }
 
+    /**
+     * This test method is intended to test the validation of the MonitoringRequest object for date order.
+     * It checks if the start date is before the end date and vice versa.
+     * If the dates are in the wrong order, it should throw an IllegalArgumentException.
+     */
     @Test
     public void testRequestValidationDateOrder() {
-        // This test method is intended to test the validation of the MonitoringRequest object for date order.
         MonitoringRequest request = new MonitoringRequest();
         try{
             request.setStartDate("02/01/2023");
