@@ -42,7 +42,7 @@ public class DataManagerController {
      * @return A ResponseEntity indicating the result of the operation.
      */
     @PostMapping("/articles/")
-    public ResponseEntity<?> getArticles(@Valid @RequestBody List<Article> articles){  
+    public ResponseEntity<?> getArticles(@Valid @RequestBody List<Article> articles) {  
         // Process the articles received from the Monitoring service
         if(articles == null || articles.isEmpty()) {
             System.out.println("No articles received.");

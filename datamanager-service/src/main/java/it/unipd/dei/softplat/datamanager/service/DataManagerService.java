@@ -93,7 +93,7 @@ public class DataManagerService {
                     System.out.println("Batch of articles sent to MongoDB Service successfully.");
                     mongoArticles.clear(); // Clear the list after sending
                 } else {
-                    // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
+                    // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
                     System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + responseMongoDB.getStatus());
                 }
             }
@@ -110,7 +110,7 @@ public class DataManagerService {
                     System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
                     elasticArticles.clear(); // Clear the list after sending
                 } else {
-                    // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
+                    // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
                     System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + responseElasticSearch.getStatus());
                 }
             }
