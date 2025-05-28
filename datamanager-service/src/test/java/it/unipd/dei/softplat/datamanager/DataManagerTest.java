@@ -115,7 +115,8 @@ public class DataManagerTest {
      @Test
      public void testArticleNullValues() {
         Article article = new Article();
-        // Assert that the getters return null for uninitialized properties
+        
+        // Assert that the null values are not accepted
         try {
         article.setId(null);
         }
@@ -187,7 +188,8 @@ public class DataManagerTest {
     @Test
     public void testArticleEmptyValues() {
         Article article = new Article();
-        // Assert that the getters return empty strings for uninitialized properties
+        
+        // Assert that the empty strings are not accepted
         try {
             article.setId("");
         }
