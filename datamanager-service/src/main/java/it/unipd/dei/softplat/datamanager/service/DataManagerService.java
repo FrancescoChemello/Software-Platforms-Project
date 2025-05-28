@@ -3,6 +3,7 @@ package it.unipd.dei.softplat.datamanager.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -52,7 +53,11 @@ public class DataManagerService {
                 if (mongoArticles.size() >= batchSize) {
                     // Send the batch of articles to the MongoDB Service
                     try {
-                        HttpResponse<String> responseMongoDB = Unirest.post("http://localhost:8080/mongodb-service/").header("Content-Type", "application/json").body(mongoArticles.toString()).asString();
+                        // Create a SaveArticleDTO object to send the articles
+                        JSONObject saveArticleDTO = new JSONObject();
+                        saveArticleDTO.put("articles", new JSONArray(mongoArticles));
+                        saveArticleDTO.put("collectionName", article.getIssueQuery());
+                        HttpResponse<String> responseMongoDB = Unirest.post("http://localhost:8080/mongodb/save/").header("Content-Type", "application/json").body(saveArticleDTO.toString()).asString();
                         if (responseMongoDB.getStatus() == 200) {
                             System.out.println("Batch of articles sent to MongoDB Service successfully.");
                             mongoArticles.clear(); // Clear the list after sending
@@ -69,7 +74,7 @@ public class DataManagerService {
                 if (elasticArticles.size() >= batchSize) {
                     // Send the batch of articles to the ElastiSearch Service
                     try {
-                        HttpResponse<String> responseElasticSearch = Unirest.post("http://localhost:8080/elastic-service/").header("Content-Type", "application/json").body(elasticArticles.toString()).asString();
+                        HttpResponse<String> responseElasticSearch = Unirest.post("http://localhost:8080/elastic/index/").header("Content-Type", "application/json").body(elasticArticles.toString()).asString();
                         if (responseElasticSearch.getStatus() == 200) {
                             System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
                             elasticArticles.clear(); // Clear the list after sending
@@ -88,7 +93,11 @@ public class DataManagerService {
         if(!mongoArticles.isEmpty()) {
             // Send the batch of articles to the MongoDB Service
             try {
-                HttpResponse<String> responseMongoDB = Unirest.post("http://localhost:8080/mongodb-service/").header("Content-Type", "application/json").body(mongoArticles.toString()).asString();
+                // Create a SaveArticleDTO object to send the articles
+                JSONObject saveArticleDTO = new JSONObject();
+                saveArticleDTO.put("articles", new JSONArray(mongoArticles));
+                saveArticleDTO.put("collectionName", articles.get(0).getIssueQuery()); // Assuming all articles have the same issueQuery
+                HttpResponse<String> responseMongoDB = Unirest.post("http://localhost:8080/mongodb/save/").header("Content-Type", "application/json").body(saveArticleDTO.toString()).asString();
                 if (responseMongoDB.getStatus() == 200) {
                     System.out.println("Batch of articles sent to MongoDB Service successfully.");
                     mongoArticles.clear(); // Clear the list after sending
@@ -105,7 +114,7 @@ public class DataManagerService {
         if(!elasticArticles.isEmpty()) {
             // Send the batch of articles to the ElastiSearch Service
             try {
-                HttpResponse<String> responseElasticSearch = Unirest.post("http://localhost:8080/elastic-service/").header("Content-Type", "application/json").body(elasticArticles.toString()).asString();
+                HttpResponse<String> responseElasticSearch = Unirest.post("http://localhost:8080/elastic/index/").header("Content-Type", "application/json").body(elasticArticles.toString()).asString();
                 if (responseElasticSearch.getStatus() == 200) {
                     System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
                     elasticArticles.clear(); // Clear the list after sending
