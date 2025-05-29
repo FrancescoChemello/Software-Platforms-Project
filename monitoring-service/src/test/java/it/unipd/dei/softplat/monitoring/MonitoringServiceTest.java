@@ -12,19 +12,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import it.unipd.dei.softplat.monitoring.controller.MonitoringController;
-import it.unipd.dei.softplat.monitoring.service.MonitoringService;
 import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
 
 /**
  * This class is intended to test the MonitoringService.
  * It contains test methods to validate the functionality of the MonitoringController and the MonitoringRequest model.
  */
+@SpringBootTest
 public class MonitoringServiceTest {
     
-    private final MonitoringController controller_test = new MonitoringController(new MonitoringService(java.util.ResourceBundle.getBundle("application").getString("guardian.open.api.key")));
+    @Autowired
+    private MonitoringController controller_test;
 
     /**
      * This test method is intended to test the startMonitoring method of the MonitoringController.
