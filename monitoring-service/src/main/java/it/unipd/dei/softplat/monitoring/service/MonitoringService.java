@@ -28,6 +28,11 @@ import com.apitheguardian.bean.Response;
 
 import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
 
+/**
+ * This class is intended to handle monitoring operations,
+ * specifically fetching articles from The Guardian Open Platform API
+ * based on a given issue query and date range.
+ */
 @Service
 public class MonitoringService {
 

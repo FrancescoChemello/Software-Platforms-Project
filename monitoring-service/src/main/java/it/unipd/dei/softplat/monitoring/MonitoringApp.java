@@ -13,6 +13,9 @@ package it.unipd.dei.softplat.monitoring;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * This class is intended to start the Monitoring Service application.
+ */
 @SpringBootApplication
 public class MonitoringApp {
     

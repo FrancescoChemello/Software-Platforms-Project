@@ -21,6 +21,11 @@ import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
 import it.unipd.dei.softplat.monitoring.service.MonitoringService;
 import jakarta.validation.Valid;
 
+/**
+ * This class is intended to handle requests related to monitoring.
+ * It provides an endpoint to start monitoring for a specific issue query.
+ * The request must include the issue query, label, start date, and end date.
+ */
 @RestController
 public class MonitoringController {
 

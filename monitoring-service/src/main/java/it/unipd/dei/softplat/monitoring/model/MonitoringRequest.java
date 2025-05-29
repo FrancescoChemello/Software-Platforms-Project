@@ -12,6 +12,12 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * This class represents a request for monitoring issues.
+ * It contains fields for the issue query, label, start date, and end date.
+ * The class includes validation annotations to ensure that the fields are not null or empty,
+ * and that the date fields follow the specified format (DD/MM/YYYY).
+ */
 public class MonitoringRequest {
     @NotNull @NotEmpty
     private String issueQuery;
