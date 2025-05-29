@@ -13,6 +13,9 @@ package it.unipd.dei.softplat.datamanager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * This class is intended to start the Data Manager Service application.
+ */
 @SpringBootApplication
 public class DataManagerApp {
     

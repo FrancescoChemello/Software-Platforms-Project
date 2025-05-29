@@ -15,19 +15,22 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import it.unipd.dei.softplat.datamanager.controller.DataManagerController;
-import it.unipd.dei.softplat.datamanager.service.DataManagerService;
 import it.unipd.dei.softplat.datamanager.model.Article;
 
 /**
  * This class contains unit tests for the DataManagerController.
  * It tests the getArticles method and the validation of the Article object.
  */
+@SpringBootTest
 public class DataManagerTest {
     
-    private final DataManagerController controller_test = new DataManagerController(new DataManagerService());
+    @Autowired
+    private DataManagerController controller_test;
 
     /**
      * This test method is intended to test the getArticles method of the DataManagerController.

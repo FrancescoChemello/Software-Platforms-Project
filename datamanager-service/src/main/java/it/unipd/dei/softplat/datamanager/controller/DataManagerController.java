@@ -1,7 +1,5 @@
 /**
  * DataManagerController.java
- * This file implements the DataManagerController class
- * which is responsible for handling data management-related requests.
  * 
  * @author Francesco Chemello
  * @version 1.0.0
@@ -14,13 +12,18 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
 
 import it.unipd.dei.softplat.datamanager.model.Article;
 import it.unipd.dei.softplat.datamanager.service.DataManagerService;
-import jakarta.validation.Valid;
 
+/**
+ * This class is intended to handle requests related to data management.
+ */
+@RestController
 public class DataManagerController {
     
     private final DataManagerService dataService;

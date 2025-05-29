@@ -12,6 +12,12 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * This class represents an article in the data manager service.
+ * It contains fields for the article's ID, issue query, label, type, section ID,
+ * section name, web publication date, web title, web URL, and body text.
+ * The class includes validation annotations to ensure that the fields are not null or empty,
+ */
 public class Article {
 
     @NotNull @NotEmpty

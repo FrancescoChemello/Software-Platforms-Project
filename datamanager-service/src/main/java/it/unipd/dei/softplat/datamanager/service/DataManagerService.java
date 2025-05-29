@@ -1,3 +1,11 @@
+/**
+ * DataManagerService.java
+ * 
+ * @author Francesco Chemello
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 package it.unipd.dei.softplat.datamanager.service;
 
 import java.util.ArrayList;
@@ -6,6 +14,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.HttpResponse;
@@ -13,6 +22,13 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 import it.unipd.dei.softplat.datamanager.model.Article;
 
+/**
+ * This class is intended to handle data management operations,
+ * specifically storing articles in MongoDB and Elasticsearch.
+ * It processes a list of articles, prepares them for storage,
+ * and sends them in batches to the respective services.
+ */
+@Service
 public class DataManagerService {
     
     @Value("${data.batch.size}")
