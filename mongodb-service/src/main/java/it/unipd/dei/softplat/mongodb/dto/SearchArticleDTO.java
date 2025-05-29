@@ -10,9 +10,19 @@ package it.unipd.dei.softplat.mongodb.dto;
 
 import java.util.List;
 
+import com.mongodb.lang.NonNull;
+
+import jakarta.validation.constraints.NotEmpty;
+
+/**
+ * This class is intended to represent a Data Transfer Object (DTO) for searching articles in MongoDB.
+ * It contains the name of the collection and a list of article IDs to search for.
+ */
 public class SearchArticleDTO {
 
+    @NonNull @NotEmpty
     private String collectionName;
+    @NonNull @NotEmpty
     private List<String> ids;
 
     /**

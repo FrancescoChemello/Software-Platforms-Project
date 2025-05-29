@@ -16,6 +16,8 @@ import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -25,7 +27,6 @@ import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 
 import it.unipd.dei.softplat.mongodb.controller.MongodbController;
-import it.unipd.dei.softplat.mongodb.service.MongodbService;
 import it.unipd.dei.softplat.mongodb.model.MongoArticle;
 import it.unipd.dei.softplat.mongodb.dto.SaveArticleDTO;
 import it.unipd.dei.softplat.mongodb.dto.SearchArticleDTO;
@@ -36,9 +37,11 @@ import it.unipd.dei.softplat.mongodb.dto.SearchArticleDTO;
  * as well as the MongoArticle model.
  * It uses an embedded MongoDB instance for testing purposes.
  */
+@SpringBootTest
 public class MongodbTest {
     
-    private static MongodbController mongodbController;
+    @Autowired
+    private MongodbController mongodbController;
     // To start an embedded MongoDB instance for testing purposes
     private static MongodExecutable mongodExecutable;
     private static final int PORT = 27017;
@@ -58,8 +61,8 @@ public class MongodbTest {
         mongodExecutable = starter.prepare(mongodConfig);
         mongodExecutable.start();
 
-        // Controller initialization
-        mongodbController = new MongodbController(new MongodbService("localhost", String.valueOf(PORT)));
+        // // Controller initialization
+        // mongodbController = new MongodbController(new MongodbService("localhost", String.valueOf(PORT)));
     }
 
     /**

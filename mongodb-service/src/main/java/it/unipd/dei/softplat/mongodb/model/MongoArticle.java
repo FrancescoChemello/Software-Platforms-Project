@@ -11,6 +11,12 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * This class represents an article stored in MongoDB.
+ * It contains fields for the article's ID, type, section ID, section name,
+ * web publication date, web title, web URL, and body text.
+ * The class includes validation annotations to ensure that the fields are not null or empty,
+ */
 public class MongoArticle {
     
     @NotNull @NotEmpty

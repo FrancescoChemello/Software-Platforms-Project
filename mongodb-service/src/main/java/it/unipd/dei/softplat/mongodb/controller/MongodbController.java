@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
 import it.unipd.dei.softplat.mongodb.model.MongoArticle;
@@ -25,6 +25,11 @@ import it.unipd.dei.softplat.mongodb.service.MongodbService;
 import it.unipd.dei.softplat.mongodb.dto.SearchArticleDTO;
 import it.unipd.dei.softplat.mongodb.dto.SaveArticleDTO;
 
+/**
+ * This class is intended to handle requests related to MongoDB operations.
+ * It provides endpoints to save articles, drop collections, and search for articles.
+ */
+@RestController
 public class MongodbController {
  
     private final MongodbService mongodbService;

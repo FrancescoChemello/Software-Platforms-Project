@@ -15,16 +15,24 @@ import org.bson.Document;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 
+import org.springframework.stereotype.Service;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 import it.unipd.dei.softplat.mongodb.model.MongoArticle;
 
+/**
+ * This class is intended to handle MongoDB operations.
+ * It provides methods to establish a connection to MongoDB, create and drop collections,
+ * retrieve collections, and save articles to MongoDB.
+ */
+@Service
 public class MongodbService {
 
     private String mongoUrl;

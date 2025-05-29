@@ -10,11 +10,20 @@ package it.unipd.dei.softplat.mongodb.dto;
 
 import java.util.List;
 
-import it.unipd.dei.softplat.mongodb.model.MongoArticle;
+import com.mongodb.lang.NonNull;
 
+import it.unipd.dei.softplat.mongodb.model.MongoArticle;
+import jakarta.validation.constraints.NotEmpty;
+
+/**
+ * This class is intended to represent a Data Transfer Object (DTO) for saving articles in MongoDB.
+ * It contains a list of articles and the name of the collection where they should be saved.
+ */
 public class SaveArticleDTO {
     
+    @NonNull @NotEmpty
     private List<MongoArticle> articles;
+    @NonNull @NotEmpty
     private String collectionName;
 
     /**
