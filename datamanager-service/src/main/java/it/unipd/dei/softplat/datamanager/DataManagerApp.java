@@ -12,6 +12,8 @@ package it.unipd.dei.softplat.datamanager;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * This class is intended to start the Data Manager Service application.
@@ -19,6 +21,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class DataManagerApp {
     
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    } 
+
     public static void main(String[] args){
         SpringApplication.run(DataManagerApp.class, args);
         System.out.println("Data Manager Service is running...");

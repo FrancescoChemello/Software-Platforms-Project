@@ -10,17 +10,25 @@ package it.unipd.dei.softplat.datamanager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import it.unipd.dei.softplat.datamanager.controller.DataManagerController;
 import it.unipd.dei.softplat.datamanager.model.Article;
+import it.unipd.dei.softplat.http.service.HttpClientService;
 
 /**
  * This class contains unit tests for the DataManagerController.
@@ -28,8 +36,11 @@ import it.unipd.dei.softplat.datamanager.model.Article;
  */
 @SpringBootTest
 public class DataManagerTest {
+
+    @MockBean
+    private HttpClientService httpClientService;
     
-    @Autowired
+    @Autowired @InjectMocks
     private DataManagerController controller_test;
 
     /**
@@ -39,6 +50,18 @@ public class DataManagerTest {
      */
     @Test
     public void testGetArticles() {
+        // Mock configuration for MongoDB and ElasticSearch services
+        when(httpClientService.postRequest(
+                eq("http://localhost:8080/mongodb/save/"),
+                org.mockito.ArgumentMatchers.anyString()
+            )
+        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
+        when(httpClientService.postRequest(
+                eq("http://localhost:8080/elastic/index/"),
+                org.mockito.ArgumentMatchers.anyString()
+            )
+        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
+
         // Example of a valid Article object
         Article test_article = new Article();
         // Set the properties of the test_article object
@@ -58,6 +81,10 @@ public class DataManagerTest {
         // Assert that the response is not null and has a status code of 200 OK
         assertNotNull(response, "Response should not be null");
         assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+
+        // Verify that the postRequest methods of DataManagerService was called with the correct parameters
+        verify(httpClientService).postRequest(eq("http://localhost:8080/mongodb/save/"), anyString());
+        verify(httpClientService).postRequest(eq("http://localhost:8080/elastic/index/"), anyString());
 
         // Example of an invalid Article object
         List<Article> invalid_article_list = new ArrayList<>();

@@ -113,6 +113,12 @@
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
+        <!-- HttpClient RestTemplate Dependency -->
+        <dependency>
+            <groupId>it.unipd.dei.softplat</groupId>
+            <artifactId>common-httpclient</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.mashape.unirest.http.JsonNode;
@@ -27,6 +29,7 @@ import com.apitheguardian.bean.Article;
 import com.apitheguardian.bean.Response;
 
 import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
+import it.unipd.dei.softplat.http.service.HttpClientService;
 
 /**
  * This class is intended to handle monitoring operations,
@@ -40,14 +43,16 @@ public class MonitoringService {
     private String apiKey;
     @Value("${data.batch.size}")
     private int batchSize;
+    private final HttpClientService httpClientService;
     
-    public MonitoringService(@Value("${guardian.open.api.key}") String apiKey) {
+    public MonitoringService(@Value("${guardian.open.api.key}") String apiKey, HttpClientService httpClientService) {
 
         if (apiKey == null || apiKey.isEmpty()) {
             throw new IllegalArgumentException("The Guardian Service API environment variable is not set.");
         }
         this.client = new GuardianContentApi(apiKey);
         this.apiKey = apiKey;
+        this.httpClientService = httpClientService;
     }
 
     /**
@@ -200,35 +205,25 @@ public class MonitoringService {
                     // Send the JSON articles to the DataManager Service
                     if (retrievedArticles.size() >= batchSize) {
                         // Send the batch of articles to the DataManager Service
-                        try {
-                            HttpResponse<String> responseDataManager = Unirest.post("http://localhost:8080/articles/").header("Content-Type", "application/json").body(retrievedArticles.toString()).asString();
-                            if (responseDataManager.getStatus() == 200) {
-                                System.out.println("Batch of articles sent to DataManager Service successfully.");
-                                retrievedArticles.clear(); // Clear the list after sending
-                            } else {
-                                // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                                System.out.println("Failed to send batch of articles to DataManager Service. Status: " + responseDataManager.getStatus());
-                            }
-                        }
-                        catch (UnirestException e) {
-                            System.out.println("Error sending articles to DataManager Service: " + e.getMessage());
+                        ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/articles/", retrievedArticles.toString());
+                        if (responseDataManager.getStatusCode() == HttpStatus.OK) {
+                            System.out.println("Batch of articles sent to DataManager Service successfully.");
+                            retrievedArticles.clear(); // Clear the list after sending
+                        } else {
+                            // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
+                            System.out.println("Failed to send batch of articles to DataManager Service. Status: " + responseDataManager.getStatusCode());
                         }
                     }
                 }
             }
             // Send the JSON articles left to the DataManager Service
             if (!retrievedArticles.isEmpty()) {
-                try {
-                    HttpResponse<String> responseDataManager = Unirest.post("http://localhost:8080/articles/").header("Content-Type", "application/json").body(retrievedArticles.toString()).asString();
-                    if (responseDataManager.getStatus() == 200) {
-                        System.out.println("Batch of articles sent to DataManager Service successfully.");
-                        retrievedArticles.clear(); // Clear the list after sending
-                    } else {
-                        System.out.println("Failed to send batch of articles to DataManager Service. Status: " + responseDataManager.getStatus());
-                    }
-                }
-                catch (UnirestException e) {
-                    System.out.println("Error sending articles to DataManager Service: " + e.getMessage());
+                ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/articles/", retrievedArticles.toString());
+                if (responseDataManager.getStatusCode() == HttpStatus.OK) {
+                    System.out.println("Batch of articles sent to DataManager Service successfully.");
+                    retrievedArticles.clear(); // Clear the list after sending
+                } else {
+                    System.out.println("Failed to send batch of articles to DataManager Service. Status: " + responseDataManager.getStatusCode());
                 }
             }
         }

@@ -22,6 +22,7 @@
     </developers>
 
     <modules>
+        <module>common-http</module>
         <module>client-service</module>
         <module>monitoring-service</module>
         <module>datamanager-service</module>

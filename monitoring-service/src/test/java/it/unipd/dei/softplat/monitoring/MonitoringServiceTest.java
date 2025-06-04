@@ -10,12 +10,20 @@ package it.unipd.dei.softplat.monitoring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import it.unipd.dei.softplat.http.service.HttpClientService;
 import it.unipd.dei.softplat.monitoring.controller.MonitoringController;
 import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
 
@@ -25,8 +33,11 @@ import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
  */
 @SpringBootTest
 public class MonitoringServiceTest {
+
+    @MockBean
+    private HttpClientService httpClientService;
     
-    @Autowired
+    @Autowired @InjectMocks
     private MonitoringController controller_test;
 
     /**
@@ -35,6 +46,13 @@ public class MonitoringServiceTest {
      */
     @Test
     public void testStartMonitoring() {
+        // Mock configuration
+        when(httpClientService.postRequest(
+                eq("http://localhost:8080/articles/"),
+                org.mockito.ArgumentMatchers.anyString()
+            )
+        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
+
         // Example of a valid request
         MonitoringRequest request = new MonitoringRequest(
             "example issue query",
@@ -49,6 +67,9 @@ public class MonitoringServiceTest {
         // Assert that the response is not null and has a status code of 200 OK
         assertNotNull(response, "Response should not be null");
         assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+
+        // Verify that the postRequest method of MonitoringService was called with the correct parameters
+        verify(httpClientService).postRequest(eq("http://localhost:8080/articles/"), anyString());
 
         // Example of an invalid request
         MonitoringRequest invalidRequest = new MonitoringRequest(

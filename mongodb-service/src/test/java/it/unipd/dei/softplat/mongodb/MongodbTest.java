@@ -10,14 +10,21 @@ package it.unipd.dei.softplat.mongodb;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -25,7 +32,7 @@ import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.MongodConfig;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
-
+import it.unipd.dei.softplat.http.service.HttpClientService;
 import it.unipd.dei.softplat.mongodb.controller.MongodbController;
 import it.unipd.dei.softplat.mongodb.model.MongoArticle;
 import it.unipd.dei.softplat.mongodb.dto.SaveArticleDTO;
@@ -39,8 +46,11 @@ import it.unipd.dei.softplat.mongodb.dto.SearchArticleDTO;
  */
 @SpringBootTest
 public class MongodbTest {
+
+    @MockBean
+    private HttpClientService httpClientService;
     
-    @Autowired
+    @Autowired @InjectMocks
     private MongodbController mongodbController;
     // To start an embedded MongoDB instance for testing purposes
     private static MongodExecutable mongodExecutable;
@@ -123,17 +133,41 @@ public class MongodbTest {
     
     @Test
     public void testSearchArticles() {
-       String collectionName = "test_collection";
-       String id = "test_id";
-       
-       // Call the searchArticles method with a valid collection name and ID
-       SearchArticleDTO searchArticleDTO = new SearchArticleDTO(collectionName, List.of(id));
-       ResponseEntity<?> response = mongodbController.searchArticles(searchArticleDTO);
+        // Mock configuration
+        when(httpClientService.postRequest(
+                eq("http://localhost:8080/query/results/"),
+                org.mockito.ArgumentMatchers.anyString()
+            )
+        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
-         // Assert that the response is not null and has a status code of 200 OK
+        // Save an article
+        MongoArticle test_article = new MongoArticle(
+            "test_id",
+            "test_type",
+            "section_id_test",
+            "section_name_test",
+            "2023-10-01T12:00:00Z",
+            "Test Web Title",
+            "https://example.com/test-web-url",
+            "This is a test body text for the MongoDB article."
+        );
+        SaveArticleDTO saveArticleDTO = new SaveArticleDTO(List.of(test_article), "test_collection");
+        mongodbController.saveArticles(saveArticleDTO);
+
+        String collectionName = "test_collection";
+        String id = "test_id";
+        
+        // Call the searchArticles method with a valid collection name and ID
+        SearchArticleDTO searchArticleDTO = new SearchArticleDTO(collectionName, List.of(id));
+        ResponseEntity<?> response = mongodbController.searchArticles(searchArticleDTO);
+
+        // Assert that the response is not null and has a status code of 200 OK
         assertNotNull(response, "Response should not be null");
         assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
         
+        // Verify that the postRequest methods of DataManagerService was called with the correct parameters
+        verify(httpClientService).postRequest(eq("http://localhost:8080/query/results/"), anyString());
+
         // Call the searchArticles method with an empty collection name
         SearchArticleDTO emptyCollectionDTO = new SearchArticleDTO("", List.of(id));
         ResponseEntity<?> emptyCollectionResponse = mongodbController.searchArticles(emptyCollectionDTO);

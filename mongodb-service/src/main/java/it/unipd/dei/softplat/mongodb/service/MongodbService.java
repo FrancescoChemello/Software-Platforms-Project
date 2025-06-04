@@ -14,11 +14,9 @@ import java.util.List;
 import org.bson.Document;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -26,6 +24,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import it.unipd.dei.softplat.mongodb.model.MongoArticle;
+import it.unipd.dei.softplat.http.service.HttpClientService;
 
 /**
  * This class is intended to handle MongoDB operations.
@@ -41,15 +40,17 @@ public class MongodbService {
     private MongoClient mongoClient;
     @Value("${data.batch.size}")
     private int batchSize;
+    private final HttpClientService httpClientService;
  
     /**
      * Default constructor for MongodbService.
      * @param mongoUrl
      * @param mongoPort
      */
-    public MongodbService(@Value("${mongodb.url}") String mongoUrl, @Value("${mongodb.port}") String mongoPort) {
+    public MongodbService(@Value("${mongodb.url}") String mongoUrl, @Value("${mongodb.port}") String mongoPort, HttpClientService httpClientService) {
         this.mongoUrl = mongoUrl;
         this.mongoPort = mongoPort;
+        this.httpClientService = httpClientService;
         // Establish connections to MongoDB
         try {
             establishConnections();
@@ -200,8 +201,6 @@ public class MongodbService {
                 }
             }
         }
-        // Close connection after saving articles
-        closeConnection();
         System.out.println("All articles saved successfully to collection " + collectionName + ".");
     }
 
@@ -222,9 +221,6 @@ public class MongodbService {
         }
         // Drop the specified collection
         dropACollection(collectionName);
-
-        // Close connection after dropping the collection
-        closeConnection();
     }
 
     public void getArticlesById(String collectionName, List<String> ids) {
@@ -262,18 +258,13 @@ public class MongodbService {
                 // Send the article to the Query service
                 if (articles.size() >= batchSize) {
                     // Send the batch of articles to the Query service
-                    try {
-                        HttpResponse<String> responseQuery = Unirest.post("http://localhost:8080/query/results/").header("Content-Type", "application/json").body(articles.toString()).asString();
-                        if (responseQuery.getStatus() == 200) {
-                            System.out.println("Batch of articles sent to Query Service successfully.");
-                            articles.clear(); // Clear the list after sending
-                        } else {
-                            // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                            System.out.println("Failed to send batch of articles to Service Service. Status: " + responseQuery.getStatus());
-                        }
-                    }
-                    catch (UnirestException e) {
-                        System.out.println("Error sending articles to Query Service: " + e.getMessage());
+                    ResponseEntity<String> responseQuery = httpClientService.postRequest("http://localhost:8080/query/results/", articles.toString());
+                    if (responseQuery.getStatusCode() == HttpStatus.OK) {
+                        System.out.println("Batch of articles sent to Query Service successfully.");
+                        articles.clear(); // Clear the list after sending
+                    } else {
+                        // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
+                        System.out.println("Failed to send batch of articles to Service Service. Status: " + responseQuery.getStatusCode());
                     }
                 }
             }
@@ -284,22 +275,15 @@ public class MongodbService {
         }
         // Send the remaining articles if any
         if (!articles.isEmpty()) {
-            try {
-                HttpResponse<String> responseQuery = Unirest.post("http://localhost:8080/query/results/").header("Content-Type", "application/json").body(articles.toString()).asString();
-                if (responseQuery.getStatus() == 200) {
-                    System.out.println("Batch of articles sent to Query Service successfully.");
-                    articles.clear(); // Clear the list after sending
-                } else {
-                    // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
-                    System.out.println("Failed to send batch of articles to Service Service. Status: " + responseQuery.getStatus());
-                }
-            }
-            catch (UnirestException e) {
-                System.out.println("Error sending articles to Query Service: " + e.getMessage());
+            ResponseEntity<String> responseQuery = httpClientService.postRequest("http://localhost:8080/query/results/", articles.toString());
+            if (responseQuery.getStatusCode() == HttpStatus.OK) {
+                System.out.println("Batch of articles sent to Query Service successfully.");
+                articles.clear(); // Clear the list after sending
+            } else {
+                // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
+                System.out.println("Failed to send batch of articles to Service Service. Status: " + responseQuery.getStatusCode());
             }
         }
-        // Close connection after retrieving articles
-        closeConnection();
         System.out.println("All articles retrieved successfully from collection " + collectionName + ".");
     }
 }
