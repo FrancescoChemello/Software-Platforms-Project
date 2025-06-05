@@ -112,7 +112,7 @@ public class MongodbTest {
 
         // Assert that the response is not null and has a status code of 200 OK
         assertNotNull(response, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Call the saveArticles method with an empty list
         SaveArticleDTO emptySaveArticleDTO = new SaveArticleDTO(List.of(), "test_collection");
@@ -120,7 +120,7 @@ public class MongodbTest {
 
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(emptyResponse, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, emptyResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, emptyResponse.getStatusCode(), "Response should have status code 400 Bad Request");
 
         // Call the saveArticles method with a null list
         SaveArticleDTO nullSaveArticleDTO = new SaveArticleDTO(null, "test_collection");
@@ -128,7 +128,7 @@ public class MongodbTest {
 
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(nullResponse, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, nullResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, nullResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
     
     @Test
@@ -163,7 +163,7 @@ public class MongodbTest {
 
         // Assert that the response is not null and has a status code of 200 OK
         assertNotNull(response, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
         
         // Verify that the postRequest methods of DataManagerService was called with the correct parameters
         verify(httpClientService).postRequest(eq("http://localhost:8080/query/results/"), anyString());
@@ -173,7 +173,7 @@ public class MongodbTest {
         ResponseEntity<?> emptyCollectionResponse = mongodbController.searchArticles(emptyCollectionDTO);
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(emptyCollectionResponse, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, emptyCollectionResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, emptyCollectionResponse.getStatusCode(), "Response should have status code 400 Bad Request");
 
         // Call the searchArticles method with a null collection name
         SearchArticleDTO nullCollectionDTO = new SearchArticleDTO(null, List.of(id));
@@ -181,7 +181,7 @@ public class MongodbTest {
         
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(nullCollectionResponse, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, nullCollectionResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, nullCollectionResponse.getStatusCode(), "Response should have status code 400 Bad Request");
 
         // Call the searchArticles method with an empty list of IDs
         SearchArticleDTO emptyIdDTO = new SearchArticleDTO(collectionName, List.of());
@@ -189,7 +189,7 @@ public class MongodbTest {
         
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(emptyIdResponse, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, emptyIdResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, emptyIdResponse.getStatusCode(), "Response should have status code 400 Bad Request");
         
         // Call the searchArticles method with a null list of IDs
         SearchArticleDTO nullIdDTO = new SearchArticleDTO(collectionName, null);
@@ -197,7 +197,7 @@ public class MongodbTest {
         
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(nullIdResponse, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, nullIdResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, nullIdResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
     /**
@@ -212,21 +212,21 @@ public class MongodbTest {
 
         // Assert that the response is not null and has a status code of 200 OK
         assertNotNull(response, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Call the dropCollection method with an empty collection name
         ResponseEntity<?> emptyResponse = mongodbController.dropCollection("");
 
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(emptyResponse, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, emptyResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, emptyResponse.getStatusCode(), "Response should have status code 400 Bad Request");
 
         // Call the dropCollection method with a null collection name
         ResponseEntity<?> nullResponse = mongodbController.dropCollection(null);
 
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(nullResponse, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, nullResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, nullResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
     

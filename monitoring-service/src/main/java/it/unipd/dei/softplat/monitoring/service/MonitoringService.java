@@ -204,6 +204,7 @@ public class MonitoringService {
 
                     // Send the JSON articles to the DataManager Service
                     if (retrievedArticles.size() >= batchSize) {
+                        // TODO: Implement a mechanism to process only a size of batchSize articles
                         // Send the batch of articles to the DataManager Service
                         ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/articles/", retrievedArticles.toString());
                         if (responseDataManager.getStatusCode() == HttpStatus.OK) {
@@ -223,6 +224,7 @@ public class MonitoringService {
                     System.out.println("Batch of articles sent to DataManager Service successfully.");
                     retrievedArticles.clear(); // Clear the list after sending
                 } else {
+                    // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
                     System.out.println("Failed to send batch of articles to DataManager Service. Status: " + responseDataManager.getStatusCode());
                 }
             }
