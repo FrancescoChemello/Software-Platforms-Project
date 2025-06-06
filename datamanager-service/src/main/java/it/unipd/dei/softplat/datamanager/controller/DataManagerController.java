@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 
 import it.unipd.dei.softplat.datamanager.model.Article;
+import it.unipd.dei.softplat.datamanager.model.ArticleTopics;
 import it.unipd.dei.softplat.datamanager.service.DataManagerService;
 
 /**
@@ -53,8 +54,20 @@ public class DataManagerController {
         }
 
         // Start the service
-        dataService.storingArticles(articles);
-        return ResponseEntity.ok().body("Articles received successfully.");
-        
+        dataService.topicExtraction(articles);
+        return ResponseEntity.ok().body("Articles received successfully.");   
+    }
+
+    @PostMapping("/topics/")
+    public ResponseEntity<?> saveArticles(@Valid @RequestBody List<ArticleTopics> topicsArticles) {
+        // Process the articles received from the Monitoring service
+        if(topicsArticles == null || topicsArticles.isEmpty()) {
+            System.out.println("No articles received.");
+            return ResponseEntity.badRequest().body("No articles received.");
+        }
+
+        // Start the service
+        dataService.storingArticles(topicsArticles);
+        return ResponseEntity.ok().body("Articles with topics received successfully.");
     }
 }
