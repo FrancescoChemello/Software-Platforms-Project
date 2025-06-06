@@ -136,7 +136,7 @@ public class MongodbTest {
         // Mock configuration
         when(httpClientService.postRequest(
                 eq("http://localhost:8080/query/results/"),
-                org.mockito.ArgumentMatchers.anyString()
+                anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 

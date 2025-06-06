@@ -75,7 +75,7 @@ public class HttpClientTest {
 
         org.mockito.Mockito.when(
             restTemplate.postForEntity(eq(url), org.mockito.ArgumentMatchers.any(), eq(String.class))
-        ).thenThrow(new org.springframework.web.client.HttpClientErrorException(org.springframework.http.HttpStatus.BAD_REQUEST, "Bad Request"));
+        ).thenThrow(new org.springframework.web.client.HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request"));
 
         ResponseEntity<String> response = httpClientService.postRequest(url, jsonBody);
 

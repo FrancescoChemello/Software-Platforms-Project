@@ -10,6 +10,7 @@ package it.unipd.dei.softplat.mallet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -42,7 +43,7 @@ public class MalletTest {
         // Mock configuration
         when(httpClientService.postRequest(
                 eq("http://localhost:8080/topics/"),
-                org.mockito.ArgumentMatchers.anyString()
+                anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 

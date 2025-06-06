@@ -49,7 +49,7 @@ public class MonitoringServiceTest {
         // Mock configuration
         when(httpClientService.postRequest(
                 eq("http://localhost:8080/articles/"),
-                org.mockito.ArgumentMatchers.anyString()
+                anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
@@ -66,7 +66,7 @@ public class MonitoringServiceTest {
         
         // Assert that the response is not null and has a status code of 200 OK
         assertNotNull(response, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Verify that the postRequest method of MonitoringService was called with the correct parameters
         verify(httpClientService).postRequest(eq("http://localhost:8080/articles/"), anyString());
@@ -84,7 +84,7 @@ public class MonitoringServiceTest {
 
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(response, "Response should not be null");
-        assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
     /**
