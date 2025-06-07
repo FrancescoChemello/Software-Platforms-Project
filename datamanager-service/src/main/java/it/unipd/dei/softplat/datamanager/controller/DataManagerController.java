@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 
 import it.unipd.dei.softplat.datamanager.model.Article;
-import it.unipd.dei.softplat.datamanager.model.ArticleTopics;
 import it.unipd.dei.softplat.datamanager.service.DataManagerService;
 
 /**
@@ -39,27 +38,13 @@ public class DataManagerController {
     }
 
     /**
-     * This method receives a list of articles from the Monitoring service
-     * and processes them.
-     * It is expected to be called by the Monitoring service.
-     * @param articles
-     * @return A ResponseEntity indicating the result of the operation.
+     * This method receives a list of articles with topics extracted
+     * and stores them in MongoDB and Elasticsearch.
+     * @param topicsArticles List of articles with topics.
+     * @return ResponseEntity indicating the result of the operation.
      */
-    @PostMapping("/articles/")
-    public ResponseEntity<?> getArticles(@Valid @RequestBody List<Article> articles) {  
-        // Process the articles received from the Monitoring service
-        if(articles == null || articles.isEmpty()) {
-            System.out.println("No articles received.");
-            return ResponseEntity.badRequest().body("No articles received.");
-        }
-
-        // Start the service
-        dataService.topicExtraction(articles);
-        return ResponseEntity.ok().body("Articles received successfully.");   
-    }
-
-    @PostMapping("/topics/")
-    public ResponseEntity<?> saveArticles(@Valid @RequestBody List<ArticleTopics> topicsArticles) {
+    @PostMapping("/datamanager/save-articles/")
+    public ResponseEntity<?> saveArticles(@Valid @RequestBody List<Article> topicsArticles) {
         // Process the articles received from the Monitoring service
         if(topicsArticles == null || topicsArticles.isEmpty()) {
             System.out.println("No articles received.");

@@ -61,6 +61,8 @@ public class MonitoringService {
      */
     public void startMonitoring(MonitoringRequest request) {
 
+        // TODO: Implement a mechanism to continuously monitor for new articles in case of end date empty
+
         Response response;
         ArrayList<JSONObject> retrievedArticles = new ArrayList<>();
 
@@ -206,7 +208,7 @@ public class MonitoringService {
                     if (retrievedArticles.size() >= batchSize) {
                         // TODO: Implement a mechanism to process only a size of batchSize articles
                         // Send the batch of articles to the DataManager Service
-                        ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/articles/", retrievedArticles.toString());
+                        ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/datamanager/save-articles/", retrievedArticles.toString());
                         if (responseDataManager.getStatusCode() == HttpStatus.OK) {
                             System.out.println("Batch of articles sent to DataManager Service successfully.");
                             retrievedArticles.clear(); // Clear the list after sending
@@ -219,7 +221,7 @@ public class MonitoringService {
             }
             // Send the JSON articles left to the DataManager Service
             if (!retrievedArticles.isEmpty()) {
-                ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/articles/", retrievedArticles.toString());
+                ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/datamanager/save-articles/", retrievedArticles.toString());
                 if (responseDataManager.getStatusCode() == HttpStatus.OK) {
                     System.out.println("Batch of articles sent to DataManager Service successfully.");
                     retrievedArticles.clear(); // Clear the list after sending
@@ -227,6 +229,17 @@ public class MonitoringService {
                     // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
                     System.out.println("Failed to send batch of articles to DataManager Service. Status: " + responseDataManager.getStatusCode());
                 }
+            }
+            // Send to the Client Service that the monitoring is completed
+            JSONObject monitoringCompletion = new JSONObject();
+            monitoringCompletion.put("status", "MONITORING");
+            monitoringCompletion.put("message", "Monitoring completed for query: " + request.getIssueQuery());
+            ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
+            if (responseClientService.getStatusCode() == HttpStatus.OK) {
+                System.out.println("Monitoring status sent to Client Service successfully.");
+            } else {
+                System.out.println("Failed to send monitoring status to Client Service. Status: " + responseClientService.getStatusCode());
+                // TODO: If it fails, I should try again.
             }
         }
     }
