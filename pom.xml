@@ -29,7 +29,6 @@
         <module>mongodb-service</module>
         <module>elasticsearch-service</module>
         <module>mallet-service</module>
-        <module>query-service</module>
     </modules>
 
     <properties>

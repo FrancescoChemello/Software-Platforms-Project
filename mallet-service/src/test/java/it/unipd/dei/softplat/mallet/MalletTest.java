@@ -12,8 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -28,6 +31,7 @@ import it.unipd.dei.softplat.http.service.HttpClientService;
 import it.unipd.dei.softplat.mallet.controller.MalletController;
 import it.unipd.dei.softplat.mallet.dto.AccumulateMalletArticlesDTO;
 import it.unipd.dei.softplat.mallet.model.MalletArticle;
+import it.unipd.dei.softplat.mallet.model.MalletSearch;
 
 @SpringBootTest
 public class MalletTest {
@@ -39,10 +43,40 @@ public class MalletTest {
     private MalletController malletController;
 
     @Test
-    public void testAccumulationAndProcessArticle() {
+    public void testSearchArticles() {
         // Mock configuration
         when(httpClientService.postRequest(
-                eq("http://localhost:8080/topics/"),
+            eq("http://localhost:8080/elastic/search/"),
+            anyString()
+            )
+        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
+
+        MalletSearch searchQuery = new MalletSearch();
+        searchQuery.setQuery("software application development");
+        searchQuery.setCorpus("test_corpus");
+        searchQuery.setNumTopics(5);
+        searchQuery.setNumTopWordsPerTopic(10);
+        Calendar cal = Calendar.getInstance();
+        cal.set(2023, Calendar.OCTOBER, 1, 0, 0, 0);
+        searchQuery.setStartDate(cal.getTime());
+        cal.set(2023, Calendar.OCTOBER, 31, 23, 59, 59);
+        searchQuery.setEndDate(cal.getTime());
+
+        ResponseEntity<?> response = malletController.search(searchQuery);
+
+        // Check if the response is not null
+        assertNotNull(response, "Response should not be null");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+
+        // Verify that the postRequest method of MalletService was called with the correct URL and parameters
+        verify(httpClientService).postRequest(eq("http://localhost:8080/elastic/search/"), anyString());
+    }
+
+    @Test
+    public void testAccumulationAndProcessResult() {
+        // Mock configuration
+        when(httpClientService.postRequest(
+                eq("http://localhost:8080/client/query-result/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -82,8 +116,121 @@ public class MalletTest {
         // Check if the response is not null
         assertNotNull(response, "Response should not be null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+
+        // Verify that the postRequest method of MalletService was called with the correct URL and parameters
+        verify(httpClientService).postRequest(eq("http://localhost:8080/client/query-result/"), anyString());
     }
-    
+
+    /**
+     * Test the MalletSearch model.
+     * This test verifies that the MalletSearch class can be instantiated
+     * and that its properties can be set and retrieved correctly.
+     */
+    @Test
+    public void testMalletSearch() {
+        MalletSearch malletSearch = new MalletSearch();
+
+        malletSearch.setQuery("test query");
+        malletSearch.setCorpus("test_corpus");
+        malletSearch.setNumTopics(5);
+        malletSearch.setNumTopWordsPerTopic(10);
+        Calendar cal_01_10_2023 = Calendar.getInstance();
+        cal_01_10_2023.set(2023, Calendar.OCTOBER, 1, 0, 0, 0);
+        malletSearch.setStartDate(cal_01_10_2023.getTime());
+        Calendar cal_31_10_2023 = Calendar.getInstance();
+        cal_31_10_2023.set(2023, Calendar.OCTOBER, 31, 23, 59, 59);
+        malletSearch.setEndDate(cal_31_10_2023.getTime());
+        
+        // Assertions to verify the properties
+        assertEquals("test query", malletSearch.getQuery());
+        assertEquals("test_corpus", malletSearch.getCorpus());
+        assertEquals(5, malletSearch.getNumTopics());
+        assertEquals(10, malletSearch.getNumTopWordsPerTopic());
+        assertEquals(cal_01_10_2023.getTime(), malletSearch.getStartDate());
+        assertEquals(cal_31_10_2023.getTime(), malletSearch.getEndDate());
+    }
+
+    /**
+     * Test the MalletSearch model with empty values.
+     * This test verifies that the MalletSearch class throws exceptions
+     * when trying to set empty or null values for its properties.
+     */
+    @Test
+    public void testMalletSearchWithEmptyValues() {
+        MalletSearch malletSearch = new MalletSearch();
+
+        try {
+            malletSearch.setQuery("");
+        } 
+        catch (IllegalArgumentException e) {
+            assertEquals("Query cannot be empty", e.getMessage(), "Expected exception for empty query");
+        }
+        try {
+            malletSearch.setCorpus("");
+        } 
+        catch (IllegalArgumentException e) {
+            assertEquals("Corpus cannot be empty", e.getMessage(), "Expected exception for empty corpus");
+        }
+        try {
+            malletSearch.setStartDate(new Date());
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Start date cannot be null", e.getMessage(), "Expected exception for null start date");
+        }
+        try {
+            malletSearch.setEndDate(new Date());
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("End date cannot be null", e.getMessage(), "Expected exception for null end date");
+        }
+    }
+
+    /**
+     * Test the MalletSearch model with null values.
+     * This test verifies that the MalletSearch class throws exceptions
+     * when trying to set null values for its properties.
+     */
+    @Test
+    public void testMalletSearchWithNullValues() {
+        MalletSearch malletSearch = new MalletSearch();
+
+        try {
+            malletSearch.setQuery(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Query cannot be null", e.getMessage(), "Expected exception for null query");
+        }
+        try {
+            malletSearch.setCorpus(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Corpus cannot be null", e.getMessage(), "Expected exception for null corpus");
+        }
+        try {
+            malletSearch.setNumTopics(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Number of topics cannot be null", e.getMessage(), "Expected exception for null number of topics");
+        }
+        try {
+            malletSearch.setNumTopWordsPerTopic(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Number of top words per topic cannot be null", e.getMessage(), "Expected exception for null number of top words per topic");
+        }
+        try {
+            malletSearch.setStartDate(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Start date cannot be null", e.getMessage(), "Expected exception for null start date");
+        }
+        try {
+            malletSearch.setEndDate(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("End date cannot be null", e.getMessage(), "Expected exception for null end date");
+        }
+    }
+
+    /**
+     * Test the MalletArticle model.
+     * This test verifies that the MalletArticle class can be instantiated
+     * and that its properties can be set and retrieved correctly.
+     */
     @Test
     public void testMalletArticle() {
         MalletArticle article = new MalletArticle();
@@ -115,6 +262,11 @@ public class MalletTest {
         assertEquals("This is a test body text for the MongoDB article.", article.getBodyText());
     }
 
+    /**
+     * Test the MalletArticle model with empty values.
+     * This test verifies that the MalletArticle class throws exceptions
+     * when trying to set empty or null values for its properties.
+     */
     @Test
     public void testMalletArticleWithEmptyValues() {
        MalletArticle article = new MalletArticle();
@@ -172,6 +324,11 @@ public class MalletTest {
         }
     }
 
+    /**
+     * Test the MalletArticle model with null values.
+     * This test verifies that the MalletArticle class throws exceptions
+     * when trying to set null values for its properties.
+     */
     @Test
     public void testMalletArticleWithNullValues() {
         MalletArticle article = new MalletArticle();
