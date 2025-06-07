@@ -8,9 +8,10 @@
 
 package it.unipd.dei.softplat.monitoring.model;
 
+import java.util.Date;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 
 /**
  * This class represents a request for monitoring issues.
@@ -23,10 +24,10 @@ public class MonitoringRequest {
     private String issueQuery;
     @NotNull @NotEmpty
     private String label;
-    @NotNull @NotEmpty @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "Start date must be in the format DD/MM/YYYY")
-    private String startDate;
-    @NotNull @NotEmpty @Pattern(regexp = "\\d{2}/\\d{2}/\\d{4}", message = "End date must be in the format DD/MM/YYYY")
-    private String endDate;
+    @NotNull @NotEmpty 
+    private Date startDate;
+    @NotNull @NotEmpty 
+    private Date endDate;
 
     /**
      * Default constructor for MonitoringRequest.
@@ -42,7 +43,7 @@ public class MonitoringRequest {
      * @param startDate the start date for the monitoring period
      * @param endDate the end date for the monitoring period
      */
-    public MonitoringRequest(String issueQuery, String label, String startDate, String endDate) {      
+    public MonitoringRequest(String issueQuery, String label, Date startDate, Date endDate) {      
         // Initialize the fields with the provided values
         this.issueQuery = issueQuery;
         this.label = label;
@@ -86,7 +87,7 @@ public class MonitoringRequest {
      * Returns the start date for the monitoring period.
      * @return the start date string in format (DD/MM/YYYY)
      */
-    public String getStartDate() {
+    public Date getStartDate() {
         return this.startDate;
     }
 
@@ -94,7 +95,7 @@ public class MonitoringRequest {
      * Sets the start date for the monitoring period.
      * @param startDate
      */
-    public void setStartDate(String startDate) {
+    public void setStartDate(Date startDate) {
         if(this.endDate != null && startDate.compareTo(this.endDate) > 0) {
             throw new IllegalArgumentException("Start date cannot be after end date.");
         }
@@ -105,7 +106,7 @@ public class MonitoringRequest {
      * Returns the end date for the monitoring period.
      * @return the end date string in format (DD/MM/YYYY)
      */
-    public String getEndDate() {
+    public Date getEndDate() {
         return this.endDate;
     }
 
@@ -113,7 +114,7 @@ public class MonitoringRequest {
      * Sets the end date for the monitoring period.
      * @param endDate
      */
-    public void setEndDate(String endDate) {
+    public void setEndDate(Date endDate) {
         if(this.startDate != null && this.startDate.compareTo(endDate) > 0) {
             throw new IllegalArgumentException("End date cannot be before start date.");
         }

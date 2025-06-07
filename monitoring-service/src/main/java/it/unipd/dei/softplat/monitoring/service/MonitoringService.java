@@ -8,8 +8,6 @@
 
 package it.unipd.dei.softplat.monitoring.service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.json.JSONObject;
@@ -70,16 +68,8 @@ public class MonitoringService {
             throw new IllegalArgumentException("Monitoring request cannot be null.");
         }
 
-        // To manage date formats
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
-        try {
-            client.setFromDate(dateFormat.parse(request.getStartDate()));
-            client.setToDate(dateFormat.parse(request.getEndDate()));
-        }
-        catch (ParseException e){
-            throw new IllegalArgumentException("Invalid date format. Please use dd/MM/yyyy.");
-        }
+        client.setFromDate(request.getStartDate());
+        client.setToDate(request.getEndDate());
 
         // Set the label for the query
         try{

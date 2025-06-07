@@ -47,19 +47,19 @@ public class MonitoringController {
     @PostMapping("/monitoring/")
     public ResponseEntity<?> startMonitoring(@Valid @RequestBody MonitoringRequest request){
         // Validate the request
-        if(request == null) {
+        if (request == null) {
             return ResponseEntity.badRequest().body("Request cannot be null.");
         }
-        if(request.getIssueQuery() == null || request.getIssueQuery().isEmpty()) {
+        if (request.getIssueQuery() == null || request.getIssueQuery().isEmpty()) {
             return ResponseEntity.badRequest().body("Issue query cannot be null or empty.");
         }
-        if(request.getLabel() == null || request.getLabel().isEmpty()) {
+        if (request.getLabel() == null || request.getLabel().isEmpty()) {
             return ResponseEntity.badRequest().body("Label cannot be null or empty.");
         }
-        if(request.getStartDate() == null || request.getStartDate().isEmpty()) {
+        if (request.getStartDate() == null || request.getStartDate().toString().isEmpty()) {
             return ResponseEntity.badRequest().body("Start date cannot be null or empty.");
         }
-        if(request.getEndDate() == null || request.getEndDate().isEmpty()) {
+        if (request.getEndDate() == null || request.getEndDate().toString().isEmpty()) {
             return ResponseEntity.badRequest().body("End date cannot be null or empty.");
         }
 

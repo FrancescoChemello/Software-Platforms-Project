@@ -15,6 +15,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
+import java.util.Calendar;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,12 +62,18 @@ public class MonitoringTest {
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
         // Example of a valid request
-        MonitoringRequest request = new MonitoringRequest(
-            "example issue query",
-            "example label",
-            "01/01/2023",
-            "31/12/2023"
-        );
+        MonitoringRequest request = new MonitoringRequest();
+        request.setIssueQuery("example issue query");
+        request.setLabel("example label");
+        Calendar cal = java.util.Calendar.getInstance();
+        cal.set(2023, java.util.Calendar.JANUARY, 1, 0, 0, 0);
+        cal.set(java.util.Calendar.MILLISECOND, 0);
+        Date startDate = cal.getTime();
+        request.setStartDate(startDate);
+        cal.set(2023, java.util.Calendar.DECEMBER, 31, 23, 59, 59);
+        cal.set(java.util.Calendar.MILLISECOND, 999);
+        Date endDate = cal.getTime();
+        request.setEndDate(endDate);
 
         // Call the startMonitoring method and check if the ResponseEntity is successful.
         ResponseEntity <?> response = controller_test.startMonitoring(request);
@@ -78,12 +87,18 @@ public class MonitoringTest {
         verify(httpClientService).postRequest(eq("http://localhost:8080/client/status/"), anyString());
 
         // Example of an invalid request
-        MonitoringRequest invalidRequest = new MonitoringRequest(
-            "", // Empty issue query
-            "example label",
-            "01/01/2023",
-            "31/12/2023"
-        );
+        MonitoringRequest invalidRequest = new MonitoringRequest();
+        invalidRequest.setIssueQuery("");
+        invalidRequest.setLabel("example label");
+        cal = java.util.Calendar.getInstance();
+        cal.set(2023, java.util.Calendar.JANUARY, 1, 0, 0, 0);
+        cal.set(java.util.Calendar.MILLISECOND, 0);
+        startDate = cal.getTime();
+        request.setStartDate(startDate);
+        cal.set(2023, java.util.Calendar.DECEMBER, 31, 23, 59, 59);
+        cal.set(java.util.Calendar.MILLISECOND, 999);
+        endDate = cal.getTime();
+        request.setEndDate(endDate);
 
         // Call the startMonitoring method with an invalid request and check if it returns a bad request response.
         ResponseEntity <?> invalidResponse = controller_test.startMonitoring(invalidRequest);
@@ -108,11 +123,18 @@ public class MonitoringTest {
         request.setLabel("test label");
         assertEquals("test label", request.getLabel(), "Label should match the set value");
         // Set the start date
-        request.setStartDate("01/01/2023");
-        assertEquals("01/01/2023", request.getStartDate(), "Start date should match the set value");
+        Calendar cal = Calendar.getInstance();
+        cal.set(2023, java.util.Calendar.JANUARY, 1, 0, 0, 0);
+        cal.set(java.util.Calendar.MILLISECOND, 0);
+        Date startDate = cal.getTime();
+        request.setStartDate(startDate);
+        assertEquals(startDate, request.getStartDate(), "Start date should match the set value");
         // Set the end date
-        request.setEndDate("31/12/2023");
-        assertEquals("31/12/2023", request.getEndDate(), "End date should match the set value");
+        cal.set(2023, java.util.Calendar.DECEMBER, 31, 23, 59, 59);
+        cal.set(java.util.Calendar.MILLISECOND, 999);
+        Date endDate = cal.getTime();
+        request.setEndDate(endDate);
+        assertEquals(endDate, request.getEndDate(), "End date should match the set value");
     }
 
     /**
@@ -178,40 +200,17 @@ public class MonitoringTest {
         }
         // setStartDate with empty string
         try {
-            request.setStartDate("");
+            request.setStartDate(new Date());
         } 
         catch (IllegalArgumentException e) {
             assertEquals("Start date cannot be null or empty.", e.getMessage(), "Should throw an exception for empty start date");
         }
         // setEndDate with empty string
         try {
-            request.setEndDate("");
+            request.setEndDate(new Date());
         } 
         catch (IllegalArgumentException e) {
             assertEquals("End date cannot be null or empty.", e.getMessage(), "Should throw an exception for empty end date");
-        }
-    }
-
-    /**
-     * This test method is intended to test the validation of the MonitoringRequest object for patterns.
-     * It checks if the start date and end date follow the expected pattern of dd/MM/yyyy.
-     * If the dates do not match the expected pattern, it should throw an IllegalArgumentException.
-     */
-    @Test
-    public void testRequestValidationPatterns() {
-        MonitoringRequest request = new MonitoringRequest();
-        // setStartDate with invalid pattern
-        try {
-            request.setStartDate("01-01-2023"); // Invalid format
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Invalid date format. Please use dd/MM/yyyy.", e.getMessage(), "Should throw an exception for invalid start date format");
-        }
-        try {
-            request.setEndDate("01-01-2023"); // Invalid format
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Invalid date format. Please use dd/MM/yyyy.", e.getMessage(), "Should throw an exception for invalid start date format");
         }
     }
 
@@ -223,17 +222,27 @@ public class MonitoringTest {
     @Test
     public void testRequestValidationDateOrder() {
         MonitoringRequest request = new MonitoringRequest();
+        Calendar cal_01_01_2023 = Calendar.getInstance();
+        cal_01_01_2023.set(2023, java.util.Calendar.JANUARY, 2, 0, 0, 0);
+        cal_01_01_2023.set(java.util.Calendar.MILLISECOND, 0);
+        Date endDate = cal_01_01_2023.getTime();
+        Calendar cal_02_01_2023 = Calendar.getInstance();
+        cal_02_01_2023.set(2023, java.util.Calendar.JANUARY, 1, 23, 59, 59);
+        cal_02_01_2023.set(java.util.Calendar.MILLISECOND, 999);
+        Date startDate = cal_02_01_2023.getTime();
         try{
-            request.setStartDate("02/01/2023");
-            request.setEndDate("01/01/2023"); // End date before start date
+            request.setStartDate(startDate);
+            request.setEndDate(endDate); // End date before start date
         }
         catch (IllegalArgumentException e) {
             assertEquals("End date cannot be before start date.", e.getMessage(), "Should throw an exception for end date before start date");
         }
         request = new MonitoringRequest();
+        endDate = cal_01_01_2023.getTime();
+        startDate = cal_02_01_2023.getTime(); 
         try {
-            request.setEndDate("01/01/2023");
-            request.setStartDate("02/01/2023"); // Start date after end date
+            request.setEndDate(endDate);
+            request.setStartDate(startDate); // Start date after end date
         }
         catch (IllegalArgumentException e) {
             assertEquals("Start date cannot be after end date.", e.getMessage(), "Should throw an exception for start date after end date");
