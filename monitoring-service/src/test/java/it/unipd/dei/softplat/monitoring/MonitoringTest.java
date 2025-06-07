@@ -65,13 +65,11 @@ public class MonitoringTest {
         MonitoringRequest request = new MonitoringRequest();
         request.setIssueQuery("example issue query");
         request.setLabel("example label");
-        Calendar cal = java.util.Calendar.getInstance();
-        cal.set(2023, java.util.Calendar.JANUARY, 1, 0, 0, 0);
-        cal.set(java.util.Calendar.MILLISECOND, 0);
+        Calendar cal = Calendar.getInstance();
+        cal.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
         Date startDate = cal.getTime();
         request.setStartDate(startDate);
-        cal.set(2023, java.util.Calendar.DECEMBER, 31, 23, 59, 59);
-        cal.set(java.util.Calendar.MILLISECOND, 999);
+        cal.set(2023, Calendar.DECEMBER, 31, 23, 59, 59);
         Date endDate = cal.getTime();
         request.setEndDate(endDate);
 
@@ -90,13 +88,11 @@ public class MonitoringTest {
         MonitoringRequest invalidRequest = new MonitoringRequest();
         invalidRequest.setIssueQuery("");
         invalidRequest.setLabel("example label");
-        cal = java.util.Calendar.getInstance();
-        cal.set(2023, java.util.Calendar.JANUARY, 1, 0, 0, 0);
-        cal.set(java.util.Calendar.MILLISECOND, 0);
+        cal = Calendar.getInstance();
+        cal.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
         startDate = cal.getTime();
         request.setStartDate(startDate);
-        cal.set(2023, java.util.Calendar.DECEMBER, 31, 23, 59, 59);
-        cal.set(java.util.Calendar.MILLISECOND, 999);
+        cal.set(2023, Calendar.DECEMBER, 31, 23, 59, 59);
         endDate = cal.getTime();
         request.setEndDate(endDate);
 
@@ -124,14 +120,12 @@ public class MonitoringTest {
         assertEquals("test label", request.getLabel(), "Label should match the set value");
         // Set the start date
         Calendar cal = Calendar.getInstance();
-        cal.set(2023, java.util.Calendar.JANUARY, 1, 0, 0, 0);
-        cal.set(java.util.Calendar.MILLISECOND, 0);
+        cal.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
         Date startDate = cal.getTime();
         request.setStartDate(startDate);
         assertEquals(startDate, request.getStartDate(), "Start date should match the set value");
         // Set the end date
-        cal.set(2023, java.util.Calendar.DECEMBER, 31, 23, 59, 59);
-        cal.set(java.util.Calendar.MILLISECOND, 999);
+        cal.set(2023, Calendar.DECEMBER, 31, 23, 59, 59);
         Date endDate = cal.getTime();
         request.setEndDate(endDate);
         assertEquals(endDate, request.getEndDate(), "End date should match the set value");
@@ -223,12 +217,10 @@ public class MonitoringTest {
     public void testRequestValidationDateOrder() {
         MonitoringRequest request = new MonitoringRequest();
         Calendar cal_01_01_2023 = Calendar.getInstance();
-        cal_01_01_2023.set(2023, java.util.Calendar.JANUARY, 2, 0, 0, 0);
-        cal_01_01_2023.set(java.util.Calendar.MILLISECOND, 0);
+        cal_01_01_2023.set(2023, Calendar.JANUARY, 2, 0, 0, 0);
         Date endDate = cal_01_01_2023.getTime();
         Calendar cal_02_01_2023 = Calendar.getInstance();
-        cal_02_01_2023.set(2023, java.util.Calendar.JANUARY, 1, 23, 59, 59);
-        cal_02_01_2023.set(java.util.Calendar.MILLISECOND, 999);
+        cal_02_01_2023.set(2023, Calendar.JANUARY, 1, 23, 59, 59);
         Date startDate = cal_02_01_2023.getTime();
         try{
             request.setStartDate(startDate);
