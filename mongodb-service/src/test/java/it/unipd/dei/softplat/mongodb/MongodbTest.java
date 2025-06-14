@@ -17,8 +17,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +24,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.containers.MongoDBContainer;
 
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.MongodConfig;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.distribution.Version;
 import it.unipd.dei.softplat.http.service.HttpClientService;
 import it.unipd.dei.softplat.mongodb.controller.MongodbController;
 import it.unipd.dei.softplat.mongodb.model.MongoArticle;
@@ -45,47 +43,23 @@ import it.unipd.dei.softplat.mongodb.dto.SearchArticleDTO;
  * It uses an embedded MongoDB instance for testing purposes.
  */
 @SpringBootTest
+@Testcontainers
 public class MongodbTest {
 
+    // To start an embedded MongoDB instance for testing purposes
+    @Container
+    private static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
+
+    @DynamicPropertySource
+    static void setMongoDbProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
+    
     @MockBean
     private HttpClientService httpClientService;
     
     @Autowired @InjectMocks
     private MongodbController mongodbController;
-    // To start an embedded MongoDB instance for testing purposes
-    private static MongodExecutable mongodExecutable;
-    private static final int PORT = 27017;
-
-    /**
-     * This method sets up an embedded MongoDB instance before all tests are run.
-     * It uses the de.flapdoodle.embed.mongo library to start a MongoDB server
-     * @throws Exception if there is an error starting the MongoDB instance
-     */
-    @BeforeAll
-    public static void setUpMongo() throws Exception {
-        MongodStarter starter = MongodStarter.getDefaultInstance();
-        MongodConfig mongodConfig = MongodConfig.builder()
-                .version(Version.Main.V6_0)
-                .net(new Net(PORT, false))
-                .build();
-        mongodExecutable = starter.prepare(mongodConfig);
-        mongodExecutable.start();
-
-        // // Controller initialization
-        // mongodbController = new MongodbController(new MongodbService("localhost", String.valueOf(PORT)));
-    }
-
-    /**
-     * This method stops the embedded MongoDB instance after all tests are run.
-     * It ensures that the MongoDB server is properly shut down to free up resources.
-     * @throws Exception if there is an error stopping the MongoDB instance
-     */
-    @AfterAll
-    public static void tearDownMongo() {
-        if (mongodExecutable != null) {
-            mongodExecutable.stop();
-        }
-    }
 
     /**
      * This test method is intended to test the saveArticles method of the MongodbController.

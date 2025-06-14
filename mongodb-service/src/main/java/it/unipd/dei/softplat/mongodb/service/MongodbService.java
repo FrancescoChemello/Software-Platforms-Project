@@ -13,13 +13,13 @@ import java.util.List;
 
 import org.bson.Document;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -34,8 +34,6 @@ import it.unipd.dei.softplat.http.service.HttpClientService;
 @Service
 public class MongodbService {
 
-    private String mongoUrl;
-    private String mongoPort;
     private MongoDatabase database;
     private MongoClient mongoClient;
     @Value("${data.batch.size}")
@@ -44,44 +42,14 @@ public class MongodbService {
  
     /**
      * Default constructor for MongodbService.
-     * @param mongoUrl
-     * @param mongoPort
+     * @param mongoClient
+     * @param httpClientService
      */
-    public MongodbService(@Value("${mongodb.url}") String mongoUrl, @Value("${mongodb.port}") String mongoPort, HttpClientService httpClientService) {
-        this.mongoUrl = mongoUrl;
-        this.mongoPort = mongoPort;
+    @Autowired
+    public MongodbService(MongoClient mongoClient, HttpClientService httpClientService) {
+        this.mongoClient = mongoClient;
+        this.database = mongoClient.getDatabase("softplatDB");
         this.httpClientService = httpClientService;
-        // Establish connections to MongoDB
-        try {
-            establishConnections();
-            System.out.println("Connected to MongoDB at " + mongoUrl + ":" + mongoPort);
-        } catch (Exception e) {
-            System.out.println("Error establishing connection to MongoDB: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Default constructor for MongodbService.
-     * This method establishes a connection to the MongoDB server.
-     * @throws Exception if there is an error establishing the connection.
-     */
-    private void establishConnections() {
-        try {
-            // Establish a connection to the MongoDB server
-            String connectionString = "mongodb://" + mongoUrl + ":" + mongoPort;
-            System.out.println("Connecting to MongoDB at " + connectionString);
-            // Create a MongoClient instance
-            this.mongoClient = MongoClients.create(connectionString);
-            // Get the database
-            this.database = mongoClient.getDatabase("softplatDB");
-
-            System.out.println("Connected to MongoDB at " + mongoUrl + ":" + mongoPort);
-        }
-        catch (Exception e) {
-            System.out.println("Error establishing connection to MongoDB: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -103,10 +71,6 @@ public class MongodbService {
      */
     private void createCollection(String collectionName) {
         try {
-            // Establish a connection to MongoDB if not already done
-            if (this.database == null) {
-                establishConnections();
-            }
             // Create the collection
             database.createCollection(collectionName);
 
@@ -125,10 +89,6 @@ public class MongodbService {
      */
     private void dropACollection(String collectionName) {
         try {
-            // Establish a connection to MongoDB if not already done
-            if (this.database == null) {
-                establishConnections();
-            }
             // Drop the collection
             database.getCollection(collectionName).drop();
 
@@ -147,11 +107,7 @@ public class MongodbService {
      */
     private List<String> listCollections() {
         try {
-            // Establish a connection to MongoDB if not already done
-            if (this.database == null) {
-                establishConnections();
-            }
-            // Get the list of collections
+             // Get the list of collections
             return database.listCollectionNames().into(new ArrayList<>());
         } catch (Exception e) {
             System.out.println("Error retrieving collections: " + e.getMessage());
@@ -165,10 +121,6 @@ public class MongodbService {
      * @param articles The list of articles to be saved.
      */
     public void saveArticles(List<MongoArticle> articles, String collectionName) {
-        // Establish a connection to MongoDB if not already done
-        if (this.database == null) {
-            establishConnections();
-        }
         // Check if the collection exists, if not create it
         if (!listCollections().contains(collectionName)) {
             createCollection(collectionName);
@@ -210,10 +162,6 @@ public class MongodbService {
      * @param collectionName
      */
     public void dropCollection(String collectionName) {
-        // Establish a connection to MongoDB if not already done
-        if (this.database == null) {
-            establishConnections();
-        }
         // Check if the collection exists
         if (!listCollections().contains(collectionName)) {
             System.out.println("Collection " + collectionName + " does not exist.");
@@ -225,10 +173,6 @@ public class MongodbService {
 
     public void getArticlesById(String collectionName, List<String> ids) {
         List<JSONObject> articles = new ArrayList<>();
-        // Establish a connection to MongoDB if not already done
-        if (this.database == null) {
-            establishConnections();
-        }
         // Check if the collection exists
         if (!listCollections().contains(collectionName)) {
             System.out.println("Collection " + collectionName + " does not exist.");
