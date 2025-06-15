@@ -161,13 +161,6 @@ public class MonitoringTest {
         catch (IllegalArgumentException e) {
             assertEquals("Start date cannot be null or empty.", e.getMessage(), "Should throw an exception for null start date");
         }
-        // setEndDate with null value
-        try {
-            request.setEndDate(null);
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("End date cannot be null or empty.", e.getMessage(), "Should throw an exception for null end date");
-        }
     }
 
     /**
@@ -191,20 +184,6 @@ public class MonitoringTest {
         } 
         catch (IllegalArgumentException e) {
             assertEquals("Label cannot be null or empty.", e.getMessage(), "Should throw an exception for empty label");
-        }
-        // setStartDate with empty string
-        try {
-            request.setStartDate(new Date());
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Start date cannot be null or empty.", e.getMessage(), "Should throw an exception for empty start date");
-        }
-        // setEndDate with empty string
-        try {
-            request.setEndDate(new Date());
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("End date cannot be null or empty.", e.getMessage(), "Should throw an exception for empty end date");
         }
     }
 

@@ -9,6 +9,7 @@
 package it.unipd.dei.softplat.monitoring.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,178 +60,237 @@ public class MonitoringService {
      */
     public void startMonitoring(MonitoringRequest request) {
 
-        // TODO: Implement a mechanism to continuously monitor for new articles in case of end date empty
-
         Response response;
         ArrayList<JSONObject> retrievedArticles = new ArrayList<>();
-
+        
         if (request == null) {
             throw new IllegalArgumentException("Monitoring request cannot be null.");
         }
-
-        client.setFromDate(request.getStartDate());
-        client.setToDate(request.getEndDate());
-
-        // Set the label for the query
-        try{
-            response = client.getContent(request.getIssueQuery());
-        }
-        catch (UnirestException e){
-            throw new RuntimeException("Error while fetching content from The Guardian API: " + e.getMessage(), e);
-        }
-
-        // Here you can implement the logic to process the response and store it in the database
-        if (response.getResults().length == 0) {
-            System.out.println("No articles found for the given query and date range.");
+        
+        if (request.getEndDate() == null) {
+            System.out.println("End date is null, monitoring will continue indefinitely.");
         } else {
-            System.out.println("Found " + response.getResults().length + " articles.");
-            // Convert the response results to a stream
-            Article [] articles = response.getResults();
-            // Second call to get the body of the articles
-            for (Article article : articles) {
-                if (article == null) {
-                    System.out.println("Received null article.");
-                } else {
-                    /**
-                     * The article is as follows:
-                     * {
-                     *   "id": "article-id",
-                     *   "type": "article_type",
-                     *   "sectionId": "section_id",
-                     *   "sectionName": "section_name",
-                     *   "webPublicationDate": "2023-10-01T12:00:00Z",
-                     *   "webTitle": "Article Title", 
-                     *   "webUrl": "https://www.theguardian.com/article-url",
-                     *   "apiUrl": "https://content.guardianapis.com/article-id",
-                     *   "isHosted": false
-                     * }
-                     */
+            System.out.println("Monitoring completed for the given date range.");
+        }
 
-                     String bodyText;
+        // Variable to check if the monitoring should continue indefinitely
+        boolean continueMonitoring = (request.getEndDate() == null);
+        
+        // Loop the section
+        do {
+            client.setToDate(request.getEndDate());
+            if (!continueMonitoring) {
+                // If the end date is not null, set the end date for the query
+                client.setFromDate(request.getStartDate());
+            } else {
+                // If the end date is null, set the end date to the current date
+                client.setFromDate(new Date()); // new Date() = current date and time 
+            }
 
-                    String apiurl = article.getApiUrl();
-                    if( apiurl == null || apiurl.isEmpty()) {
-                        System.out.println("Article API URL is missing.");
-                        continue;
-                    }
+            // Set the label for the query
+            try{
+                response = client.getContent(request.getIssueQuery());
+            }
+            catch (UnirestException e){
+                throw new RuntimeException("Error while fetching content from The Guardian API: " + e.getMessage(), e);
+            }
 
-                    // Fetch the full article content using the API URL
-                    try {
+            // Here you can implement the logic to process the response and store it in the database
+            if (response.getResults().length == 0) {
+                System.out.println("No articles found for the given query and date range.");
+            } else {
+                System.out.println("Found " + response.getResults().length + " articles.");
+                // Convert the response results to a stream
+                Article [] articles = response.getResults();
+                // Second call to get the body of the articles
+                for (Article article : articles) {
+                    if (article == null) {
+                        System.out.println("Received null article.");
+                    } else {
                         /**
-                         * JSON response:
-                         * Full article: 
+                         * The article is as follows:
                          * {
-                         *  "response":
-                         *  {
-                         *      "userTier":"developer",
-                         *      "total":1,
-                         *      "content":{
-                         *          "sectionName":"World news",
-                         *          "pillarName":"News",
-                         *          "webPublicationDate":"2023-12-27T03:46:38Z",
-                         *          "apiUrl":"https://content.guardianapis.com/world/2023/dec/27/daihatsu-suspends-production-in-japan-after-safety-test-scandal",
-                         *          "webUrl":"https://www.theguardian.com/world/2023/dec/27/daihatsu-suspends-production-in-japan-after-safety-test-scandal",
-                         *          "isHosted":false,
-                         *          "pillarId":"pillar/news",
-                         *          "webTitle":"Daihatsu suspends production in Japan after safety test scandal",
-                         *          "id":"world/2023/dec/27/daihatsu-suspends-production-in-japan-after-safety-test-scandal",
-                         *          "sectionId":"world",
-                         *          "type":"article",
-                         *          "fields":{
-                         *              "bodyText":"Production was suspended at the last operating domestic factory of Japanese automaker Daihatsu on Tuesday, as the ... 
-                         *          }
-                         *      },
-                         *      "status":"ok"
-                         *  }
+                         *   "id": "article-id",
+                         *   "type": "article_type",
+                         *   "sectionId": "section_id",
+                         *   "sectionName": "section_name",
+                         *   "webPublicationDate": "2023-10-01T12:00:00Z",
+                         *   "webTitle": "Article Title", 
+                         *   "webUrl": "https://www.theguardian.com/article-url",
+                         *   "apiUrl": "https://content.guardianapis.com/article-id",
+                         *   "isHosted": false
                          * }
                          */
-                        HttpResponse<JsonNode> fullArticle = Unirest.get(apiurl).queryString("api-key", this.apiKey).queryString("show-fields", "bodyText").asJson();
-                        if (fullArticle.getStatus() != 200) {
-                            System.out.println("Failed to fetch full article content. Status: " + fullArticle.getStatus());
+                        
+                        String bodyText;
+
+                        String apiurl = article.getApiUrl();
+                        if( apiurl == null || apiurl.isEmpty()) {
+                            System.out.println("Article API URL is missing.");
                             continue;
                         }
-                        // Get the body text from the response
-                        // System.out.println("Full article: " + fullArticle.getBody().toString());
-                        JSONObject body = fullArticle.getBody().getObject().getJSONObject("response").getJSONObject("content").getJSONObject("fields");
-                        bodyText = body.getString("bodyText");
-                        if (bodyText == null || bodyText.isEmpty()) {
-                            System.out.println("Body text is missing for article ID: " + article.getId());
+
+                        // Fetch the full article content using the API URL
+                        try {
+                            /**
+                             * JSON response:
+                             * Full article: 
+                             * {
+                             *  "response":
+                             *  {
+                             *      "userTier":"developer",
+                             *      "total":1,
+                             *      "content":{
+                             *          "sectionName":"World news",
+                             *          "pillarName":"News",
+                             *          "webPublicationDate":"2023-12-27T03:46:38Z",
+                             *          "apiUrl":"https://content.guardianapis.com/world/2023/dec/27/daihatsu-suspends-production-in-japan-after-safety-test-scandal",
+                             *          "webUrl":"https://www.theguardian.com/world/2023/dec/27/daihatsu-suspends-production-in-japan-after-safety-test-scandal",
+                             *          "isHosted":false,
+                             *          "pillarId":"pillar/news",
+                             *          "webTitle":"Daihatsu suspends production in Japan after safety test scandal",
+                             *          "id":"world/2023/dec/27/daihatsu-suspends-production-in-japan-after-safety-test-scandal",
+                             *          "sectionId":"world",
+                             *          "type":"article",
+                             *          "fields":{
+                             *              "bodyText":"Production was suspended at the last operating domestic factory of Japanese automaker Daihatsu on Tuesday, as the ... 
+                             *          }
+                             *      },
+                             *      "status":"ok"
+                             *  }
+                             * }
+                             */
+                            HttpResponse<JsonNode> fullArticle = Unirest.get(apiurl).queryString("api-key", this.apiKey).queryString("show-fields", "bodyText").asJson();
+                            if (fullArticle.getStatus() != 200) {
+                                System.out.println("Failed to fetch full article content. Status: " + fullArticle.getStatus());
+                                continue;
+                            }
+                            // Get the body text from the response
+                            JSONObject body = fullArticle.getBody().getObject().getJSONObject("response").getJSONObject("content").getJSONObject("fields");
+                            bodyText = body.getString("bodyText");
+                            if (bodyText == null || bodyText.isEmpty()) {
+                                System.out.println("Body text is missing for article ID: " + article.getId());
+                                continue;
+                            }
+                            System.out.println("Body Text: " + bodyText);
+                        } catch (UnirestException e) {
+                            System.out.println("Error fetching full article content: " + e.getMessage());
                             continue;
                         }
-                        System.out.println("Body Text: " + bodyText);
-                    } catch (UnirestException e) {
-                        System.out.println("Error fetching full article content: " + e.getMessage());
-                        continue;
-                    }
 
-                    // JSON format of the article
-                    JSONObject articleJson = new JSONObject();
-                    /**
-                     * Saving:
-                     * {
-                     *   "id": "article-id",
-                     *   "issueQuery": "query",
-                     *   "label": "label"
-                     *   "type": "article_type",
-                     *   "sectionId": "section_id",
-                     *   "sectionName": "section_name",
-                     *   "webPublicationDate": "2023-10-01T12:00:00Z",
-                     *   "webTitle": "Article Title",
-                     *   "webUrl": "https://www.theguardian.com/article-url",
-                     *   "bodyText": "Full article body text",
-                     * }
-                     */
-                    articleJson.put("id", article.getId());
-                    articleJson.put("issueQuery", request.getIssueQuery());
-                    articleJson.put("label", request.getLabel());
-                    articleJson.put("type", article.getType());
-                    articleJson.put("sectionId", article.getSectionId());
-                    articleJson.put("sectionName", article.getSectionName());
-                    articleJson.put("webPublicationDate", article.getWebPublicationDate());
-                    articleJson.put("webTitle", article.getWebTitle());
-                    articleJson.put("webUrl", article.getWebUrl());
-                    articleJson.put("bodyText", bodyText);
+                        // JSON format of the article
+                        JSONObject articleJson = new JSONObject();
+                        /**
+                         * Saving:
+                         * {
+                         *   "id": "article-id",
+                         *   "issueQuery": "query",
+                         *   "label": "label"
+                         *   "type": "article_type",
+                         *   "sectionId": "section_id",
+                         *   "sectionName": "section_name",
+                         *   "webPublicationDate": "2023-10-01T12:00:00Z",
+                         *   "webTitle": "Article Title",
+                         *   "webUrl": "https://www.theguardian.com/article-url",
+                         *   "bodyText": "Full article body text",
+                         * }
+                         */
+                        articleJson.put("id", article.getId());
+                        articleJson.put("issueQuery", request.getIssueQuery());
+                        articleJson.put("label", request.getLabel());
+                        articleJson.put("type", article.getType());
+                        articleJson.put("sectionId", article.getSectionId());
+                        articleJson.put("sectionName", article.getSectionName());
+                        articleJson.put("webPublicationDate", article.getWebPublicationDate());
+                        articleJson.put("webTitle", article.getWebTitle());
+                        articleJson.put("webUrl", article.getWebUrl());
+                        articleJson.put("bodyText", bodyText);
 
-                    retrievedArticles.add(articleJson);
-                    System.out.println("Article processed: " + article.getId());
+                        retrievedArticles.add(articleJson);
+                        System.out.println("Article processed: " + article.getId());
 
-                    // Send the JSON articles to the DataManager Service
-                    if (retrievedArticles.size() >= batchSize) {
-                        // TODO: Implement a mechanism to process only a size of batchSize articles
-                        // Send the batch of articles to the DataManager Service
-                        ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/datamanager/save-articles/", retrievedArticles.toString());
-                        if (responseDataManager.getStatusCode() == HttpStatus.OK) {
-                            System.out.println("Batch of articles sent to DataManager Service successfully.");
-                            retrievedArticles.clear(); // Clear the list after sending
-                        } else {
-                            // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                            System.out.println("Failed to send batch of articles to DataManager Service. Status: " + responseDataManager.getStatusCode());
+                        // Send the JSON articles to the DataManager Service
+                        if (retrievedArticles.size() >= batchSize) {
+                            // Take the first batchSize articles from the retrievedArticles list
+                            ArrayList<JSONObject> articleBatch = new ArrayList<>(retrievedArticles.subList(0, Math.min(batchSize, retrievedArticles.size())));
+                            // Send the batch of articles to the DataManager Service
+                            ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/datamanager/save-articles/", articleBatch.toString());
+                            if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
+                                System.out.println("Batch of articles sent to DataManager Service successfully.");
+                                // Remove the sent articles from the retrievedArticles list
+                                retrievedArticles.removeAll(articleBatch);
+                            } else {
+                                // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
+                                System.out.println("Failed to send batch of articles to DataManager Service. Status: " + (responseDataManager != null ? responseDataManager.getStatusCode() : "No response received"));
+                            }
                         }
                     }
                 }
-            }
-            // Send the JSON articles left to the DataManager Service
-            if (!retrievedArticles.isEmpty()) {
-                ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/datamanager/save-articles/", retrievedArticles.toString());
-                if (responseDataManager.getStatusCode() == HttpStatus.OK) {
-                    System.out.println("Batch of articles sent to DataManager Service successfully.");
-                    retrievedArticles.clear(); // Clear the list after sending
+                // Send the JSON articles left to the DataManager Service
+                int attempts = 0;
+                while (!retrievedArticles.isEmpty() && attempts < 5) {
+                    // Take the first batchSize articles from the retrievedArticles list
+                    ArrayList<JSONObject> articleBatch = new ArrayList<>(retrievedArticles.subList(0, Math.min(batchSize, retrievedArticles.size())));
+                    ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/datamanager/save-articles/", articleBatch.toString());
+                    if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
+                        System.out.println("Batch of articles sent to DataManager Service successfully.");
+                        // Remove the sent articles from the retrievedArticles list
+                        retrievedArticles.removeAll(articleBatch);
+                    } else {
+                        attempts++;
+                        // Sleep for a while before retrying
+                        try {
+                            Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                        } catch (InterruptedException e) {
+                            System.out.println("Retry interrupted: " + e.getMessage());
+                            Thread.currentThread().interrupt(); // Restore the interrupted status
+                        }
+                        System.out.println("Failed to send batch of articles to DataManager Service. Status: " + (responseDataManager != null ? responseDataManager.getStatusCode() : "No response received"));
+                    }
+                }
+                // Check if some articles are left
+                if (!retrievedArticles.isEmpty()) {
+                    System.out.println("Some articles were not sent to the DataManager Service.");
+                }
+
+                // Send to the Client Service that the monitoring is completed
+                JSONObject monitoringCompletion = new JSONObject();
+                monitoringCompletion.put("status", "MONITORING");
+                monitoringCompletion.put("message", "Monitoring completed for query: " + request.getIssueQuery());
+                ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
+                if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
+                    System.out.println("Monitoring status sent to Client Service successfully.");
                 } else {
-                    // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
-                    System.out.println("Failed to send batch of articles to DataManager Service. Status: " + responseDataManager.getStatusCode());
+                    System.out.println("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                    attempts = 0;
+                    while (attempts < 5) {
+                        attempts++;
+                        // Sleep for a while before retrying
+                        try {
+                            Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                        } catch (InterruptedException e) {
+                            System.out.println("Retry interrupted: " + e.getMessage());
+                            Thread.currentThread().interrupt(); // Restore the interrupted status
+                        }
+                        responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
+                        if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
+                            System.out.println("Monitoring status sent to Client Service successfully.");
+                            break;
+                        } else {
+                            System.out.println("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                        }
+                    }
                 }
             }
-            // Send to the Client Service that the monitoring is completed
-            JSONObject monitoringCompletion = new JSONObject();
-            monitoringCompletion.put("status", "MONITORING");
-            monitoringCompletion.put("message", "Monitoring completed for query: " + request.getIssueQuery());
-            ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
-            if (responseClientService.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Monitoring status sent to Client Service successfully.");
-            } else {
-                System.out.println("Failed to send monitoring status to Client Service. Status: " + responseClientService.getStatusCode());
-                // TODO: If it fails, I should try again.
+            // Sleep for a while before the next monitoring cycle
+            if (continueMonitoring) {
+                try {
+                    Thread.sleep(60000); // Sleep for 60 seconds before the next monitoring cycle
+                } catch (InterruptedException e) {
+                    System.out.println("Monitoring interrupted: " + e.getMessage());
+                    Thread.currentThread().interrupt(); // Restore the interrupted status
+                }
             }
-        }
+        } while (continueMonitoring);
     }
 }

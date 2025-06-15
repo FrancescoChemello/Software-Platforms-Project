@@ -56,11 +56,8 @@ public class MonitoringController {
         if (request.getLabel() == null || request.getLabel().isEmpty()) {
             return ResponseEntity.badRequest().body("Label cannot be null or empty.");
         }
-        if (request.getStartDate() == null || request.getStartDate().toString().isEmpty()) {
-            return ResponseEntity.badRequest().body("Start date cannot be null or empty.");
-        }
-        if (request.getEndDate() == null || request.getEndDate().toString().isEmpty()) {
-            return ResponseEntity.badRequest().body("End date cannot be null or empty.");
+        if (request.getStartDate() == null) {
+            return ResponseEntity.badRequest().body("Start date cannot be null.");
         }
 
         // Start the monitoring process
