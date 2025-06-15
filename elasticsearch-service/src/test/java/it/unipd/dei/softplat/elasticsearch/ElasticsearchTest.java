@@ -218,4 +218,122 @@ public class ElasticsearchTest {
         // Verify that the HTTP client service was called with the correct URL and parameters
         verify(httpClientService, times(2)).postRequest(eq("http://localhost:8080/mongodb/get-articles/"), anyString());
     }
+
+    @Test
+    public void testElasticArticle(){
+        // Create an instance of ElasticArticle
+        ElasticArticle article = new ElasticArticle();
+        // Set properties
+        article.setId("test_id");
+        article.setIssueQuery("test_issue_query");
+        article.setLabel("test_label");
+        article.setType("test_type");
+        Calendar cal = Calendar.getInstance();
+        cal.set(2025, Calendar.JANUARY, 1, 0, 0, 0);
+        Date date = cal.getTime();
+        article.setWebPublicationDate(date);
+        article.setWebTitle("Test Web Title");
+        article.setBodyText("This is a test body text for the ElasticArticle class.");
+        // Assert that the properties are set correctly
+        assertEquals("test_id", article.getId(), "ID should match");
+        assertEquals("test_issue_query", article.getIssueQuery(), "Issue query should match");
+        assertEquals("test_label", article.getLabel(), "Label should match");
+        assertEquals("test_type", article.getType(), "Type should match");
+        assertEquals(date, article.getWebPublicationDate(), "Web publication date should match");
+        assertEquals("Test Web Title", article.getWebTitle(), "Web title should match");
+        assertEquals("This is a test body text for the ElasticArticle class.", article.getBodyText(), "Body text should match");
+    }
+
+    @Test
+    public void testElasticArticleWithNullValues() {
+        // Create an instance of ElasticArticle with null values
+        ElasticArticle article = new ElasticArticle();
+        // Assert that the properties are null
+        try {
+            article.setId(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("ID cannot be null", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setIssueQuery(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Issue query cannot be null", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setLabel(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Label cannot be null", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setType(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Type cannot be null", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setWebPublicationDate(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Web publication date cannot be null", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setWebTitle(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Web title cannot be null", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setBodyText(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Body text cannot be null", e.getMessage(), "Exception message should match");
+        }
+    }
+
+    @Test
+    public void testElasticArticleWithEmptyValues() {
+        // Create an instance of ElasticArticle with empty values
+        ElasticArticle article = new ElasticArticle();
+        // Assert that the properties are empty
+        try {
+            article.setId("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("ID cannot be empty", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setIssueQuery("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Issue query cannot be empty", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setLabel("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Label cannot be empty", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setType("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Type cannot be empty", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setWebTitle("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Web title cannot be empty", e.getMessage(), "Exception message should match");
+        }
+        try {
+            article.setBodyText("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Body text cannot be empty", e.getMessage(), "Exception message should match");
+        }
+    }
+
 }
