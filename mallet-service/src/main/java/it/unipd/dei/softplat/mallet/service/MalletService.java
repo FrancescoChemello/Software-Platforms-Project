@@ -75,11 +75,27 @@ public class MalletService {
         
         // Send the search request to the Elasticsearch Service
         ResponseEntity<String> response = httpClientService.postRequest("http://localhost:8080/elastic/search/", searchRequest.toString());
-        if (response.getStatusCode() == HttpStatus.OK) {
+        if (response != null && response.getStatusCode() == HttpStatus.OK) {
             System.out.println("Search request sent successfully to Elasticsearch Service.");
         } else {
-            System.out.println("Failed to send search request to Elasticsearch Service. Status code: " + response.getStatusCode());
-            // TODO: Implement a mechanism to send again the request after some time.
+            int attempts = 0;
+            while (attempts < 5) {
+                // Retry sending the request
+                response = httpClientService.postRequest("http://localhost:8080/elastic/search/", searchRequest.toString());
+                if (response != null && response.getStatusCode() == HttpStatus.OK) {
+                    System.out.println("Search request sent successfully to Elasticsearch Service after " + (attempts + 1) + " attempts.");
+                    break; // Exit the loop if the request was successful
+                } else {
+                    attempts++;
+                    try {
+                        Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                    } catch (InterruptedException e) {
+                        System.out.println("Retry interrupted: " + e.getMessage());
+                        Thread.currentThread().interrupt(); // Restore the interrupted status
+                    }
+                    System.out.println("Failed to send search request to Elasticsearch Service. Status code: " + (response != null ? response.getStatusCode() : "No response received"));
+                }
+            }
         }
     }
 
@@ -107,7 +123,6 @@ public class MalletService {
             processArticles(query);
         } else {
             if (this.articles.size() >= batchSize) {
-                // TODO: Implement a mechanism to process only a size of batchSize articles
                 // Process the articles in batches of batchSize
                 System.out.println("Processing batch of articles for query: " + query);
                 processArticles(query);
@@ -123,8 +138,7 @@ public class MalletService {
     private void processArticles(String query) {
 
         // TODO: check the values for numTopic and numTopWordsPerTopic
-        // TODO: modify the response sent back to the Client service.
-
+        
         // Get the file stopwords from resources folder
         // the stoplist file is from https://github.com/mimno/Mallet/blob/master/stoplists/en.txt
         InputStream stoplistInputStream = MalletApp.class.getResourceAsStream("/stopwords_en.txt");
@@ -153,9 +167,9 @@ public class MalletService {
             instances.addThruPipe(instance);
         }
         System.out.println(String.format("Number of instances (docs): %s", instances.size()));
-
+        
         System.out.println("Starting topic modeling for query: " + query);
-
+        
         // Prepare the topic model
         ParallelTopicModel topicModel = new ParallelTopicModel(numTopics);
         topicModel.addInstances(instances);
@@ -194,19 +208,38 @@ public class MalletService {
             queryArticle.put("webTitle", article.getWebTitle());
             queryArticle.put("webUrl", article.getWebUrl());
             queryArticle.put("bodyText", article.getBodyText());
-
+            
             queryResult.add(queryArticle);
         }
-
+        
+        // TODO: modify the response sent back to the Client service.
         // Send the articles to the CLient Service
         ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/query-result/", queryResult.toString());
-        if (responseClientService.getStatusCode() == HttpStatus.OK) {
+        if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
             System.out.println("Successfully sent query result to Client Service.");
             // Clear the articles list after processing
             this.articles.clear();
         } else {
-            System.out.println("Failed to send query result to Client Service. Status code: " + responseClientService.getStatusCode());
-            // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
+            System.out.println("Failed to send query result to Client Service. Status code: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+            int attempts = 0;
+            while(attempts < 5) {
+                // Retry sending the request
+                responseClientService = httpClientService.postRequest("http://localhost:8080/client/query-result/", queryResult.toString());
+                if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
+                    System.out.println("Successfully sent query result to Client Service after " + (attempts + 1) + " attempts.");
+                    this.articles.clear(); // Clear the articles list after processing
+                    break; // Exit the loop if the request was successful
+                } else {
+                    attempts++;
+                    try {
+                        Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                    } catch (InterruptedException e) {
+                        System.out.println("Retry interrupted: " + e.getMessage());
+                        Thread.currentThread().interrupt(); // Restore the interrupted status
+                    }
+                    System.out.println("Failed to send query result to Client Service. Status code: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                }
+            }
         }
     }
 }
