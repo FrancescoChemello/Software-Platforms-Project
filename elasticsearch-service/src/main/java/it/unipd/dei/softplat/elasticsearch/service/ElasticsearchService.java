@@ -187,11 +187,28 @@ public class ElasticsearchService {
                     articleIDs.put("collectionName", corpus);
                     articleIDs.put("ids", new JSONArray(documentsID));
                     ResponseEntity<?> mongoRequest = httpClientService.postRequest("http://localhost:8080/mongodb/get-articles/", articleIDs.toString());
-                    if (mongoRequest.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Articles retrieved successfully from MongoDB service.");
+                    if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
+                        System.out.println("Articles to retreive sent successfully to MongoDB service.");
                     } else {
-                        System.out.println("Failed to retrieve articles from MongoDB service. Status: " + mongoRequest.getStatusCode());
-                        // TODO: implement a mechanism to retry the request
+                        int attempts = 0;
+                        while (attempts < 5) {
+                            // Retry the request to MongoDB service
+                            mongoRequest = httpClientService.postRequest("http://localhost:8080/mongodb/get-articles/", articleIDs.toString());
+                            if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
+                                System.out.println("Articles to retreive sent successfully to MongoDB service.");
+                                break;
+                            } else {
+                                attempts++;
+                                // Sleep for a while before retrying
+                                try {
+                                    Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                                } catch (InterruptedException e) {
+                                    System.out.println("Retry interrupted: " + e.getMessage());
+                                    Thread.currentThread().interrupt(); // Restore the interrupted status
+                                }
+                                System.out.println("Failed to send articles to retreive to MongoDB service. Status: " + (mongoRequest != null ? mongoRequest.getStatusCode() : "No response received"));
+                            }
+                        }
                     }
                 }
             } else {
