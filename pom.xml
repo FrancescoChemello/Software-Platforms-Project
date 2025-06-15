@@ -27,8 +27,8 @@
         <module>monitoring-service</module>
         <module>datamanager-service</module>
         <module>mongodb-service</module>
-        <module>elasticsearch-service</module>
         <module>mallet-service</module>
+        <module>elasticsearch-service</module>
     </modules>
 
     <properties>
@@ -51,7 +51,7 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>4.5.4</version>
+                <version>4.5.14</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api -->
             <dependency>

@@ -85,7 +85,6 @@
 	        <groupId>com.github.mimno</groupId>
 	        <artifactId>Mallet</artifactId>
 	        <version>v202108</version>
-	</dependency>
+	    </dependency>
     </dependencies>
-
 </project>
