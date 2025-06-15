@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -109,7 +110,7 @@ public class MongodbTest {
     public void testSearchArticles() {
         // Mock configuration
         when(httpClientService.postRequest(
-                eq("http://localhost:8080/query/results/"),
+                eq("http://localhost:8080/mallet/accumulate/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -140,15 +141,15 @@ public class MongodbTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
         
         // Verify that the postRequest methods of DataManagerService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8080/query/results/"), anyString());
-
+        verify(httpClientService, times(2)).postRequest(eq("http://localhost:8080/mallet/accumulate/"), anyString());
+        
         // Call the searchArticles method with an empty collection name
         SearchArticleDTO emptyCollectionDTO = new SearchArticleDTO("", List.of(id));
         ResponseEntity<?> emptyCollectionResponse = mongodbController.searchArticles(emptyCollectionDTO);
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(emptyCollectionResponse, "Response should not be null");
         assertEquals(HttpStatus.BAD_REQUEST, emptyCollectionResponse.getStatusCode(), "Response should have status code 400 Bad Request");
-
+        
         // Call the searchArticles method with a null collection name
         SearchArticleDTO nullCollectionDTO = new SearchArticleDTO(null, List.of(id));
         ResponseEntity<?> nullCollectionResponse = mongodbController.searchArticles(nullCollectionDTO);
@@ -156,7 +157,7 @@ public class MongodbTest {
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(nullCollectionResponse, "Response should not be null");
         assertEquals(HttpStatus.BAD_REQUEST, nullCollectionResponse.getStatusCode(), "Response should have status code 400 Bad Request");
-
+        
         // Call the searchArticles method with an empty list of IDs
         SearchArticleDTO emptyIdDTO = new SearchArticleDTO(collectionName, List.of());
         ResponseEntity<?> emptyIdResponse = mongodbController.searchArticles(emptyIdDTO);
