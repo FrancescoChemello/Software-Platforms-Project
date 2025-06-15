@@ -17,6 +17,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -71,7 +73,10 @@ public class DataManagerTest {
         test_article.setType("test type");
         test_article.setSectionId("test section id");
         test_article.setSectionName("test section name");
-        test_article.setWebPublicationDate("2023-10-01T12:00:00Z");
+        Calendar cal = Calendar.getInstance();
+        cal.set(2023, Calendar.OCTOBER, 1, 12, 0, 0);
+        Date webPublicationDate = cal.getTime();
+        test_article.setWebPublicationDate(webPublicationDate);
         test_article.setWebTitle("Test Web Title");
         test_article.setWebUrl("https://example.com/test-article");
         test_article.setBodyText("This is a test body text for the article.");
@@ -118,7 +123,10 @@ public class DataManagerTest {
             article.setType("test type");
             article.setSectionId("test section id");
             article.setSectionName("test section name");
-            article.setWebPublicationDate("2023-10-01T12:00:00Z");
+            Calendar cal = Calendar.getInstance();
+            cal.set(2023, Calendar.OCTOBER, 1, 12, 0, 0);
+            Date webPublicationDate = cal.getTime();
+            article.setWebPublicationDate(webPublicationDate);
             article.setWebTitle("Test Web Title");
             article.setWebUrl("https://example.com/test-article");
             article.setBodyText("This is a test body text for the article.");
@@ -130,7 +138,7 @@ public class DataManagerTest {
             assertEquals("test type", article.getType());
             assertEquals("test section id", article.getSectionId());
             assertEquals("test section name", article.getSectionName());
-            assertEquals("2023-10-01T12:00:00Z", article.getWebPublicationDate());
+            assertEquals(webPublicationDate, article.getWebPublicationDate());
             assertEquals("Test Web Title", article.getWebTitle());
             assertEquals("https://example.com/test-article", article.getWebUrl());
             assertEquals("This is a test body text for the article.", article.getBodyText());
@@ -255,12 +263,6 @@ public class DataManagerTest {
         }
         catch (IllegalArgumentException e) {
             assertEquals("Section name cannot be empty", e.getMessage(), "Expected exception for empty section name");
-        }
-        try {
-            article.setWebPublicationDate("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web publication date cannot be empty", e.getMessage(), "Expected exception for empty web publication date");
         }
         try {
             article.setWebTitle("");

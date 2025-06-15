@@ -8,6 +8,10 @@
 
 package it.unipd.dei.softplat.datamanager.model;
 
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -32,9 +36,9 @@ public class Article {
     private String sectionId;
     @NotNull @NotEmpty
     private String sectionName;
-    @NotNull @NotEmpty
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z", message = "Web publication date must be in the format YYYY-MM-DDTHH:MM:SSZ")
-    private String webPublicationDate;
+    @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+    private Date webPublicationDate;
     @NotNull @NotEmpty
     private String webTitle;
     @NotNull @NotEmpty
@@ -63,7 +67,7 @@ public class Article {
      * @param webUrl
      * @param bodyText
      */
-    public Article(String id, String issueQuery, String label, String type, String sectionId, String sectionName, String webPublicationDate, String webTitle, String webUrl, String bodyText) {
+    public Article(String id, String issueQuery, String label, String type, String sectionId, String sectionName, Date webPublicationDate, String webTitle, String webUrl, String bodyText) {
         this.id = id;
         this.issueQuery = issueQuery;
         this.label = label;
@@ -178,9 +182,9 @@ public class Article {
 
     /**
      * Returns the web publication date of the article.
-     * @return the web publication date in format YYYY-MM-DDTHH:MM:SSZ
+     * @return the web publication date
      */
-    public String getWebPublicationDate() {
+    public Date getWebPublicationDate() {
         return this.webPublicationDate;
     }
 
@@ -188,7 +192,7 @@ public class Article {
      * Sets the web publication date of the article.
      * @param webPublicationDate
      */
-    public void setWebPublicationDate(String webPublicationDate) {
+    public void setWebPublicationDate(Date webPublicationDate) {
         this.webPublicationDate = webPublicationDate;
     }
 

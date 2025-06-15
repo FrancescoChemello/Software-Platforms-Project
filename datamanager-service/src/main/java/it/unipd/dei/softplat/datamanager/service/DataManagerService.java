@@ -80,63 +80,106 @@ public class DataManagerService {
 
                 // Send the batch of articles to the MongoDB Service
                 if (mongoArticles.size() >= batchSize) {
-                    // TODO: Implement a mechanism to process only a size of batchSize articles
+                    // Take the first batchSize articles from the mongoArticles list
+                    ArrayList<JSONObject> articleBatch = new ArrayList<>(mongoArticles.subList(0, Math.min(batchSize, mongoArticles.size())));
                     // Create a SaveArticleDTO object to send the articles
                     JSONObject saveArticleDTO = new JSONObject();
-                    saveArticleDTO.put("articles", new JSONArray(mongoArticles));
+                    saveArticleDTO.put("articles", new JSONArray(articleBatch));
                     saveArticleDTO.put("collectionName", article.getIssueQuery());
                     // Send articles to the MongoDB Service
                     ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8080/mongodb/save/", saveArticleDTO.toString());
-                    if (responseMongoDB.getStatusCode() == HttpStatus.OK) {
+                    if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Batch of articles sent to MongoDB Service successfully.");
-                        mongoArticles.clear(); // Clear the list after sending
+                        // Remove the sent articles from the mongoArticles list
+                        mongoArticles.removeAll(articleBatch);
                     } else {
                         // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                        System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + responseMongoDB.getStatusCode());
+                        System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + (responseMongoDB != null ? responseMongoDB.getStatusCode() : "No response received"));
                     }
                 }
                 // Send the batch of articles to the ElastiSearch Service
                 if (elasticArticles.size() >= batchSize) {
-                    // TODO: Implement a mechanism to process only a size of batchSize articles
+                    // Take the first batchSize articles from the mongoArticles list
+                    ArrayList<JSONObject> articleBatch = new ArrayList<>(elasticArticles.subList(0, Math.min(batchSize, elasticArticles.size())));
+                    // Create an IndexArticleDTO object to send the articles
+                    JSONObject IndexArticleDTO = new JSONObject();
+                    IndexArticleDTO.put("articles", new JSONArray(articleBatch));
+                    IndexArticleDTO.put("collectionName", article.getIssueQuery());
                     // Send articles to the ElastiSearch Service
-                    ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8080/elastic/index/", elasticArticles.toString());
-                    if (responseElasticSearch.getStatusCode() == HttpStatus.OK) {
+                    ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8080/elastic/index/", IndexArticleDTO.toString());
+                    if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
-                        elasticArticles.clear(); // Clear the list after sending
+                        // Remove the sent articles from the mongoArticles list
+                        elasticArticles.removeAll(articleBatch);
                     } else {
                         // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                        System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + responseElasticSearch.getStatusCode());
+                        System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + (responseElasticSearch != null ? responseElasticSearch.getStatusCode() : "No response received"));
                     }
                 }
             }
         }
         // Send the JSON articles left to the MongoDB Service
-        if(!mongoArticles.isEmpty()) {
+        int attempts = 0;
+        while (!mongoArticles.isEmpty() && attempts < 5) {
+            // Take the first batchSize articles from the mongoArticles list
+            ArrayList<JSONObject> articleBatch = new ArrayList<>(mongoArticles.subList(0, Math.min(batchSize, mongoArticles.size())));
             // Create a SaveArticleDTO object to send the articles
             JSONObject saveArticleDTO = new JSONObject();
-            saveArticleDTO.put("articles", new JSONArray(mongoArticles));
+            saveArticleDTO.put("articles", new JSONArray(articleBatch));
             saveArticleDTO.put("collectionName", articles.get(0).getIssueQuery()); // Assuming all articles have the same issueQuery
             // Send articles to the MongoDB Service
             ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8080/mongodb/save/", saveArticleDTO.toString());
-            if (responseMongoDB.getStatusCode() == HttpStatus.OK) {
+            if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Batch of articles sent to MongoDB Service successfully.");
-                mongoArticles.clear(); // Clear the list after sending
+                // Remove the sent articles from the mongoArticles list
+                mongoArticles.removeAll(articleBatch);
             } else {
-                // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
-                System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + responseMongoDB.getStatusCode());
+                attempts++;
+                // Sleep for a while before retrying
+                try {
+                    Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                } catch (InterruptedException e) {
+                    System.out.println("Retry interrupted: " + e.getMessage());
+                    Thread.currentThread().interrupt(); // Restore the interrupted status
+                }
+                System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + (responseMongoDB != null ? responseMongoDB.getStatusCode() : "No response received"));
             }
         }
+        // Check if some articles are left
+        if (!mongoArticles.isEmpty()) {
+            System.out.println("Some articles were not sent to the MongoDB Service.");
+        }
+
         // Send articles left to the ElasticSearch Service
-        if(!elasticArticles.isEmpty()) {
+        attempts = 0;
+        while (!elasticArticles.isEmpty() && attempts < 5) {
+            // Take the first batchSize articles from the elasticArticles list
+            ArrayList<JSONObject> articleBatch = new ArrayList<>(elasticArticles.subList(0, Math.min(batchSize, elasticArticles.size())));
+            // Create an IndexArticleDTO object to send the articles
+            JSONObject IndexArticleDTO = new JSONObject();
+            IndexArticleDTO.put("articles", new JSONArray(articleBatch));
+            IndexArticleDTO.put("collectionName", articles.get(0).getIssueQuery());
             // Send articles to the ElastiSearch Service
-            ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8080/elastic/index/", elasticArticles.toString());
-            if (responseElasticSearch.getStatusCode() == HttpStatus.OK) {
+            ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8080/elastic/index/", IndexArticleDTO.toString());
+            if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
-                elasticArticles.clear(); // Clear the list after sending
+                // Remove the sent articles from the elasticArticles list
+                elasticArticles.removeAll(articleBatch);
             } else {
-                // TODO: If it fails, I should try again to send the same set of articles using a while loop + a sleep
-                System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + responseElasticSearch.getStatusCode());
+                attempts++;
+                // Sleep for a while before retrying
+                try {
+                    Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                } catch (InterruptedException e) {
+                    System.out.println("Retry interrupted: " + e.getMessage());
+                    Thread.currentThread().interrupt(); // Restore the interrupted status
+                }
+                System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + (responseElasticSearch != null ? responseElasticSearch.getStatusCode() : "No response received"));
             }
+        }
+        // Check if some articles are left
+        if (!elasticArticles.isEmpty()) {
+            System.out.println("Some articles were not sent to the Elasticsearch Service.");
         }
     }
 }
