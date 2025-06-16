@@ -10,8 +10,8 @@ package it.unipd.dei.softplat.mallet.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -22,12 +22,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import cc.mallet.types.*;
-import cc.mallet.pipe.*;
-import cc.mallet.topics.*;
+import cc.mallet.pipe.CharSequence2TokenSequence;
+import cc.mallet.pipe.CharSequenceLowercase;
+import cc.mallet.pipe.Pipe;
+import cc.mallet.pipe.SerialPipes;
+import cc.mallet.pipe.TokenSequence2FeatureSequence;
+import cc.mallet.pipe.TokenSequenceRemoveStopwords;
+import cc.mallet.topics.ParallelTopicModel;
+import cc.mallet.types.Instance;
+import cc.mallet.types.InstanceList;
+import it.unipd.dei.softplat.http.service.HttpClientService;
 import it.unipd.dei.softplat.mallet.MalletApp;
 import it.unipd.dei.softplat.mallet.model.MalletArticle;
-import it.unipd.dei.softplat.http.service.HttpClientService;
 
 @Service
 public class MalletService {
@@ -136,9 +142,6 @@ public class MalletService {
      * @param query
      */
     private void processArticles(String query) {
-
-        // TODO: check the values for numTopic and numTopWordsPerTopic
-        
         // Get the file stopwords from resources folder
         // the stoplist file is from https://github.com/mimno/Mallet/blob/master/stoplists/en.txt
         InputStream stoplistInputStream = MalletApp.class.getResourceAsStream("/stopwords_en.txt");
@@ -185,11 +188,30 @@ public class MalletService {
         }
         System.out.println("Topic model estimation completed for query: " + query);
         
+        /**
+         * Example of the response sent to the Client Service
+         * 
+         * {
+         * "query": "ChatGPT",
+         * "topics": [
+         *      {
+         *          "id": 0,
+         *         "topWords": [
+         *                "word1", "word2", "word3"
+         *           ]
+         *      }, 
+         *   ...
+         *   ]
+         * }
+         */
+
         // Prepare the articles to be sent to the Client Service
-        ArrayList<JSONObject> queryResult = new ArrayList<JSONObject>();
+        JSONObject queryResult = new JSONObject();
+        queryResult.put("query", query);
+        ArrayList<JSONObject> articleTopics = new ArrayList<JSONObject>();
+        // Extract the top words from each article
         for (MalletArticle article : this.articles) {
-            JSONObject queryArticle = new JSONObject();
-            queryArticle.put("query", query);
+            JSONObject topwordsArticle = new JSONObject();
             // Extract the top words for each topic
             List<String> topics = new ArrayList<>();
             for (int t = 0; t < numTopics; t++) {
@@ -197,22 +219,17 @@ public class MalletService {
                     topics.add((String) obj);
                 }
             }
-            queryArticle.put("topics", new JSONArray(topics));
-            queryArticle.put("id", article.getId());
-            queryArticle.put("issueQuery", article.getIssueQuery());
-            queryArticle.put("label", article.getLabel());
-            queryArticle.put("type", article.getType());
-            queryArticle.put("sectionId", article.getSectionId());
-            queryArticle.put("sectionName", article.getSectionName());
-            queryArticle.put("webPublicationDate", article.getWebPublicationDate());
-            queryArticle.put("webTitle", article.getWebTitle());
-            queryArticle.put("webUrl", article.getWebUrl());
-            queryArticle.put("bodyText", article.getBodyText());
-            
-            queryResult.add(queryArticle);
+            topwordsArticle.put("id", article.getId());
+            topwordsArticle.put("topWords", new JSONArray(topics));
+            // Add the article with its topics to the list
+            articleTopics.add(topwordsArticle);
         }
+        // Add the articles to the query result
+        queryResult.put("topics", new JSONArray(articleTopics));
+
+        // For debugging purposes, print the query result
+        System.out.println("Query Result: " + queryResult.toString(2));
         
-        // TODO: modify the response sent back to the Client service.
         // Send the articles to the CLient Service
         ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/query-result/", queryResult.toString());
         if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
