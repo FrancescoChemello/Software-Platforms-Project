@@ -76,16 +76,21 @@ public class MonitoringService {
         // Variable to check if the monitoring should continue indefinitely
         boolean continueMonitoring = (request.getEndDate() == null);
         
+        Date startDate = request.getStartDate();
+        Date endDate;
+        
         // Loop the section
         do {
-            client.setToDate(request.getEndDate());
             if (!continueMonitoring) {
                 // If the end date is not null, set the end date for the query
-                client.setFromDate(request.getStartDate());
+                endDate = request.getEndDate();
             } else {
                 // If the end date is null, set the end date to the current date
-                client.setFromDate(new Date()); // new Date() = current date and time 
+                endDate = new Date(); // new Date() = current date and time 
             }
+            // Set the date range for the query
+            client.setFromDate(startDate);
+            client.setToDate(endDate); 
 
             // Set the label for the query
             try{
@@ -284,6 +289,8 @@ public class MonitoringService {
             }
             // Sleep for a while before the next monitoring cycle
             if (continueMonitoring) {
+                // Set startDate
+                startDate = endDate; // Set the end date to the current date
                 try {
                     Thread.sleep(60000); // Sleep for 60 seconds before the next monitoring cycle
                 } catch (InterruptedException e) {
