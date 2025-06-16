@@ -1,0 +1,223 @@
+/**
+ * ClientTest.java
+ * 
+ * @author Francesco Chemello
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+package it.unipd.dei.softplat.client;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import it.unipd.dei.softplat.client.controller.ClientController;
+import it.unipd.dei.softplat.client.service.ClientService;
+import it.unipd.dei.softplat.client.dto.MessageDTO;
+import it.unipd.dei.softplat.client.model.QueryResult;
+import it.unipd.dei.softplat.client.model.QueryTopic;
+import it.unipd.dei.softplat.http.service.HttpClientService;
+
+/**
+ * This class is intended to test the ClientService and ClientController.
+ * It contains test methods to validate the functionality of the ClientController and the ClientService.
+ */
+@SpringBootTest
+public class ClientTest {
+    
+    @MockBean
+    private HttpClientService httpClientService;
+
+    @Autowired @InjectMocks
+    private ClientController controller_test;
+
+    @Autowired @InjectMocks
+    private ClientService service_test;
+
+    /**
+     * This test method is intended to test the getQueryResult method of the ClientController.
+     * It creates a valid and an invalid QueryResult and calls the getQueryResult method.
+     */
+    @Test
+    public void testGetQueryResult() {
+        // Create a valid QueryTopic object
+        QueryTopic queryTopic_1 = new QueryTopic(
+            "article_id_1",
+            List.of("topic_word_1", "topic_word_2")
+        );
+        QueryTopic queryTopic_2 = new QueryTopic(
+            "article_id_2",
+            List.of("topic_word_3", "topic_word_4")
+        );
+        // Create a valid QueryResult object
+        QueryResult queryResult = new QueryResult(
+            "query_test",
+            List.of(queryTopic_1, queryTopic_2)
+        );
+
+        // Call the getQueryResult method with the valid QueryResult object
+        ResponseEntity<?> response = controller_test.getQueryResult(queryResult);
+        // Assert that the response is not null
+        assertNotNull(response, "Response should not be null");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+
+        // Invalid QueryResult object
+        QueryResult invalidQueryResult = new QueryResult(
+            null, // Invalid query
+            List.of(queryTopic_1, queryTopic_2)
+            );
+            
+        // Call the getQueryResult method with an invalid QueryResult object
+        ResponseEntity<?> invalidResponse = controller_test.getQueryResult(invalidQueryResult);
+        // Assert that the response is not null
+        assertNotNull(invalidResponse, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Response should have status code 400 BAD REQUEST");
+
+        // Invalid QueryResult object with null topics
+        QueryResult invalidQueryResultWithNullTopics = new QueryResult(
+            "query_test",
+            null // Invalid topics
+        );
+
+        // Call the getQueryResult method with an invalid QueryResult object
+        ResponseEntity<?> invalidResponseWithNullTopics = controller_test.getQueryResult(invalidQueryResultWithNullTopics);
+        // Assert that the response is not null
+        assertNotNull(invalidResponseWithNullTopics, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponseWithNullTopics.getStatusCode(), "Response should have status code 400 BAD REQUEST");
+    }
+
+    /**
+     * This test method is intended to test the getStatus method of the ClientController.
+     * It creates a valid and an invalid MessageDTO and calls the getStatus method.
+     */
+    @Test
+    public void testGetStatus() {
+        // Create a valid MessageDTO object
+        MessageDTO messageDTO = new MessageDTO("MONITORING", "Monitoring test status OK!");
+
+        // Call the getStatus method with the valid MessageDTO object
+        ResponseEntity<?> response = controller_test.getStatus(messageDTO);
+        // Assert that the response is not null
+        assertNotNull(response, "Response should not be null");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
+
+        // Invalid MessageDTO object
+        MessageDTO invalidMessageDTO = new MessageDTO(null, null);
+        
+        // Call the getStatus method with an invalid MessageDTO object
+        ResponseEntity<?> invalidResponse = controller_test.getStatus(invalidMessageDTO);
+        // Assert that the response is not null
+        assertNotNull(invalidResponse, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Response should have status code 400 BAD REQUEST");
+
+        // Invalid MessageDTO object with empty status
+        MessageDTO invalidMessageDTOWithEmptyStatus = new MessageDTO("", "Monitoring test status OK!");
+
+        // Call the getStatus method with an invalid MessageDTO object
+        ResponseEntity<?> invalidResponseWithEmptyStatus = controller_test.getStatus(invalidMessageDTOWithEmptyStatus);
+        // Assert that the response is not null
+        assertNotNull(invalidResponseWithEmptyStatus, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponseWithEmptyStatus.getStatusCode(), "Response should have status code 400 BAD REQUEST");
+    }
+
+    /**
+     * This test method is intended to test the sendMonitoringRequest method of the ClientService.
+     * It mocks the HttpClientService and verifies that the postRequest method is called with the correct parameters.
+     */
+    @Test
+    public void testSendMonitoringRequest() {
+        // Mock configuration
+        when(httpClientService.postRequest(
+            eq("http://localhost:8080/monitoring/start/"),
+            anyString())
+        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
+
+        // Create a valid issue string
+        String issueString = "artificial intelligence";
+
+        // Call the sendMonitoringRequest method
+        service_test.sendMonitoringRequest(issueString);
+        // Verify that the postRequest method of HttpClientService was called with the correct parameters
+        verify(httpClientService).postRequest(eq("http://localhost:8080/monitoring/start/"), anyString());
+    }
+
+    /**
+     * This test method is intended to test the sendQueryRequest method of the ClientService without a 
+     * monitoring issueQuery active.
+     * It mocks the HttpClientService and verifies that the postRequest method is never called.
+     */
+    @Test
+    public void testSendQueryRequestWithNoMonitoring() {
+        // Mock configuration
+        when(httpClientService.postRequest(
+            eq("http://localhost:8080/mallet/search/"),
+            anyString())
+        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
+
+        // new ClientService instance without monitoring enabled
+        service_test = new ClientService(httpClientService);
+
+        // Create a valid query request
+        String query = "test query";
+        String corpus = "test corpus";
+        String subCorpus = "test sub-corpus";
+        Integer numTopics = 5;
+        Integer numTopWordsPerTopic = 10;
+        Date startDate = new Date();
+        Date endDate = new Date();
+
+        // Call the sendQueryRequest method
+        service_test.sendQueryRequest(query, corpus, subCorpus, numTopics, numTopWordsPerTopic, startDate, endDate);
+        
+        // Verify that the postRequest method of HttpClientService was called with the correct parameters
+        verify(httpClientService, times(0)).postRequest(eq("http://localhost:8080/mallet/search/"), anyString());
+    }
+
+    /**
+     * This test method is intended to test the sendQueryRequest method of the ClientService with a
+     * monitoring issueQuery active.
+     * It mocks the HttpClientService and verifies that the postRequest method is called with the correct parameters.
+     */
+    @Test
+    public void testSendQueryRequestWithMonitoring() {
+        // Mock configuration
+        when(httpClientService.postRequest(
+            eq("http://localhost:8080/mallet/search/"),
+            anyString())
+        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
+
+        // Client configuration to enable monitoring
+        service_test.isMonitoringEnabled("MONITORING", "Monitoring enable!");
+
+        // Create a valid query request
+        String query = "test query";
+        String corpus = "test corpus";
+        String subCorpus = "test sub-corpus";
+        Integer numTopics = 5;
+        Integer numTopWordsPerTopic = 10;
+        Date startDate = new Date();
+        Date endDate = new Date();
+
+        // Call the sendQueryRequest method
+        service_test.sendQueryRequest(query, corpus, subCorpus, numTopics, numTopWordsPerTopic, startDate, endDate);
+        
+        // Verify that the postRequest method of HttpClientService was called with the correct parameters
+        verify(httpClientService).postRequest(eq("http://localhost:8080/mallet/search/"), anyString());
+    }
+}
