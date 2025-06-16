@@ -44,7 +44,7 @@ public class MonitoringController {
      * @param request The request containing the issue query, label, start date, and end date.
      * @return A ResponseEntity indicating the result of the operation.
      */
-    @PostMapping("/monitoring/")
+    @PostMapping("/monitoring/start/")
     public ResponseEntity<?> startMonitoring(@Valid @RequestBody MonitoringRequest request){
         // Validate the request
         if (request == null) {

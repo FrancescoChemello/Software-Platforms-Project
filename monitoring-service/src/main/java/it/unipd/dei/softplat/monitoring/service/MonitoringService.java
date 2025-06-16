@@ -62,6 +62,9 @@ public class MonitoringService {
 
         Response response;
         ArrayList<JSONObject> retrievedArticles = new ArrayList<>();
+
+        // Variable to check if the monitoring status has been sent to the Client Service
+        boolean monitoringStatusSent = false;
         
         if (request == null) {
             throw new IllegalArgumentException("Monitoring request cannot be null.");
@@ -259,30 +262,32 @@ public class MonitoringService {
                 }
 
                 // Send to the Client Service that the monitoring is completed
-                JSONObject monitoringCompletion = new JSONObject();
-                monitoringCompletion.put("status", "MONITORING");
-                monitoringCompletion.put("message", "Monitoring completed for query: " + request.getIssueQuery());
-                ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
-                if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
-                    System.out.println("Monitoring status sent to Client Service successfully.");
-                } else {
-                    System.out.println("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
-                    attempts = 0;
-                    while (attempts < 5) {
-                        attempts++;
-                        // Sleep for a while before retrying
-                        try {
-                            Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
-                        } catch (InterruptedException e) {
-                            System.out.println("Retry interrupted: " + e.getMessage());
-                            Thread.currentThread().interrupt(); // Restore the interrupted status
-                        }
-                        responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
-                        if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
-                            System.out.println("Monitoring status sent to Client Service successfully.");
-                            break;
-                        } else {
-                            System.out.println("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                if (!monitoringStatusSent) {
+                    JSONObject monitoringCompletion = new JSONObject();
+                    monitoringCompletion.put("status", "MONITORING");
+                    monitoringCompletion.put("message", "Monitoring completed for query: " + request.getIssueQuery());
+                    ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
+                    if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
+                        System.out.println("Monitoring status sent to Client Service successfully.");
+                    } else {
+                        System.out.println("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                        attempts = 0;
+                        while (attempts < 5) {
+                            attempts++;
+                            // Sleep for a while before retrying
+                            try {
+                                Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                            } catch (InterruptedException e) {
+                                System.out.println("Retry interrupted: " + e.getMessage());
+                                Thread.currentThread().interrupt(); // Restore the interrupted status
+                            }
+                            responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
+                            if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
+                                System.out.println("Monitoring status sent to Client Service successfully.");
+                                break;
+                            } else {
+                                System.out.println("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                            }
                         }
                     }
                 }
