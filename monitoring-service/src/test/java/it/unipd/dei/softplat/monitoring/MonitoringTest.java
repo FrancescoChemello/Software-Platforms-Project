@@ -51,7 +51,7 @@ public class MonitoringTest {
     public void testStartMonitoring() {
         // Mock configuration
         when(httpClientService.postRequest(
-                eq("http://localhost:8080/datamanager/save-articles/"),
+                eq("http://localhost:8082/datamanager/save-articles/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -81,7 +81,7 @@ public class MonitoringTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Verify that the postRequest method of MonitoringService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8080/datamanager/save-articles/"), anyString());
+        verify(httpClientService).postRequest(eq("http://localhost:8082/datamanager/save-articles/"), anyString());
         verify(httpClientService).postRequest(eq("http://localhost:8080/client/status/"), anyString());
 
         // Example of an invalid request

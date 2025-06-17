@@ -16,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -144,29 +145,36 @@ public class ClientTest {
     public void testSendMonitoringRequest() {
         // Mock configuration
         when(httpClientService.postRequest(
-            eq("http://localhost:8080/monitoring/start/"),
+            eq("http://localhost:8081/monitoring/start/"),
             anyString())
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
         // Create a valid issue string
         String issueString = "artificial intelligence";
+        String label = "ai";
+        Calendar cal1 = Calendar.getInstance();
+        cal1.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
+        Date startDate = cal1.getTime();
+        Calendar cal2 = Calendar.getInstance();
+        cal2.set(2023, Calendar.DECEMBER, 31, 23, 59, 59);
+        Date endDate = cal2.getTime();
 
         // Call the sendMonitoringRequest method
-        service_test.sendMonitoringRequest(issueString);
+        service_test.sendMonitoringRequest(issueString, label, startDate, endDate);
         // Verify that the postRequest method of HttpClientService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8080/monitoring/start/"), anyString());
+        verify(httpClientService).postRequest(eq("http://localhost:8081/monitoring/start/"), anyString());
     }
 
     /**
      * This test method is intended to test the sendQueryRequest method of the ClientService without a 
-     * monitoring issueQuery active.
+     * monitoring issueString active.
      * It mocks the HttpClientService and verifies that the postRequest method is never called.
      */
     @Test
     public void testSendQueryRequestWithNoMonitoring() {
         // Mock configuration
         when(httpClientService.postRequest(
-            eq("http://localhost:8080/mallet/search/"),
+            eq("http://localhost:8084/mallet/search/"),
             anyString())
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
@@ -176,29 +184,29 @@ public class ClientTest {
         // Create a valid query request
         String query = "test query";
         String corpus = "test corpus";
-        String subCorpus = "test sub-corpus";
+
         Integer numTopics = 5;
         Integer numTopWordsPerTopic = 10;
         Date startDate = new Date();
         Date endDate = new Date();
 
         // Call the sendQueryRequest method
-        service_test.sendQueryRequest(query, corpus, subCorpus, numTopics, numTopWordsPerTopic, startDate, endDate);
+        service_test.sendQueryRequest(query, corpus, numTopics, numTopWordsPerTopic, startDate, endDate);
         
         // Verify that the postRequest method of HttpClientService was called with the correct parameters
-        verify(httpClientService, times(0)).postRequest(eq("http://localhost:8080/mallet/search/"), anyString());
+        verify(httpClientService, times(0)).postRequest(eq("http://localhost:8084/mallet/search/"), anyString());
     }
 
     /**
      * This test method is intended to test the sendQueryRequest method of the ClientService with a
-     * monitoring issueQuery active.
+     * monitoring issueString active.
      * It mocks the HttpClientService and verifies that the postRequest method is called with the correct parameters.
      */
     @Test
     public void testSendQueryRequestWithMonitoring() {
         // Mock configuration
         when(httpClientService.postRequest(
-            eq("http://localhost:8080/mallet/search/"),
+            eq("http://localhost:8084/mallet/search/"),
             anyString())
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
@@ -208,16 +216,15 @@ public class ClientTest {
         // Create a valid query request
         String query = "test query";
         String corpus = "test corpus";
-        String subCorpus = "test sub-corpus";
         Integer numTopics = 5;
         Integer numTopWordsPerTopic = 10;
         Date startDate = new Date();
         Date endDate = new Date();
 
         // Call the sendQueryRequest method
-        service_test.sendQueryRequest(query, corpus, subCorpus, numTopics, numTopWordsPerTopic, startDate, endDate);
+        service_test.sendQueryRequest(query, corpus, numTopics, numTopWordsPerTopic, startDate, endDate);
         
         // Verify that the postRequest method of HttpClientService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8080/mallet/search/"), anyString());
+        verify(httpClientService).postRequest(eq("http://localhost:8084/mallet/search/"), anyString());
     }
 }
