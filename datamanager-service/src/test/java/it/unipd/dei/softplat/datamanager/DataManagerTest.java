@@ -68,7 +68,7 @@ public class DataManagerTest {
         Article test_article = new Article();
         // Set the properties of the test_article object
         test_article.setId("test-id");
-        test_article.setIssueQuery("test issue query");
+        test_article.setissueString("test issue query");
         test_article.setLabel("test label");
         test_article.setType("test type");
         test_article.setSectionId("test section id");
@@ -118,7 +118,7 @@ public class DataManagerTest {
     
             // Set the properties of the article object
             article.setId("test-id");
-            article.setIssueQuery("test issue query");
+            article.setissueString("test issue query");
             article.setLabel("test label");
             article.setType("test type");
             article.setSectionId("test section id");
@@ -133,7 +133,7 @@ public class DataManagerTest {
     
             // Assert that the getters return the expected values
             assertEquals("test-id", article.getId());
-            assertEquals("test issue query", article.getIssueQuery());
+            assertEquals("test issue query", article.getissueString());
             assertEquals("test label", article.getLabel());
             assertEquals("test type", article.getType());
             assertEquals("test section id", article.getSectionId());
@@ -162,7 +162,7 @@ public class DataManagerTest {
             assertEquals("Id cannot be null", e.getMessage(), "Expected exception for null ID");
         }
         try {
-            article.setIssueQuery(null);
+            article.setissueString(null);
         }
         catch (IllegalArgumentException e) {
             assertEquals("Issue query cannot be null", e.getMessage(), "Expected exception for null issue query");
@@ -235,7 +235,7 @@ public class DataManagerTest {
             assertEquals("Id cannot be empty", e.getMessage(), "Expected exception for empty ID");
         }
         try {
-            article.setIssueQuery("");
+            article.setissueString("");
         }
         catch (IllegalArgumentException e) {
             assertEquals("Issue query cannot be empty", e.getMessage(), "Expected exception for empty issue query");

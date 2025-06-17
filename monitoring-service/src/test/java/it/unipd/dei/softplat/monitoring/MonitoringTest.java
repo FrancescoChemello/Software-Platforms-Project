@@ -63,7 +63,7 @@ public class MonitoringTest {
 
         // Example of a valid request
         MonitoringRequest request = new MonitoringRequest();
-        request.setIssueQuery("example issue query");
+        request.setissueString("example issue query");
         request.setLabel("example label");
         Calendar cal = Calendar.getInstance();
         cal.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
@@ -86,7 +86,7 @@ public class MonitoringTest {
 
         // Example of an invalid request
         MonitoringRequest invalidRequest = new MonitoringRequest();
-        invalidRequest.setIssueQuery("");
+        invalidRequest.setissueString("");
         invalidRequest.setLabel("example label");
         cal = Calendar.getInstance();
         cal.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
@@ -113,8 +113,8 @@ public class MonitoringTest {
         MonitoringRequest request = new MonitoringRequest();
 
         // Set the issue query
-        request.setIssueQuery("test issue query");
-        assertEquals("test issue query", request.getIssueQuery(), "Issue query should match the set value");
+        request.setissueString("test issue query");
+        assertEquals("test issue query", request.getissueString(), "Issue query should match the set value");
         // Set the label
         request.setLabel("test label");
         assertEquals("test label", request.getLabel(), "Label should match the set value");
@@ -140,9 +140,9 @@ public class MonitoringTest {
     public void testRequestValidationNullValues() {
         MonitoringRequest request = new MonitoringRequest();
         // Check if the request rejects null values, empty strings, or invalid formats
-        // setIssueQuery with null value
+        // setissueString with null value
         try {
-            request.setIssueQuery(null);
+            request.setissueString(null);
         } 
         catch (IllegalArgumentException e) {
             assertEquals("Issue query cannot be null or empty.", e.getMessage(), "Should throw an exception for null issue query");
@@ -171,9 +171,9 @@ public class MonitoringTest {
     @Test
     public void testRequestValidationEmptyValues() {
         MonitoringRequest request = new MonitoringRequest();
-        // setIssueQuery with empty string
+        // setissueString with empty string
         try {
-            request.setIssueQuery("");
+            request.setissueString("");
         } 
         catch (IllegalArgumentException e) {
             assertEquals("Issue query cannot be null or empty.", e.getMessage(), "Should throw an exception for empty issue query");

@@ -68,7 +68,7 @@ public class DataManagerService {
                 mngArticle.put("bodyText", article.getBodyText());
                 JSONObject elArticle = new JSONObject();
                 elArticle.put("id", article.getId());
-                elArticle.put("issueQuery", article.getIssueQuery());
+                elArticle.put("issueString", article.getissueString());
                 elArticle.put("label", article.getLabel());
                 elArticle.put("type", article.getType());
                 elArticle.put("webPublicationDate", article.getWebPublicationDate());
@@ -85,7 +85,7 @@ public class DataManagerService {
                     // Create a SaveArticleDTO object to send the articles
                     JSONObject saveArticleDTO = new JSONObject();
                     saveArticleDTO.put("articles", new JSONArray(articleBatch));
-                    saveArticleDTO.put("collectionName", article.getIssueQuery());
+                    saveArticleDTO.put("collectionName", article.getissueString());
                     // Send articles to the MongoDB Service
                     ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8080/mongodb/save/", saveArticleDTO.toString());
                     if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
@@ -104,7 +104,7 @@ public class DataManagerService {
                     // Create an IndexArticleDTO object to send the articles
                     JSONObject IndexArticleDTO = new JSONObject();
                     IndexArticleDTO.put("articles", new JSONArray(articleBatch));
-                    IndexArticleDTO.put("collectionName", article.getIssueQuery());
+                    IndexArticleDTO.put("collectionName", article.getissueString());
                     // Send articles to the ElastiSearch Service
                     ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8080/elastic/index/", IndexArticleDTO.toString());
                     if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
@@ -126,7 +126,7 @@ public class DataManagerService {
             // Create a SaveArticleDTO object to send the articles
             JSONObject saveArticleDTO = new JSONObject();
             saveArticleDTO.put("articles", new JSONArray(articleBatch));
-            saveArticleDTO.put("collectionName", articles.get(0).getIssueQuery()); // Assuming all articles have the same issueQuery
+            saveArticleDTO.put("collectionName", articles.get(0).getissueString()); // Assuming all articles have the same issueString
             // Send articles to the MongoDB Service
             ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8080/mongodb/save/", saveArticleDTO.toString());
             if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
@@ -158,7 +158,7 @@ public class DataManagerService {
             // Create an IndexArticleDTO object to send the articles
             JSONObject IndexArticleDTO = new JSONObject();
             IndexArticleDTO.put("articles", new JSONArray(articleBatch));
-            IndexArticleDTO.put("collectionName", articles.get(0).getIssueQuery());
+            IndexArticleDTO.put("collectionName", articles.get(0).getissueString());
             // Send articles to the ElastiSearch Service
             ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8080/elastic/index/", IndexArticleDTO.toString());
             if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {

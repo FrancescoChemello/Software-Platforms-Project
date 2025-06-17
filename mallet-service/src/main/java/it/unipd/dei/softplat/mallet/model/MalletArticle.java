@@ -19,7 +19,7 @@ public class MalletArticle {
     @NotNull @NotEmpty
     private String id;
     @NotNull @NotEmpty
-    private String issueQuery;
+    private String issueString;
     @NotNull @NotEmpty
     private String label;
     @NotNull @NotEmpty
@@ -49,7 +49,7 @@ public class MalletArticle {
     /**
      * Constructor for MalletArticle with parameters.
      * @param id
-     * @param issueQuery
+     * @param issueString
      * @param label
      * @param type
      * @param topics
@@ -60,9 +60,9 @@ public class MalletArticle {
      * @param webUrl
      * @param bodyText
      */
-    public MalletArticle (String id, String issueQuery, String label, String type, List<String> topics, String sectionId, String sectionName, String webPublicationDate, String webTitle, String webUrl, String bodyText) {
+    public MalletArticle (String id, String issueString, String label, String type, List<String> topics, String sectionId, String sectionName, String webPublicationDate, String webTitle, String webUrl, String bodyText) {
         this.id = id;
-        this.issueQuery = issueQuery;
+        this.issueString = issueString;
         this.label = label;
         this.type = type;
         this.topics = topics;
@@ -94,16 +94,16 @@ public class MalletArticle {
      * Returns the issue query associated with the article.
      * @return the issue query associated with the article
      */
-    public String getIssueQuery() {
-        return this.issueQuery;
+    public String getissueString() {
+        return this.issueString;
     }
 
     /**
      * Sets the issue query associated with the article.
-     * @param issueQuery
+     * @param issueString
      */
-    public void setIssueQuery(String issueQuery) {
-        this.issueQuery = issueQuery;
+    public void setissueString(String issueString) {
+        this.issueString = issueString;
     }
 
     /**

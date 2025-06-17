@@ -21,7 +21,7 @@ import jakarta.validation.constraints.NotNull;
  */
 public class MonitoringRequest {
     @NotNull @NotEmpty
-    private String issueQuery;
+    private String issueString;
     @NotNull @NotEmpty
     private String label;
     private Date startDate;
@@ -36,14 +36,14 @@ public class MonitoringRequest {
 
     /**
      * Default constructor for MonitoringRequest.
-     * @param issueQuery the query to search for issues
+     * @param issueString the query to search for issues
      * @param label the label to filter issues
      * @param startDate the start date for the monitoring period
      * @param endDate the end date for the monitoring period
      */
-    public MonitoringRequest(String issueQuery, String label, Date startDate, Date endDate) {      
+    public MonitoringRequest(String issueString, String label, Date startDate, Date endDate) {      
         // Initialize the fields with the provided values
-        this.issueQuery = issueQuery;
+        this.issueString = issueString;
         this.label = label;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -53,16 +53,16 @@ public class MonitoringRequest {
      * Returns the query to be used for searching issues.
      * @return the issue query string
      */
-    public String getIssueQuery() {
-        return this.issueQuery;
+    public String getissueString() {
+        return this.issueString;
     }
 
     /**
      * Sets the query to be used for searching issues.
-     * @param issueQuery
+     * @param issueString
      */
-    public void setIssueQuery(String issueQuery) {
-        this.issueQuery = issueQuery;
+    public void setissueString(String issueString) {
+        this.issueString = issueString;
     }
 
     /**

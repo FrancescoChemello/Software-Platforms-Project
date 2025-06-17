@@ -50,7 +50,7 @@ public class MonitoringController {
         if (request == null) {
             return ResponseEntity.badRequest().body("Request cannot be null.");
         }
-        if (request.getIssueQuery() == null || request.getIssueQuery().isEmpty()) {
+        if (request.getissueString() == null || request.getissueString().isEmpty()) {
             return ResponseEntity.badRequest().body("Issue query cannot be null or empty.");
         }
         if (request.getLabel() == null || request.getLabel().isEmpty()) {
@@ -62,6 +62,6 @@ public class MonitoringController {
 
         // Start the monitoring process
         monitoringService.startMonitoring(request);
-        return ResponseEntity.ok("Monitoring for issue query \""+request.getIssueQuery()+"\" started successfully.");
+        return ResponseEntity.ok("Monitoring for issue query \""+request.getissueString()+"\" started successfully.");
     }
 }

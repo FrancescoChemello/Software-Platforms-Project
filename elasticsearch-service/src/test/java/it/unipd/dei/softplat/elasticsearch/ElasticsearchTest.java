@@ -76,7 +76,7 @@ public class ElasticsearchTest {
         // Create articles to be indexed
         ElasticArticle article1 = new ElasticArticle();
         article1.setId("1");
-        article1.setIssueQuery("issue_query_1");
+        article1.setissueString("issue_query_1");
         article1.setLabel("label_1");
         article1.setType("type_1");
         Calendar cal = Calendar.getInstance();
@@ -87,7 +87,7 @@ public class ElasticsearchTest {
         article1.setBodyText("Software engineering is a branch of both computer science and engineering focused on designing, developing, testing, and maintaining software applications. It involves applying engineering principles and computer programming expertise to develop software systems that meet user needs. The terms programmer and coder overlap software engineer, but they imply only the construction aspect of a typical software engineer workload. A software engineer applies a software development process, which involves defining, implementing, testing, managing, and maintaining software systems, as well as developing the software development process itself.");
         ElasticArticle article2 = new ElasticArticle();
         article2.setId("2");
-        article2.setIssueQuery("issue_query_2");
+        article2.setissueString("issue_query_2");
         article2.setLabel("label_2");
         article2.setType("type_2");
         Calendar cal2 = Calendar.getInstance();
@@ -144,7 +144,7 @@ public class ElasticsearchTest {
         // Fill Elasticsearch with some data
         ElasticArticle article1 = new ElasticArticle();
         article1.setId("1");
-        article1.setIssueQuery("test_issue");
+        article1.setissueString("test_issue");
         article1.setLabel("label_1");
         article1.setType("type_1");
         Calendar cal = Calendar.getInstance();
@@ -155,7 +155,7 @@ public class ElasticsearchTest {
         article1.setBodyText("Software engineering is a branch of both computer science and engineering focused on designing, developing, testing, and maintaining software applications. It involves applying engineering principles and computer programming expertise to develop software systems that meet user needs. The terms programmer and coder overlap software engineer, but they imply only the construction aspect of a typical software engineer workload. A software engineer applies a software development process, which involves defining, implementing, testing, managing, and maintaining software systems, as well as developing the software development process itself.");
         ElasticArticle article2 = new ElasticArticle();
         article2.setId("2");
-        article2.setIssueQuery("test_issue");
+        article2.setissueString("test_issue");
         article2.setLabel("label_2");
         article2.setType("type_2");
         Calendar cal2 = Calendar.getInstance();
@@ -225,7 +225,7 @@ public class ElasticsearchTest {
         ElasticArticle article = new ElasticArticle();
         // Set properties
         article.setId("test_id");
-        article.setIssueQuery("test_issue_query");
+        article.setissueString("test_issue_query");
         article.setLabel("test_label");
         article.setType("test_type");
         Calendar cal = Calendar.getInstance();
@@ -236,7 +236,7 @@ public class ElasticsearchTest {
         article.setBodyText("This is a test body text for the ElasticArticle class.");
         // Assert that the properties are set correctly
         assertEquals("test_id", article.getId(), "ID should match");
-        assertEquals("test_issue_query", article.getIssueQuery(), "Issue query should match");
+        assertEquals("test_issue_query", article.getissueString(), "Issue query should match");
         assertEquals("test_label", article.getLabel(), "Label should match");
         assertEquals("test_type", article.getType(), "Type should match");
         assertEquals(date, article.getWebPublicationDate(), "Web publication date should match");
@@ -256,7 +256,7 @@ public class ElasticsearchTest {
             assertEquals("ID cannot be null", e.getMessage(), "Exception message should match");
         }
         try {
-            article.setIssueQuery(null);
+            article.setissueString(null);
         }
         catch (IllegalArgumentException e) {
             assertEquals("Issue query cannot be null", e.getMessage(), "Exception message should match");
@@ -305,7 +305,7 @@ public class ElasticsearchTest {
             assertEquals("ID cannot be empty", e.getMessage(), "Exception message should match");
         }
         try {
-            article.setIssueQuery("");
+            article.setissueString("");
         }
         catch (IllegalArgumentException e) {
             assertEquals("Issue query cannot be empty", e.getMessage(), "Exception message should match");

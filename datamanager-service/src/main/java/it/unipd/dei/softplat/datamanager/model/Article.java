@@ -27,7 +27,7 @@ public class Article {
     @NotNull @NotEmpty
     private String id;
     @NotNull @NotEmpty
-    private String issueQuery;
+    private String issueString;
     @NotNull @NotEmpty
     private String label;
     @NotNull @NotEmpty
@@ -57,7 +57,7 @@ public class Article {
      * Constructor for Article.
      * This constructor initializes an Article object with the provided parameters.
      * @param id
-     * @param issueQuery
+     * @param issueString
      * @param label
      * @param type
      * @param sectionId
@@ -67,9 +67,9 @@ public class Article {
      * @param webUrl
      * @param bodyText
      */
-    public Article(String id, String issueQuery, String label, String type, String sectionId, String sectionName, Date webPublicationDate, String webTitle, String webUrl, String bodyText) {
+    public Article(String id, String issueString, String label, String type, String sectionId, String sectionName, Date webPublicationDate, String webTitle, String webUrl, String bodyText) {
         this.id = id;
-        this.issueQuery = issueQuery;
+        this.issueString = issueString;
         this.label = label;
         this.type = type;
         this.sectionId = sectionId;
@@ -101,17 +101,17 @@ public class Article {
      * @return the issue query
      * @see it.unipd.dei.softplat.monitoring.model.MonitoringRequest
      */
-    public String getIssueQuery() {
-        return this.issueQuery;
+    public String getissueString() {
+        return this.issueString;
     }
 
     /**
      * Sets the issue query associated with the article.
-     * @param issueQuery
+     * @param issueString
      * @see it.unipd.dei.softplat.monitoring.model.MonitoringRequest
      */
-    public void setIssueQuery(String issueQuery) {
-        this.issueQuery = issueQuery;
+    public void setissueString(String issueString) {
+        this.issueString = issueString;
     }
 
     /**

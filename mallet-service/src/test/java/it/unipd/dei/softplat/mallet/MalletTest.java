@@ -83,7 +83,7 @@ public class MalletTest {
 
         MalletArticle article1 = new MalletArticle();
         article1.setId("1");
-        article1.setIssueQuery("issue_query_1");
+        article1.setissueString("issue_query_1");
         article1.setLabel("label_1");
         article1.setType("type_1");
         article1.setTopics(List.of("topic1", "topic2"));
@@ -95,7 +95,7 @@ public class MalletTest {
         article1.setBodyText("Software engineering is a branch of both computer science and engineering focused on designing, developing, testing, and maintaining software applications. It involves applying engineering principles and computer programming expertise to develop software systems that meet user needs. The terms programmer and coder overlap software engineer, but they imply only the construction aspect of a typical software engineer workload. A software engineer applies a software development process, which involves defining, implementing, testing, managing, and maintaining software systems, as well as developing the software development process itself.");
         MalletArticle article2 = new MalletArticle();
         article2.setId("2");
-        article2.setIssueQuery("issue_query_2");
+        article2.setissueString("issue_query_2");
         article2.setLabel("label_2");
         article2.setType("type_2");
         article2.setTopics(List.of("topic3", "topic4"));
@@ -237,7 +237,7 @@ public class MalletTest {
 
         // Set the properties of the article object
         article.setId("test_id");
-        article.setIssueQuery("issue_query_test");
+        article.setissueString("issue_query_test");
         article.setLabel("test_label");
         article.setType("test_type");
         article.setTopics(List.of("topic1", "topic2", "topic3"));
@@ -250,7 +250,7 @@ public class MalletTest {
 
         // Assertions to verify the properties
         assertEquals("test_id", article.getId());
-        assertEquals("issue_query_test", article.getIssueQuery());
+        assertEquals("issue_query_test", article.getissueString());
         assertEquals("test_label", article.getLabel());
         assertEquals("test_type", article.getType());
         assertEquals(List.of("topic1", "topic2", "topic3"), article.getTopics());
@@ -278,7 +278,7 @@ public class MalletTest {
             assertEquals("ID cannot be empty", e.getMessage(), "Expected exception for empty ID");
         }
         try {
-            article.setIssueQuery("");
+            article.setissueString("");
         } catch (IllegalArgumentException e) {
             assertEquals("Issue query cannot be empty", e.getMessage(), "Expected exception for empty issue query");
         }
@@ -339,7 +339,7 @@ public class MalletTest {
             assertEquals("ID cannot be null", e.getMessage(), "Expected exception for null ID");
         }
         try {
-            article.setIssueQuery(null);
+            article.setissueString(null);
         } catch (IllegalArgumentException e) {
             assertEquals("Issue query cannot be null", e.getMessage(), "Expected exception for null issue query");
         }

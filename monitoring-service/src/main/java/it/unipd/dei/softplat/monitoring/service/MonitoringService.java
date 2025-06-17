@@ -97,7 +97,7 @@ public class MonitoringService {
 
             // Set the label for the query
             try{
-                response = client.getContent(request.getIssueQuery());
+                response = client.getContent(request.getissueString());
             }
             catch (UnirestException e){
                 throw new RuntimeException("Error while fetching content from The Guardian API: " + e.getMessage(), e);
@@ -192,7 +192,7 @@ public class MonitoringService {
                          * Saving:
                          * {
                          *   "id": "article-id",
-                         *   "issueQuery": "query",
+                         *   "issueString": "query",
                          *   "label": "label"
                          *   "type": "article_type",
                          *   "sectionId": "section_id",
@@ -204,7 +204,7 @@ public class MonitoringService {
                          * }
                          */
                         articleJson.put("id", article.getId());
-                        articleJson.put("issueQuery", request.getIssueQuery());
+                        articleJson.put("issueString", request.getissueString());
                         articleJson.put("label", request.getLabel());
                         articleJson.put("type", article.getType());
                         articleJson.put("sectionId", article.getSectionId());
@@ -265,7 +265,7 @@ public class MonitoringService {
                 if (!monitoringStatusSent) {
                     JSONObject monitoringCompletion = new JSONObject();
                     monitoringCompletion.put("status", "MONITORING");
-                    monitoringCompletion.put("message", "Monitoring completed for query: " + request.getIssueQuery());
+                    monitoringCompletion.put("message", "Monitoring completed for query: " + request.getissueString());
                     ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
                     if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Monitoring status sent to Client Service successfully.");
