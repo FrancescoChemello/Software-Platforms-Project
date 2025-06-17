@@ -87,7 +87,7 @@ public class DataManagerService {
                     saveArticleDTO.put("articles", new JSONArray(articleBatch));
                     saveArticleDTO.put("collectionName", article.getissueString());
                     // Send articles to the MongoDB Service
-                    ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8080/mongodb/save/", saveArticleDTO.toString());
+                    ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8085/mongodb/save/", saveArticleDTO.toString());
                     if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Batch of articles sent to MongoDB Service successfully.");
                         // Remove the sent articles from the mongoArticles list
@@ -106,7 +106,7 @@ public class DataManagerService {
                     IndexArticleDTO.put("articles", new JSONArray(articleBatch));
                     IndexArticleDTO.put("collectionName", article.getissueString());
                     // Send articles to the ElastiSearch Service
-                    ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8080/elastic/index/", IndexArticleDTO.toString());
+                    ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8083/elastic/index/", IndexArticleDTO.toString());
                     if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
                         // Remove the sent articles from the mongoArticles list
@@ -128,7 +128,7 @@ public class DataManagerService {
             saveArticleDTO.put("articles", new JSONArray(articleBatch));
             saveArticleDTO.put("collectionName", articles.get(0).getissueString()); // Assuming all articles have the same issueString
             // Send articles to the MongoDB Service
-            ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8080/mongodb/save/", saveArticleDTO.toString());
+            ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8085/mongodb/save/", saveArticleDTO.toString());
             if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Batch of articles sent to MongoDB Service successfully.");
                 // Remove the sent articles from the mongoArticles list
@@ -160,7 +160,7 @@ public class DataManagerService {
             IndexArticleDTO.put("articles", new JSONArray(articleBatch));
             IndexArticleDTO.put("collectionName", articles.get(0).getissueString());
             // Send articles to the ElastiSearch Service
-            ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8080/elastic/index/", IndexArticleDTO.toString());
+            ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8083/elastic/index/", IndexArticleDTO.toString());
             if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
                 // Remove the sent articles from the elasticArticles list

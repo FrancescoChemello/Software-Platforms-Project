@@ -54,12 +54,12 @@ public class DataManagerTest {
     public void testSaveArticles() {
         // Mock configuration for MongoDB and ElasticSearch services
         when(httpClientService.postRequest(
-                eq("http://localhost:8080/mongodb/save/"),
+                eq("http://localhost:8085/mongodb/save/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
         when(httpClientService.postRequest(
-                eq("http://localhost:8080/elastic/index/"),
+                eq("http://localhost:8083/elastic/index/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -88,8 +88,8 @@ public class DataManagerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Verify that the postRequest methods of DataManagerService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8080/mongodb/save/"), anyString());
-        verify(httpClientService).postRequest(eq("http://localhost:8080/elastic/index/"), anyString());
+        verify(httpClientService).postRequest(eq("http://localhost:8085/mongodb/save/"), anyString());
+        verify(httpClientService).postRequest(eq("http://localhost:8083/elastic/index/"), anyString());
 
         // Example of an invalid ArticleTopics object
         List<Article> invalid_article_list = new ArrayList<>();

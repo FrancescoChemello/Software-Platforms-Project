@@ -110,7 +110,7 @@ public class MongodbTest {
     public void testSearchArticles() {
         // Mock configuration
         when(httpClientService.postRequest(
-                eq("http://localhost:8080/mallet/accumulate/"),
+                eq("http://localhost:8084/mallet/accumulate/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -141,7 +141,7 @@ public class MongodbTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
         
         // Verify that the postRequest methods of DataManagerService was called with the correct parameters
-        verify(httpClientService, times(2)).postRequest(eq("http://localhost:8080/mallet/accumulate/"), anyString());
+        verify(httpClientService, times(2)).postRequest(eq("http://localhost:8084/mallet/accumulate/"), anyString());
         
         // Call the searchArticles method with an empty collection name
         SearchArticleDTO emptyCollectionDTO = new SearchArticleDTO("", List.of(id));

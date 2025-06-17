@@ -46,7 +46,7 @@ public class MalletTest {
     public void testSearchArticles() {
         // Mock configuration
         when(httpClientService.postRequest(
-            eq("http://localhost:8080/elastic/search/"),
+            eq("http://localhost:8083/elastic/search/"),
             anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -69,7 +69,7 @@ public class MalletTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Verify that the postRequest method of MalletService was called with the correct URL and parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8080/elastic/search/"), anyString());
+        verify(httpClientService).postRequest(eq("http://localhost:8083/elastic/search/"), anyString());
     }
 
     @Test

@@ -214,7 +214,7 @@ public class MongodbService {
                     accumulateMalletArticlesDTO.put("collectionName", collectionName);
                     accumulateMalletArticlesDTO.put("endOfStream", false);
                     // Send the batch of articles to the Mallet service
-                    ResponseEntity<String> responseQuery = httpClientService.postRequest("http://localhost:8080/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
+                    ResponseEntity<String> responseQuery = httpClientService.postRequest("http://localhost:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
                     if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Batch of articles sent to Client Service successfully.");
                         // Remove the sent articles from the articles list
@@ -241,7 +241,7 @@ public class MongodbService {
             accumulateMalletArticlesDTO.put("collectionName", collectionName);
             accumulateMalletArticlesDTO.put("endOfStream", false);
             // Send the batch of articles to the Mallet service
-            ResponseEntity<String> responseQuery = httpClientService.postRequest("http://localhost:8080/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
+            ResponseEntity<String> responseQuery = httpClientService.postRequest("http://localhost:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
             if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Batch of articles sent to Mallet Service successfully.");
                 // Remove the sent articles from the articles list
@@ -268,14 +268,14 @@ public class MongodbService {
             endOfStreamDTO.put("collectionName", collectionName);
             endOfStreamDTO.put("endOfStream", true);
             // Send the end of stream signal to the Mallet service
-            ResponseEntity<String> responseEndOfStream = httpClientService.postRequest("http://localhost:8080/mallet/accumulate/", endOfStreamDTO.toString());
+            ResponseEntity<String> responseEndOfStream = httpClientService.postRequest("http://localhost:8084/mallet/accumulate/", endOfStreamDTO.toString());
             if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
                 System.out.println("End of stream signal sent to Mallet Service successfully.");
             } else {
                 attempts = 0;
                 while (attempts < 5) {
                     // Retry sending the end of stream signal
-                    responseEndOfStream = httpClientService.postRequest("http://localhost:8080/mallet/accumulate/", endOfStreamDTO.toString());
+                    responseEndOfStream = httpClientService.postRequest("http://localhost:8084/mallet/accumulate/", endOfStreamDTO.toString());
                     if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
                         System.out.println("End of stream signal sent to Mallet Service successfully.");
                         break; // Exit the loop if successful

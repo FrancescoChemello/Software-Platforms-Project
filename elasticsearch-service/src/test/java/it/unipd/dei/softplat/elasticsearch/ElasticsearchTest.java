@@ -136,7 +136,7 @@ public class ElasticsearchTest {
     public void testGetArticlesByQuery() {
         // Mock configuration for Elasticsearch
         when(httpClientService.postRequest(
-            eq("http://localhost:8080/mongodb/get-articles/"),
+            eq("http://localhost:8085/mongodb/get-articles/"),
             anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -216,7 +216,7 @@ public class ElasticsearchTest {
         assertEquals(HttpStatus.OK, responseQuery2.getStatusCode(), "Response should have status code 200 OK");
         
         // Verify that the HTTP client service was called with the correct URL and parameters
-        verify(httpClientService, times(2)).postRequest(eq("http://localhost:8080/mongodb/get-articles/"), anyString());
+        verify(httpClientService, times(2)).postRequest(eq("http://localhost:8085/mongodb/get-articles/"), anyString());
     }
 
     @Test

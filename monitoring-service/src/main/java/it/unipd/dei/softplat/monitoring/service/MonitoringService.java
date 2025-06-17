@@ -222,7 +222,7 @@ public class MonitoringService {
                             // Take the first batchSize articles from the retrievedArticles list
                             ArrayList<JSONObject> articleBatch = new ArrayList<>(retrievedArticles.subList(0, Math.min(batchSize, retrievedArticles.size())));
                             // Send the batch of articles to the DataManager Service
-                            ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/datamanager/save-articles/", articleBatch.toString());
+                            ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8082/datamanager/save-articles/", articleBatch.toString());
                             if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
                                 System.out.println("Batch of articles sent to DataManager Service successfully.");
                                 // Remove the sent articles from the retrievedArticles list
@@ -239,7 +239,7 @@ public class MonitoringService {
                 while (!retrievedArticles.isEmpty() && attempts < 5) {
                     // Take the first batchSize articles from the retrievedArticles list
                     ArrayList<JSONObject> articleBatch = new ArrayList<>(retrievedArticles.subList(0, Math.min(batchSize, retrievedArticles.size())));
-                    ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8080/datamanager/save-articles/", articleBatch.toString());
+                    ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8082/datamanager/save-articles/", articleBatch.toString());
                     if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Batch of articles sent to DataManager Service successfully.");
                         // Remove the sent articles from the retrievedArticles list

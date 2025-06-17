@@ -80,14 +80,14 @@ public class MalletService {
         searchRequest.put("endDate", endDate);
         
         // Send the search request to the Elasticsearch Service
-        ResponseEntity<String> response = httpClientService.postRequest("http://localhost:8080/elastic/search/", searchRequest.toString());
+        ResponseEntity<String> response = httpClientService.postRequest("http://localhost:8083/elastic/search/", searchRequest.toString());
         if (response != null && response.getStatusCode() == HttpStatus.OK) {
             System.out.println("Search request sent successfully to Elasticsearch Service.");
         } else {
             int attempts = 0;
             while (attempts < 5) {
                 // Retry sending the request
-                response = httpClientService.postRequest("http://localhost:8080/elastic/search/", searchRequest.toString());
+                response = httpClientService.postRequest("http://localhost:8083/elastic/search/", searchRequest.toString());
                 if (response != null && response.getStatusCode() == HttpStatus.OK) {
                     System.out.println("Search request sent successfully to Elasticsearch Service after " + (attempts + 1) + " attempts.");
                     break; // Exit the loop if the request was successful
