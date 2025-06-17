@@ -102,12 +102,6 @@
             <version>1.19.7</version>
             <scope>test</scope>
         </dependency>
-        <!-- Dependency for Elasticsearch -->
-        <!-- <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-elasticsearch</artifactId>
-            <version>5.1.2</version>
-        </dependency> -->
         <!-- Dependency for Elasticsearch client -->
         <dependency>
             <groupId>co.elastic.clients</groupId>
