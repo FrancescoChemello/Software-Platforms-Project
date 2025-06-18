@@ -37,7 +37,7 @@ public class HttpClientTest {
     @Test
     public void testPostRequest() {
         // Create a valid URL and JSON body
-        String url = "http://localhost:8080/";
+        String url = "http://client-service:8080/";
         String jsonBody = "{\"key\":\"value\"}";
         ResponseEntity<String> mockResponse = ResponseEntity.ok("ok");
         
@@ -70,7 +70,7 @@ public class HttpClientTest {
 
     @Test
     public void testPostRequest_exception() {
-        String url = "http://localhost:8080/test";
+        String url = "http://client-service:8080/test";
         String jsonBody = "{\"foo\":\"bar\"}";
 
         org.mockito.Mockito.when(
@@ -91,7 +91,7 @@ public class HttpClientTest {
     @Test
     public void testGetRequest() {
         // Create a valid URL
-        String url = "http://localhost:8080/test";
+        String url = "http://client-service:8080/test";
         ResponseEntity<String> mockResponse = ResponseEntity.ok("ok");
 
         // Configure Mock
