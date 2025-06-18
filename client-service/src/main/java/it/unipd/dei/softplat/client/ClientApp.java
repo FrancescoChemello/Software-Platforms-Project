@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import it.unipd.dei.softplat.client.service.ClientService;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"it.unipd.dei.softplat"})
 public class ClientApp {
     
     @Bean
@@ -39,7 +39,10 @@ public class ClientApp {
         var clientService = context.getBean(ClientService.class);
         boolean endInput = false;
         Scanner scanner = new Scanner(System.in);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+
+        System.out.println("Press ENTER to start: ");
+        scanner.nextLine(); // Wait for the user to press ENTER
         
         System.out.println("This is a platform for monitoring articles from online newspapers using the Guardian Open Platform.");
 
@@ -80,10 +83,10 @@ public class ClientApp {
                         TemporalAccessor startDateTemporal = formatter.parse(startDateInput); // Assuming the input is in a valid format
                         startDate = Date.from(Instant.from(startDateTemporal)); // Convert to Date
                     } catch (Exception e) {
-                        System.out.println("Invalid start date format. Please use YYYY-MM-DD.");
+                        System.out.println("Invalid start date format. Please use Please use (yyyy-MM-dd'T'HH:mm:ss'Z').");
                         continue; // Skip to the next iteration to re-prompt for input
                     }
-                    System.out.print("Enter the end date (YYYY-MM-DD) or 'continuous' for ongoing monitoring: ");
+                    System.out.print("Enter the end date (Please use yyyy-MM-dd'T'HH:mm:ss'Z') or 'continuous' for ongoing monitoring: ");
                     Date endDate = null;
                     String endDateInput = scanner.nextLine().trim();
                     if (!endDateInput.equalsIgnoreCase("continuous")) {
@@ -91,7 +94,7 @@ public class ClientApp {
                             TemporalAccessor endDateTemporal = formatter.parse(endDateInput); // Assuming the input is in a valid format
                             endDate = Date.from(Instant.from(endDateTemporal)); // Convert to Date
                         } catch (Exception e) {
-                            System.out.println("Invalid end date format. Please use YYYY-MM-DD.");
+                            System.out.println("Invalid end date format. Please use Please use (yyyy-MM-dd'T'HH:mm:ss'Z').");
                             continue; // Skip to the next iteration to re-prompt for input
                         }
                     } else if (endDateInput.equalsIgnoreCase("continuous")) {
@@ -155,19 +158,19 @@ public class ClientApp {
                             TemporalAccessor startQueryDateTemporal = formatter.parse(startQueryDateInput); // Assuming the input is in a valid format
                             startQueryDate = Date.from(Instant.from(startQueryDateTemporal)); // Convert to Date
                         } catch (Exception e) {
-                            System.out.println("Invalid start date format. Please use YYYY-MM-DD.");
+                            System.out.println("Invalid start date format. Please use Please use (yyyy-MM-dd'T'HH:mm:ss'Z').");
                             continue; // Skip to the next iteration to re-prompt for input
                         }
                     }
                     System.out.print("Enter the end date (yyyy-MM-dd'T'HH:mm:ss'Z') or leave empty for no end date: ");
                     Date endQueryDate = null;
                     String endQueryDateInput = scanner.nextLine().trim();
-                    if (!endQueryDateInput.isEmpty()) {
+                    if (endQueryDateInput != null && !endQueryDateInput.isEmpty()) {
                         try {
                             TemporalAccessor endQueryDateTemporal = formatter.parse(endQueryDateInput); // Assuming the input is in a valid format
                             endQueryDate = Date.from(Instant.from(endQueryDateTemporal)); // Convert to Date
                         } catch (Exception e) {
-                            System.out.println("Invalid end date format. Please use YYYY-MM-DD.");
+                            System.out.println("Invalid end date format. Please use Please use (yyyy-MM-dd'T'HH:mm:ss'Z').");
                             continue; // Skip to the next iteration to re-prompt for input
                         }
                     }

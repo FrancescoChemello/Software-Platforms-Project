@@ -21,6 +21,12 @@ public class QueryResult {
 
     /**
      * Default constructor.
+     * This constructor is used for serialization/deserialization purposes.
+     */
+    public QueryResult() { }
+
+    /**
+     * Constructor to create a QueryResult with a query string and a list of topics.
      * @param query
      * @param topics
      */

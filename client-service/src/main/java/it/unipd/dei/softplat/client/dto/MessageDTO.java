@@ -18,6 +18,13 @@ public class MessageDTO {
     private String status;
 
     /**
+     * Default constructor for MessageDTO.
+     * This constructor is required for frameworks that require a no-argument constructor,
+     * such as Spring when deserializing JSON requests.
+     */
+    public MessageDTO() { }
+
+    /**
      * Default constructor.
      * @param message the message to set
      * @param status the status to set

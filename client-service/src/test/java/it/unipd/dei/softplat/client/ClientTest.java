@@ -145,7 +145,7 @@ public class ClientTest {
     public void testSendMonitoringRequest() {
         // Mock configuration
         when(httpClientService.postRequest(
-            eq("http://localhost:8081/monitoring/start/"),
+            eq("http://monitoring-service:8081/monitoring/start/"),
             anyString())
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
@@ -162,7 +162,7 @@ public class ClientTest {
         // Call the sendMonitoringRequest method
         service_test.sendMonitoringRequest(issueString, label, startDate, endDate);
         // Verify that the postRequest method of HttpClientService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8081/monitoring/start/"), anyString());
+        verify(httpClientService).postRequest(eq("http://monitoring-service:8081/monitoring/start/"), anyString());
     }
 
     /**
@@ -174,7 +174,7 @@ public class ClientTest {
     public void testSendQueryRequestWithNoMonitoring() {
         // Mock configuration
         when(httpClientService.postRequest(
-            eq("http://localhost:8084/mallet/search/"),
+            eq("http://mallet-service:8084/mallet/search/"),
             anyString())
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
@@ -194,7 +194,7 @@ public class ClientTest {
         service_test.sendQueryRequest(query, corpus, numTopics, numTopWordsPerTopic, startDate, endDate);
         
         // Verify that the postRequest method of HttpClientService was called with the correct parameters
-        verify(httpClientService, times(0)).postRequest(eq("http://localhost:8084/mallet/search/"), anyString());
+        verify(httpClientService, times(0)).postRequest(eq("http://mallet-service:8084/mallet/search/"), anyString());
     }
 
     /**
@@ -206,7 +206,7 @@ public class ClientTest {
     public void testSendQueryRequestWithMonitoring() {
         // Mock configuration
         when(httpClientService.postRequest(
-            eq("http://localhost:8084/mallet/search/"),
+            eq("http://mallet-service:8084/mallet/search/"),
             anyString())
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
@@ -225,6 +225,6 @@ public class ClientTest {
         service_test.sendQueryRequest(query, corpus, numTopics, numTopWordsPerTopic, startDate, endDate);
         
         // Verify that the postRequest method of HttpClientService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8084/mallet/search/"), anyString());
+        verify(httpClientService).postRequest(eq("http://mallet-service:8084/mallet/search/"), anyString());
     }
 }

@@ -8,6 +8,7 @@
 
 package it.unipd.dei.softplat.client.service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -42,14 +43,15 @@ public class ClientService {
      * @param endDate
      */
     public void sendMonitoringRequest(String issueString, String label, Date startDate, Date endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
         // JSON object to hold the monitoring request data
         JSONObject monitoringRequest = new JSONObject();
         monitoringRequest.put("issueString", issueString);
         monitoringRequest.put("label", label);
-        monitoringRequest.put("startDate", startDate.toString());
-        monitoringRequest.put("endDate", endDate.toString());
+        monitoringRequest.put("startDate", formatter.format(startDate.toInstant()));
+        monitoringRequest.put("endDate", formatter.format(endDate.toInstant()));
         // Send the monitoring request to the Monitoring service.
-        ResponseEntity<String> response = httpClientService.postRequest("http://localhost:8081/monitoring/start/", monitoringRequest.toString());
+        ResponseEntity<String> response = httpClientService.postRequest("http://monitoring-service:8081/monitoring/start/", monitoringRequest.toString());
         if (response != null && response.getStatusCode() == HttpStatus.OK) {
             System.out.println("Monitoring request sent successfully.");
         } else {
@@ -58,7 +60,7 @@ public class ClientService {
             while (attempts < 5) {
                 try {
                     Thread.sleep(2000 * attempts); // Wait for 2s * attempts before retrying
-                    response = httpClientService.postRequest("http://localhost:8081/monitoring/start/", issueString);
+                    response = httpClientService.postRequest("http://monitoring-service:8081/monitoring/start/", monitoringRequest.toString());
                     if (response != null && response.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Monitoring request sent successfully.");
                         break;
@@ -87,16 +89,17 @@ public class ClientService {
      */
     public void sendQueryRequest(String query, String corpus, Integer numTopics, Integer numTopWordsPerTopic, Date startDate, Date endDate) {
         if (isMonitoringEnabled) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
             // Prepare the query request
             JSONObject queryRequest = new JSONObject();
             queryRequest.put("query", query);
             queryRequest.put("corpus", corpus);
             queryRequest.put("numTopics", numTopics);
             queryRequest.put("numTopWordsPerTopic", numTopWordsPerTopic);
-            queryRequest.put("startDate", startDate.toString());
-            queryRequest.put("endDate", endDate.toString());
+            queryRequest.put("startDate", formatter.format(startDate.toInstant()));
+            queryRequest.put("endDate", formatter.format(endDate.toInstant()));
             // Send the query request to the Mallet service
-            ResponseEntity<String> response = httpClientService.postRequest("http://localhost:8084/mallet/search/", queryRequest.toString());
+            ResponseEntity<String> response = httpClientService.postRequest("http://mallet-service:8084/mallet/search/", queryRequest.toString());
             if (response != null && response.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Query request sent successfully for query: " + query);
             } else {
@@ -105,7 +108,7 @@ public class ClientService {
                 while (attempts < 5) {
                     try {
                         Thread.sleep(2000 * attempts); // Wait for 2s * attempts before retrying
-                        response = httpClientService.postRequest("http://localhost:8084/mallet/search/", queryRequest.toString());
+                        response = httpClientService.postRequest("http://mallet-service:8084/mallet/search/", queryRequest.toString());
                         if (response != null && response.getStatusCode() == HttpStatus.OK) {
                             System.out.println("Query request sent successfully for query: " + query);
                             break;

@@ -20,6 +20,12 @@ public class QueryTopic {
     
     /**
      * Default constructor.
+     * This constructor is used for serialization/deserialization purposes.
+     */
+    public QueryTopic() { }
+
+    /**
+     * Constructor to create a QueryTopic with an ID and a list of top words.
      * @param id
      * @param topWords
      */
