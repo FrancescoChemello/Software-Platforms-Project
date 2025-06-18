@@ -8,6 +8,7 @@
 
 package it.unipd.dei.softplat.datamanager.service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import it.unipd.dei.softplat.datamanager.model.Article;
@@ -47,10 +49,12 @@ public class DataManagerService {
      * and stores them in MongoDB and Elasticsearch.
      * @param articles
      */
+    @Async
     public void storingArticles(List<Article> articles){
 
         ArrayList<JSONObject> mongoArticles = new ArrayList<>();
         ArrayList<JSONObject> elasticArticles = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
 
         for (Article article : articles) {
             if(article == null) {
@@ -62,7 +66,7 @@ public class DataManagerService {
                 mngArticle.put("type", article.getType());
                 mngArticle.put("sectionID", article.getSectionId());
                 mngArticle.put("sectionName", article.getSectionName());
-                mngArticle.put("webPublicationDate", article.getWebPublicationDate());
+                mngArticle.put("webPublicationDate", formatter.format(article.getWebPublicationDate().toInstant()));
                 mngArticle.put("webTitle", article.getWebTitle());
                 mngArticle.put("webUrl", article.getWebUrl());
                 mngArticle.put("bodyText", article.getBodyText());
@@ -71,53 +75,53 @@ public class DataManagerService {
                 elArticle.put("issueString", article.getissueString());
                 elArticle.put("label", article.getLabel());
                 elArticle.put("type", article.getType());
-                elArticle.put("webPublicationDate", article.getWebPublicationDate());
+                elArticle.put("webPublicationDate", formatter.format(article.getWebPublicationDate().toInstant()));
                 elArticle.put("webTitle", article.getWebTitle());
                 elArticle.put("bodyText", article.getBodyText());
 
                 mongoArticles.add(mngArticle);
                 elasticArticles.add(elArticle);
-
-                // Send the batch of articles to the MongoDB Service
-                if (mongoArticles.size() >= batchSize) {
-                    // Take the first batchSize articles from the mongoArticles list
-                    ArrayList<JSONObject> articleBatch = new ArrayList<>(mongoArticles.subList(0, Math.min(batchSize, mongoArticles.size())));
-                    // Create a SaveArticleDTO object to send the articles
-                    JSONObject saveArticleDTO = new JSONObject();
-                    saveArticleDTO.put("articles", new JSONArray(articleBatch));
-                    saveArticleDTO.put("collectionName", article.getissueString());
-                    // Send articles to the MongoDB Service
-                    ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8085/mongodb/save/", saveArticleDTO.toString());
-                    if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Batch of articles sent to MongoDB Service successfully.");
-                        // Remove the sent articles from the mongoArticles list
-                        mongoArticles.removeAll(articleBatch);
-                    } else {
-                        // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                        System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + (responseMongoDB != null ? responseMongoDB.getStatusCode() : "No response received"));
-                    }
-                }
-                // Send the batch of articles to the ElastiSearch Service
-                if (elasticArticles.size() >= batchSize) {
-                    // Take the first batchSize articles from the mongoArticles list
-                    ArrayList<JSONObject> articleBatch = new ArrayList<>(elasticArticles.subList(0, Math.min(batchSize, elasticArticles.size())));
-                    // Create an IndexArticleDTO object to send the articles
-                    JSONObject IndexArticleDTO = new JSONObject();
-                    IndexArticleDTO.put("articles", new JSONArray(articleBatch));
-                    IndexArticleDTO.put("collectionName", article.getissueString());
-                    // Send articles to the ElastiSearch Service
-                    ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8083/elastic/index/", IndexArticleDTO.toString());
-                    if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
-                        // Remove the sent articles from the mongoArticles list
-                        elasticArticles.removeAll(articleBatch);
-                    } else {
-                        // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                        System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + (responseElasticSearch != null ? responseElasticSearch.getStatusCode() : "No response received"));
-                    }
-                }
             }
         }
+        // Send the batch of articles to the MongoDB Service
+        if (mongoArticles.size() >= batchSize || !mongoArticles.isEmpty()) {
+            // Take the first batchSize articles from the mongoArticles list
+            ArrayList<JSONObject> articleBatch = new ArrayList<>(mongoArticles.subList(0, Math.min(batchSize, mongoArticles.size())));
+            // Create a SaveArticleDTO object to send the articles
+            JSONObject saveArticleDTO = new JSONObject();
+            saveArticleDTO.put("articles", new JSONArray(articleBatch));
+            saveArticleDTO.put("collectionName", articles.get(0).getLabel());
+            // Send articles to the MongoDB Service
+            ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://mongodb-service:8085/mongodb/save/", saveArticleDTO.toString());
+            if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
+                System.out.println("Batch of articles sent to MongoDB Service successfully.");
+                // Remove the sent articles from the mongoArticles list
+                mongoArticles.removeAll(articleBatch);
+            } else {
+                // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
+                System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + (responseMongoDB != null ? responseMongoDB.getStatusCode() : "No response received"));
+            }
+        }
+        // Send the batch of articles to the ElastiSearch Service
+        if (elasticArticles.size() >= batchSize || !elasticArticles.isEmpty()) {
+            // Take the first batchSize articles from the mongoArticles list
+            ArrayList<JSONObject> articleBatch = new ArrayList<>(elasticArticles.subList(0, Math.min(batchSize, elasticArticles.size())));
+            // Create an IndexArticleDTO object to send the articles
+            JSONObject IndexArticleDTO = new JSONObject();
+            IndexArticleDTO.put("articles", new JSONArray(articleBatch));
+            IndexArticleDTO.put("collectionName", articles.get(0).getLabel());
+            // Send articles to the ElastiSearch Service
+            ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/index/", IndexArticleDTO.toString());
+            if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
+                System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
+                // Remove the sent articles from the mongoArticles list
+                elasticArticles.removeAll(articleBatch);
+            } else {
+                // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
+                System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + (responseElasticSearch != null ? responseElasticSearch.getStatusCode() : "No response received"));
+            }
+        }
+
         // Send the JSON articles left to the MongoDB Service
         int attempts = 0;
         while (!mongoArticles.isEmpty() && attempts < 5) {
@@ -128,7 +132,7 @@ public class DataManagerService {
             saveArticleDTO.put("articles", new JSONArray(articleBatch));
             saveArticleDTO.put("collectionName", articles.get(0).getissueString()); // Assuming all articles have the same issueString
             // Send articles to the MongoDB Service
-            ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://localhost:8085/mongodb/save/", saveArticleDTO.toString());
+            ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://mongodb-service:8085/mongodb/save/", saveArticleDTO.toString());
             if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Batch of articles sent to MongoDB Service successfully.");
                 // Remove the sent articles from the mongoArticles list
@@ -160,7 +164,7 @@ public class DataManagerService {
             IndexArticleDTO.put("articles", new JSONArray(articleBatch));
             IndexArticleDTO.put("collectionName", articles.get(0).getissueString());
             // Send articles to the ElastiSearch Service
-            ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://localhost:8083/elastic/index/", IndexArticleDTO.toString());
+            ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/index/", IndexArticleDTO.toString());
             if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
                 // Remove the sent articles from the elasticArticles list
@@ -181,5 +185,6 @@ public class DataManagerService {
         if (!elasticArticles.isEmpty()) {
             System.out.println("Some articles were not sent to the Elasticsearch Service.");
         }
+        System.out.println("Articles processed and sent to the respective services.");
     }
 }

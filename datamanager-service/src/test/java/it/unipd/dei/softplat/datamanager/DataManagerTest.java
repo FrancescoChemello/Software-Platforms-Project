@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -37,6 +38,7 @@ import it.unipd.dei.softplat.http.service.HttpClientService;
  * It tests the getArticles method and the validation of the Article object.
  */
 @SpringBootTest
+@Import(TestAsyncConfig.class)
 public class DataManagerTest {
 
     @MockBean
@@ -54,12 +56,12 @@ public class DataManagerTest {
     public void testSaveArticles() {
         // Mock configuration for MongoDB and ElasticSearch services
         when(httpClientService.postRequest(
-                eq("http://localhost:8085/mongodb/save/"),
+                eq("http://mongodb-service:8085/mongodb/save/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
         when(httpClientService.postRequest(
-                eq("http://localhost:8083/elastic/index/"),
+                eq("http://elasticsearch-service:8083/elastic/index/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -88,8 +90,8 @@ public class DataManagerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Verify that the postRequest methods of DataManagerService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8085/mongodb/save/"), anyString());
-        verify(httpClientService).postRequest(eq("http://localhost:8083/elastic/index/"), anyString());
+        verify(httpClientService).postRequest(eq("http://mongodb-service:8085/mongodb/save/"), anyString());
+        verify(httpClientService).postRequest(eq("http://elasticsearch-service:8083/elastic/index/"), anyString());
 
         // Example of an invalid ArticleTopics object
         List<Article> invalid_article_list = new ArrayList<>();
