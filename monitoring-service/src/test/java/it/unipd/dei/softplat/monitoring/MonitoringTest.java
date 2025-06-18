@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -35,6 +36,7 @@ import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
  * It contains test methods to validate the functionality of the MonitoringController and the MonitoringRequest model.
  */
 @SpringBootTest
+@Import(TestAsyncConfig.class)
 public class MonitoringTest {
 
     @MockBean
@@ -51,12 +53,12 @@ public class MonitoringTest {
     public void testStartMonitoring() {
         // Mock configuration
         when(httpClientService.postRequest(
-                eq("http://localhost:8082/datamanager/save-articles/"),
+                eq("http://datamanager-service:8082/datamanager/save-articles/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
         when(httpClientService.postRequest(
-            eq("http://localhost:8080/client/status/"),
+            eq("http://client-service:8080/client/status/"),
             anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -81,8 +83,8 @@ public class MonitoringTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Verify that the postRequest method of MonitoringService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8082/datamanager/save-articles/"), anyString());
-        verify(httpClientService).postRequest(eq("http://localhost:8080/client/status/"), anyString());
+        verify(httpClientService).postRequest(eq("http://datamanager-service:8082/datamanager/save-articles/"), anyString());
+        verify(httpClientService).postRequest(eq("http://client-service:8080/client/status/"), anyString());
 
         // Example of an invalid request
         MonitoringRequest invalidRequest = new MonitoringRequest();

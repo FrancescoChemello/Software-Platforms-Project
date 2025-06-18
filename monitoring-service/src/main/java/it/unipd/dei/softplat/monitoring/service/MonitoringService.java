@@ -11,10 +11,12 @@ package it.unipd.dei.softplat.monitoring.service;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.mashape.unirest.http.JsonNode;
@@ -58,6 +60,7 @@ public class MonitoringService {
      * Starts the monitoring process for the given request.
      * @param request
      */
+    @Async
     public void startMonitoring(MonitoringRequest request) {
 
         Response response;
@@ -180,7 +183,6 @@ public class MonitoringService {
                                 System.out.println("Body text is missing for article ID: " + article.getId());
                                 continue;
                             }
-                            System.out.println("Body Text: " + bodyText);
                         } catch (UnirestException e) {
                             System.out.println("Error fetching full article content: " + e.getMessage());
                             continue;
@@ -216,22 +218,22 @@ public class MonitoringService {
 
                         retrievedArticles.add(articleJson);
                         System.out.println("Article processed: " + article.getId());
-
-                        // Send the JSON articles to the DataManager Service
-                        if (retrievedArticles.size() >= batchSize) {
-                            // Take the first batchSize articles from the retrievedArticles list
-                            ArrayList<JSONObject> articleBatch = new ArrayList<>(retrievedArticles.subList(0, Math.min(batchSize, retrievedArticles.size())));
-                            // Send the batch of articles to the DataManager Service
-                            ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8082/datamanager/save-articles/", articleBatch.toString());
-                            if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
-                                System.out.println("Batch of articles sent to DataManager Service successfully.");
-                                // Remove the sent articles from the retrievedArticles list
-                                retrievedArticles.removeAll(articleBatch);
-                            } else {
-                                // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                                System.out.println("Failed to send batch of articles to DataManager Service. Status: " + (responseDataManager != null ? responseDataManager.getStatusCode() : "No response received"));
-                            }
-                        }
+                    }
+                }
+                // Send the JSON articles to the DataManager Service
+                if (retrievedArticles.size() >= batchSize || !retrievedArticles.isEmpty()) {
+                    // Take the first batchSize articles from the retrievedArticles list
+                    ArrayList<JSONObject> articleBatch = new ArrayList<>(retrievedArticles.subList(0, Math.min(batchSize, retrievedArticles.size())));
+                    JSONArray articleBatchJsonArray = new JSONArray(articleBatch);
+                    // Send the batch of articles to the DataManager Service
+                    ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://datamanager-service:8082/datamanager/save-articles/", articleBatchJsonArray.toString());
+                    if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
+                        System.out.println("Batch of articles sent to DataManager Service successfully.");
+                        // Remove the sent articles from the retrievedArticles list
+                        retrievedArticles.removeAll(articleBatch);
+                    } else {
+                        // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
+                        System.out.println("Failed to send batch of articles to DataManager Service. Status: " + (responseDataManager != null ? responseDataManager.getStatusCode() : "No response received"));
                     }
                 }
                 // Send the JSON articles left to the DataManager Service
@@ -239,7 +241,8 @@ public class MonitoringService {
                 while (!retrievedArticles.isEmpty() && attempts < 5) {
                     // Take the first batchSize articles from the retrievedArticles list
                     ArrayList<JSONObject> articleBatch = new ArrayList<>(retrievedArticles.subList(0, Math.min(batchSize, retrievedArticles.size())));
-                    ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://localhost:8082/datamanager/save-articles/", articleBatch.toString());
+                    JSONArray articleBatchJsonArray = new JSONArray(articleBatch);
+                    ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://datamanager-service:8082/datamanager/save-articles/", articleBatchJsonArray.toString());
                     if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Batch of articles sent to DataManager Service successfully.");
                         // Remove the sent articles from the retrievedArticles list
@@ -266,7 +269,7 @@ public class MonitoringService {
                     JSONObject monitoringCompletion = new JSONObject();
                     monitoringCompletion.put("status", "MONITORING");
                     monitoringCompletion.put("message", "Monitoring completed for query: " + request.getissueString());
-                    ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
+                    ResponseEntity<String> responseClientService = httpClientService.postRequest("http://client-service:8080/client/status/", monitoringCompletion.toString());
                     if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Monitoring status sent to Client Service successfully.");
                     } else {
@@ -281,7 +284,7 @@ public class MonitoringService {
                                 System.out.println("Retry interrupted: " + e.getMessage());
                                 Thread.currentThread().interrupt(); // Restore the interrupted status
                             }
-                            responseClientService = httpClientService.postRequest("http://localhost:8080/client/status/", monitoringCompletion.toString());
+                            responseClientService = httpClientService.postRequest("http://client-service:8080/client/status/", monitoringCompletion.toString());
                             if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
                                 System.out.println("Monitoring status sent to Client Service successfully.");
                                 break;
