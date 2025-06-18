@@ -16,6 +16,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +52,9 @@ public class MalletService {
     private int numThreads;
     private int numTopics;
     private int numTopWordsPerTopic;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(MalletService.class);
 
     /**
      * Constructor for MalletService.   
@@ -85,24 +91,24 @@ public class MalletService {
         // Send the search request to the Elasticsearch Service
         ResponseEntity<String> response = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/search/", searchRequest.toString());
         if (response != null && response.getStatusCode() == HttpStatus.OK) {
-            System.out.println("Search request sent successfully to Elasticsearch Service.");
+            logger.info("Search request sent successfully to Elasticsearch Service.");
         } else {
             int attempts = 0;
             while (attempts < 5) {
                 // Retry sending the request
                 response = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/search/", searchRequest.toString());
                 if (response != null && response.getStatusCode() == HttpStatus.OK) {
-                    System.out.println("Search request sent successfully to Elasticsearch Service after " + (attempts + 1) + " attempts.");
+                    logger.info("Search request sent successfully to Elasticsearch Service after " + (attempts + 1) + " attempts.");
                     break; // Exit the loop if the request was successful
                 } else {
                     attempts++;
                     try {
                         Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                     } catch (InterruptedException e) {
-                        System.out.println("Retry interrupted: " + e.getMessage());
+                        logger.error("Retry interrupted: " + e.getMessage());
                         Thread.currentThread().interrupt(); // Restore the interrupted status
                     }
-                    System.out.println("Failed to send search request to Elasticsearch Service. Status code: " + (response != null ? response.getStatusCode() : "No response received"));
+                    logger.warn("Failed to send search request to Elasticsearch Service. Status code: " + (response != null ? response.getStatusCode() : "No response received"));
                 }
             }
         }
@@ -123,18 +129,18 @@ public class MalletService {
             if (article != null) {
                 this.articles.add(article);
             } else {
-                System.out.println("Received null article in the stream for query " + query + " in corpus " + collectionName);
+                logger.warn("Received null article in the stream for query " + query + " in corpus " + collectionName);
             }
         }
         // Check if we have reached the end of the stream
         if (endOfStream) {
             // Process the accumulated articles
-            System.out.println("Processing remaining articles for query " + query + " in corpus " + collectionName);
+            logger.info("Processing remaining articles for query " + query + " in corpus " + collectionName);
             processArticles(collectionName, query);
         } else {
             if (this.articles.size() >= batchSize) {
                 // Process the articles in batches of batchSize
-                System.out.println("Processing batch of articles for query " + query + " in corpus " + collectionName);
+                logger.info("Processing batch of articles for query " + query + " in corpus " + collectionName);
                 processArticles(collectionName, query);
             }
         }
@@ -154,7 +160,7 @@ public class MalletService {
             throw new RuntimeException("Stopwords file not found in classpath!");
         }
 
-        System.out.println("Stopwords file loaded successfully for query: " + query);
+        logger.info("Stopwords file loaded successfully for query: " + query);
         
         // Create a Pipeline for processing the articles
         ArrayList<Pipe> pipeList = new ArrayList<>();
@@ -165,7 +171,7 @@ public class MalletService {
         pipeList.add( new TokenSequenceRemoveStopwords(stoplistInputStream, "UTF-8", false, false, false) );
         pipeList.add( new TokenSequence2FeatureSequence() );
 
-        System.out.println("Pipes created successfully for query " + query + " in corpus " + collectionName);
+        logger.info("Pipes created successfully for query " + query + " in corpus " + collectionName);
 
         InstanceList instances = new InstanceList (new SerialPipes(pipeList));
 
@@ -174,9 +180,9 @@ public class MalletService {
             Instance instance = new Instance(article.getBodyText(), article.getLabel(), article.getId(), "");
             instances.addThruPipe(instance);
         }
-        System.out.println(String.format("Number of instances (docs): %s", instances.size()));
+        logger.info(String.format("Number of instances (docs): %s", instances.size()));
         
-        System.out.println("Starting topic modeling for query " + query + " in corpus " + collectionName);
+        logger.info("Starting topic modeling for query " + query + " in corpus " + collectionName);
         
         // Prepare the topic model
         ParallelTopicModel topicModel = new ParallelTopicModel(numTopics);
@@ -188,10 +194,10 @@ public class MalletService {
             topicModel.estimate();
         }
         catch (IOException e) {
-            System.err.println("Error during topic model estimation: " + e.getMessage());
+            logger.error("Error during topic model estimation: " + e.getMessage());
             return; // Exit if there is an error, no data loss
         }
-        System.out.println("Topic model estimation completed for query " + query + " in corpus " + collectionName);
+        logger.info("Topic model estimation completed for query " + query + " in corpus " + collectionName);
         
         /**
          * Example of the response sent to the Client Service
@@ -235,22 +241,22 @@ public class MalletService {
         queryResult.put("topics", new JSONArray(articleTopics));
 
         // For debugging purposes, print the query result
-        System.out.println("Query Result: " + queryResult.toString(2));
+        logger.info("Query Result: " + queryResult.toString(2));
         
         // Send the articles to the CLient Service
         ResponseEntity<String> responseClientService = httpClientService.postRequest("http://client-service:8080/client/query-result/", queryResult.toString());
         if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
-            System.out.println("Successfully sent query result to Client Service.");
+            logger.info("Successfully sent query result to Client Service.");
             // Clear the articles list after processing
             this.articles.clear();
         } else {
-            System.out.println("Failed to send query result to Client Service. Status code: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+            logger.warn("Failed to send query result to Client Service. Status code: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
             int attempts = 0;
             while(attempts < 5) {
                 // Retry sending the request
                 responseClientService = httpClientService.postRequest("http://client-service:8080/client/query-result/", queryResult.toString());
                 if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
-                    System.out.println("Successfully sent query result to Client Service after " + (attempts + 1) + " attempts.");
+                    logger.info("Successfully sent query result to Client Service after " + (attempts + 1) + " attempts.");
                     this.articles.clear(); // Clear the articles list after processing
                     break; // Exit the loop if the request was successful
                 } else {
@@ -258,12 +264,18 @@ public class MalletService {
                     try {
                         Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                     } catch (InterruptedException e) {
-                        System.out.println("Retry interrupted: " + e.getMessage());
+                        logger.error("Retry interrupted: " + e.getMessage());
                         Thread.currentThread().interrupt(); // Restore the interrupted status
                     }
-                    System.out.println("Failed to send query result to Client Service. Status code: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                    logger.warn("Failed to send query result to Client Service. Status code: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
                 }
             }
+        }
+
+        if(!this.articles.isEmpty()) {
+            logger.error("Some articles were not sended to the Client Service for query " + query + " in corpus " + collectionName);
+        } else {
+            logger.info("All articles processed successfully for query " + query + " in corpus " + collectionName);
         }
     }
 }
