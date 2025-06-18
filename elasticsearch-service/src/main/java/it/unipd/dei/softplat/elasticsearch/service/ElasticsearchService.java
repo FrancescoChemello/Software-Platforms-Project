@@ -185,15 +185,16 @@ public class ElasticsearchService {
                 if (!documentsID.isEmpty()) {
                     JSONObject articleIDs = new JSONObject();
                     articleIDs.put("collectionName", corpus);
+                    articleIDs.put("query", query);
                     articleIDs.put("ids", new JSONArray(documentsID));
-                    ResponseEntity<?> mongoRequest = httpClientService.postRequest("http://localhost:8085/mongodb/get-articles/", articleIDs.toString());
+                    ResponseEntity<?> mongoRequest = httpClientService.postRequest("http://mongodb-service:8085/mongodb/get-articles/", articleIDs.toString());
                     if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Articles to retreive sent successfully to MongoDB service.");
                     } else {
                         int attempts = 0;
                         while (attempts < 5) {
                             // Retry the request to MongoDB service
-                            mongoRequest = httpClientService.postRequest("http://localhost:8085/mongodb/get-articles/", articleIDs.toString());
+                            mongoRequest = httpClientService.postRequest("http://mongodb-service:8085/mongodb/get-articles/", articleIDs.toString());
                             if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
                                 System.out.println("Articles to retreive sent successfully to MongoDB service.");
                                 break;

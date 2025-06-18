@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * This class is intended to start the Elasticsearch Service application.
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"it.unipd.dei.softplat"})
 public class ElasticsearchApp {
 
     @Bean
