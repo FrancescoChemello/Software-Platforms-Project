@@ -12,6 +12,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +38,9 @@ public class DataManagerService {
     @Value("${data.batch.size}")
     private int batchSize;
     private final HttpClientService httpClientService;
+    
+    // For logging
+    private static final Logger logger = LogManager.getLogger(DataManagerService.class);
 
     /**
      * Default constructor for DataManagerService.
@@ -58,7 +64,7 @@ public class DataManagerService {
 
         for (Article article : articles) {
             if(article == null) {
-                System.out.println("Received null article.");
+                logger.warn("Received null article.");
             } else {
                 // Prepare MongoArticle and ElasticArticle to be processed later
                 JSONObject mngArticle = new JSONObject();
@@ -94,12 +100,12 @@ public class DataManagerService {
             // Send articles to the MongoDB Service
             ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://mongodb-service:8085/mongodb/save/", saveArticleDTO.toString());
             if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Batch of articles sent to MongoDB Service successfully.");
+                logger.info("Batch of articles sent to MongoDB Service successfully.");
                 // Remove the sent articles from the mongoArticles list
                 mongoArticles.removeAll(articleBatch);
             } else {
                 // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + (responseMongoDB != null ? responseMongoDB.getStatusCode() : "No response received"));
+                logger.warn("Failed to send batch of articles to MongoDB Service. Status: " + (responseMongoDB != null ? responseMongoDB.getStatusCode() : "No response received"));
             }
         }
         // Send the batch of articles to the ElastiSearch Service
@@ -113,12 +119,12 @@ public class DataManagerService {
             // Send articles to the ElastiSearch Service
             ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/index/", IndexArticleDTO.toString());
             if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
+                logger.info("Batch of articles sent to ElastiSearch Service successfully.");
                 // Remove the sent articles from the mongoArticles list
                 elasticArticles.removeAll(articleBatch);
             } else {
                 // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + (responseElasticSearch != null ? responseElasticSearch.getStatusCode() : "No response received"));
+                logger.warn("Failed to send batch of articles to ElastiSearch Service. Status: " + (responseElasticSearch != null ? responseElasticSearch.getStatusCode() : "No response received"));
             }
         }
 
@@ -134,7 +140,7 @@ public class DataManagerService {
             // Send articles to the MongoDB Service
             ResponseEntity<String> responseMongoDB = httpClientService.postRequest("http://mongodb-service:8085/mongodb/save/", saveArticleDTO.toString());
             if (responseMongoDB != null && responseMongoDB.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Batch of articles sent to MongoDB Service successfully.");
+                logger.info("Batch of articles sent to MongoDB Service successfully after " + (attempts + 1) + " attempts.");
                 // Remove the sent articles from the mongoArticles list
                 mongoArticles.removeAll(articleBatch);
             } else {
@@ -143,15 +149,17 @@ public class DataManagerService {
                 try {
                     Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                 } catch (InterruptedException e) {
-                    System.out.println("Retry interrupted: " + e.getMessage());
+                    logger.error("Retry interrupted: " + e.getMessage());
                     Thread.currentThread().interrupt(); // Restore the interrupted status
                 }
-                System.out.println("Failed to send batch of articles to MongoDB Service. Status: " + (responseMongoDB != null ? responseMongoDB.getStatusCode() : "No response received"));
+                logger.warn("Failed to send batch of articles to MongoDB Service. Status: " + (responseMongoDB != null ? responseMongoDB.getStatusCode() : "No response received"));
             }
         }
         // Check if some articles are left
         if (!mongoArticles.isEmpty()) {
-            System.out.println("Some articles were not sent to the MongoDB Service.");
+            logger.error("Some articles were not sent to the MongoDB Service.");
+        } else {
+            logger.info("All articles sent to the MongoDB Service successfully.");
         }
 
         // Send articles left to the ElasticSearch Service
@@ -166,7 +174,7 @@ public class DataManagerService {
             // Send articles to the ElastiSearch Service
             ResponseEntity<String> responseElasticSearch = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/index/", IndexArticleDTO.toString());
             if (responseElasticSearch != null && responseElasticSearch.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Batch of articles sent to ElastiSearch Service successfully.");
+                logger.info("Batch of articles sent to ElastiSearch Service successfully after " + (attempts + 1) + " attempts.");
                 // Remove the sent articles from the elasticArticles list
                 elasticArticles.removeAll(articleBatch);
             } else {
@@ -175,16 +183,17 @@ public class DataManagerService {
                 try {
                     Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                 } catch (InterruptedException e) {
-                    System.out.println("Retry interrupted: " + e.getMessage());
+                    logger.error("Retry interrupted: " + e.getMessage());
                     Thread.currentThread().interrupt(); // Restore the interrupted status
                 }
-                System.out.println("Failed to send batch of articles to ElastiSearch Service. Status: " + (responseElasticSearch != null ? responseElasticSearch.getStatusCode() : "No response received"));
+                logger.warn("Failed to send batch of articles to ElastiSearch Service. Status: " + (responseElasticSearch != null ? responseElasticSearch.getStatusCode() : "No response received"));
             }
         }
         // Check if some articles are left
         if (!elasticArticles.isEmpty()) {
-            System.out.println("Some articles were not sent to the Elasticsearch Service.");
+            logger.error("Some articles were not sent to the Elasticsearch Service.");
+        } else {
+            logger.info("All articles sent to the Elasticsearch Service successfully.");
         }
-        System.out.println("Articles processed and sent to the respective services.");
     }
 }

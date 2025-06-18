@@ -10,6 +10,9 @@ package it.unipd.dei.softplat.datamanager.controller;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +30,9 @@ import it.unipd.dei.softplat.datamanager.service.DataManagerService;
 public class DataManagerController {
     
     private final DataManagerService dataService;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(DataManagerController.class);
 
     /**
      * Default constructor for DataManagerController.
@@ -47,12 +53,13 @@ public class DataManagerController {
     public ResponseEntity<?> saveArticles(@Valid @RequestBody List<Article> topicsArticles) {
         // Process the articles received from the Monitoring service
         if(topicsArticles == null || topicsArticles.isEmpty()) {
-            System.out.println("No articles received.");
+            logger.error("No articles received.");
             return ResponseEntity.badRequest().body("No articles received.");
         }
 
         // Start the service
         dataService.storingArticles(topicsArticles);
+        logger.info("Articles with topics received successfully.");
         return ResponseEntity.ok().body("Articles with topics received successfully.");
     }
 }
