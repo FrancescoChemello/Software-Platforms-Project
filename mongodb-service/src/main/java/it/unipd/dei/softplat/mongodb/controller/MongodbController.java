@@ -11,6 +11,9 @@ package it.unipd.dei.softplat.mongodb.controller;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +36,9 @@ import it.unipd.dei.softplat.mongodb.dto.SaveArticleDTO;
 public class MongodbController {
  
     private final MongodbService mongodbService;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(MongodbController.class);
     
     /**
      * Default constructor for MongodbController.
@@ -59,16 +65,19 @@ public class MongodbController {
         
         // Check if the articles and collection name are valid
         if(articles == null || articles.isEmpty()) {
-            System.out.println("No articles received.");
+            logger.error("No articles received.");
             return ResponseEntity.badRequest().body("No articles received.");
         }
         if (collectionName == null || collectionName.isEmpty()) {
-            System.out.println("No collection name provided.");
+            logger.error("No collection name provided.");
             return ResponseEntity.badRequest().body("No collection name provided.");
         } 
         
         // Start the service
         mongodbService.saveArticles(articles, collectionName);
+
+        logger.info("Articles saved successfully in collection: ", collectionName);
+
         return ResponseEntity.ok().body("Articles saved successfully.");
     }
     
@@ -81,12 +90,15 @@ public class MongodbController {
     @DeleteMapping("/mongodb/drop-collection/")
     public ResponseEntity<?> dropCollection(@RequestBody String collectionName) {
         if (collectionName == null || collectionName.isEmpty()) {
-            System.out.println("No collection name provided.");
+            logger.error("No collection name provided.");
             return ResponseEntity.badRequest().body("No collection name provided.");
         }
         
         // Start the service
         mongodbService.dropCollection(collectionName);
+
+        logger.info("Collection dropped successfully: ", collectionName);
+
         return ResponseEntity.ok().body("Collection dropped successfully.");
     }
     
@@ -106,16 +118,19 @@ public class MongodbController {
         
         // Check if the collection name and ids are valid
         if (collectionName == null || collectionName.isEmpty()) {
-            System.out.println("No collection name provided.");
+            logger.error("No collection name provided.");
             return ResponseEntity.badRequest().body("No collection name provided.");
         }
         if (ids == null || ids.isEmpty()) {
-            System.out.println("No id name list provided.");
+            logger.error("No id name list provided.");
             return ResponseEntity.badRequest().body("No id name list provided.");
         }
 
         // Start the service
         mongodbService.getArticlesById(collectionName, query, ids);
+
+        logger.info("Articles retrieved successfully from collection: ", collectionName);
+
         return ResponseEntity.ok().body("Articles retrieved successfully.");
     }
 }

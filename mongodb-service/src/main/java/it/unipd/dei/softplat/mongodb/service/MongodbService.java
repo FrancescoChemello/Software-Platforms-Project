@@ -11,6 +11,9 @@ package it.unipd.dei.softplat.mongodb.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.bson.Document;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,9 @@ public class MongodbService {
     @Value("${data.batch.size}")
     private int batchSize;
     private final HttpClientService httpClientService;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(MongodbService.class);
  
     /**
      * Default constructor for MongodbService.
@@ -61,9 +67,9 @@ public class MongodbService {
     public void closeConnection() {
         if (this.mongoClient != null) {
             this.mongoClient.close();
-            System.out.println("MongoDB connection closed.");
+            logger.info("MongoDB connection closed.");
         } else {
-            System.out.println("No MongoDB connection to close.");
+            logger.info("No MongoDB connection to close.");
         }
     }
 
@@ -78,10 +84,10 @@ public class MongodbService {
             database.createCollection(collectionName);
             MongoCollection<Document> collection = database.getCollection(collectionName);
             collection.createIndex(Indexes.ascending("id"), new IndexOptions().unique(true));
-            System.out.println("Collection " + collectionName + " created successfully.");
+            logger.info("Collection " + collectionName + " created successfully.");
         }
         catch (Exception e) {
-            System.out.println("Error creating collection: " + e.getMessage());
+            logger.info("Error creating collection: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -96,10 +102,10 @@ public class MongodbService {
             // Drop the collection
             database.getCollection(collectionName).drop();
 
-            System.out.println("Collection " + collectionName + " dropped successfully.");
+            logger.info("Collection " + collectionName + " dropped successfully.");
         }
         catch (Exception e) {
-            System.out.println("Error dropping collection: " + e.getMessage());
+            logger.error("Error dropping collection: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -114,7 +120,7 @@ public class MongodbService {
              // Get the list of collections
             return database.listCollectionNames().into(new ArrayList<>());
         } catch (Exception e) {
-            System.out.println("Error retrieving collections: " + e.getMessage());
+            logger.error("Error retrieving collections: " + e.getMessage());
             e.printStackTrace();
             return new ArrayList<>();
         }
@@ -132,7 +138,7 @@ public class MongodbService {
         // Process articles
         for (MongoArticle article : articles) {
             if (article == null) {
-                System.out.println("Received null article.");
+                logger.warn("Received null article.");
             } else {
                 // Prepare the article to be saved
                 try {
@@ -151,14 +157,14 @@ public class MongodbService {
                     // Insert the article into the collection using replaceOne with upsert option
                     // This will update the article if it exists, or insert it if it does not
                     collection.replaceOne(new Document("id", article.getId()), articleDoc, new ReplaceOptions().upsert(true));
-                    System.out.println("Article with ID " + article.getId() + " saved successfully.");
+                    logger.info("Article with ID " + article.getId() + " saved successfully.");
                 } catch (Exception e) {
-                    System.out.println("Error saving article with ID " + article.getId() + ": " + e.getMessage());
+                    logger.info("Error saving article with ID " + article.getId() + ": " + e.getMessage());
                     e.printStackTrace();
                 }
             }
         }
-        System.out.println("All articles saved successfully to collection " + collectionName + ".");
+        logger.info("All articles saved successfully to collection " + collectionName + ".");
     }
 
     /**
@@ -169,7 +175,7 @@ public class MongodbService {
     public void dropCollection(String collectionName) {
         // Check if the collection exists
         if (!listCollections().contains(collectionName)) {
-            System.out.println("Collection " + collectionName + " does not exist.");
+            logger.error("Collection " + collectionName + " does not exist.");
             return;
         }
         // Drop the specified collection
@@ -187,7 +193,7 @@ public class MongodbService {
         List<JSONObject> articles = new ArrayList<>();
         // Check if the collection exists
         if (!listCollections().contains(collectionName)) {
-            System.out.println("Collection " + collectionName + " does not exist.");
+            logger.error("Collection " + collectionName + " does not exist.");
             return;
         }
         // Retrieve articles from the specified collection with a specific ID
@@ -196,7 +202,7 @@ public class MongodbService {
                 Document doc = database.getCollection(collectionName).find(new Document("id", id)).first();
                 // Check if the document exists
                 if (doc == null) {
-                    System.out.println("No article found with ID: " + id);
+                    logger.warn("No article found with ID: " + id);
                     continue; // Skip to the next ID
                 } 
                 // Convert the Document (BSON) to a JSON file
@@ -224,18 +230,18 @@ public class MongodbService {
                     // Send the batch of articles to the Mallet service
                     ResponseEntity<String> responseQuery = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
                     if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Batch of articles sent to Client Service successfully.");
+                        logger.info("Batch of articles sent to Client Service successfully.");
                         // Remove the sent articles from the articles list
                         articles.removeAll(articleBatch);
                     } else {
                         // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                        System.out.println("Failed to send batch of articles to Service Service. Status: " + (responseQuery != null ? responseQuery.getStatusCode() : "No response received"));
+                        logger.warn("Failed to send batch of articles to Service Service. Status: " + (responseQuery != null ? responseQuery.getStatusCode() : "No response received"));
                     }
                 }
             }
         }
         catch (Exception e) {
-            System.out.println("Error retrieving articles from collection " + collectionName + ": " + e.getMessage());
+            logger.error("Error retrieving articles from collection " + collectionName + ": " + e.getMessage());
             e.printStackTrace();
         }
         // Send the remaining articles if any
@@ -252,7 +258,7 @@ public class MongodbService {
             // Send the batch of articles to the Mallet service
             ResponseEntity<String> responseQuery = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
             if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Batch of articles sent to Mallet Service successfully.");
+                logger.info("Batch of articles sent to Mallet Service successfully after " + (attempts + 1) + " attempts.");
                 // Remove the sent articles from the articles list
                 articles.removeAll(articleBatch);
             } else {
@@ -261,15 +267,15 @@ public class MongodbService {
                 try {
                     Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                 } catch (InterruptedException e) {
-                    System.out.println("Retry interrupted: " + e.getMessage());
+                    logger.error("Retry interrupted: " + e.getMessage());
                     Thread.currentThread().interrupt(); // Restore the interrupted status
                 }
-                System.out.println("Failed to send batch of articles to Mallet Service. Status: " + (responseQuery != null ? responseQuery.getStatusCode() : "No response received"));
+                logger.warn("Failed to send batch of articles to Mallet Service. Status: " + (responseQuery != null ? responseQuery.getStatusCode() : "No response received"));
             }
         }
         // Check if some articles are left
         if (!articles.isEmpty()) {
-            System.out.println("Some articles were not sent to the Mallet Service.");
+            logger.error("Some articles were not sent to the Mallet Service.");
         } else {
             // Send the end of stream signal to the Mallet service
             JSONObject endOfStreamDTO = new JSONObject();
@@ -280,14 +286,14 @@ public class MongodbService {
             // Send the end of stream signal to the Mallet service
             ResponseEntity<String> responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
             if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
-                System.out.println("End of stream signal sent to Mallet Service successfully.");
+                logger.info("End of stream signal sent to Mallet Service successfully.");
             } else {
                 attempts = 0;
                 while (attempts < 5) {
                     // Retry sending the end of stream signal
                     responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
                     if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("End of stream signal sent to Mallet Service successfully.");
+                        logger.info("End of stream signal sent to Mallet Service successfully after " + (attempts + 1) + " attempts.");
                         break; // Exit the loop if successful
                     } else {
                         attempts++;
@@ -295,14 +301,14 @@ public class MongodbService {
                         try {
                             Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                         } catch (InterruptedException e) {
-                            System.out.println("Retry interrupted: " + e.getMessage());
+                            logger.error("Retry interrupted: " + e.getMessage());
                             Thread.currentThread().interrupt(); // Restore the interrupted status
                         }
-                        System.out.println("Failed to send end of stream signal to Mallet Service. Status: " + (responseEndOfStream != null ? responseEndOfStream.getStatusCode() : "No response received"));
+                        logger.warn("Failed to send end of stream signal to Mallet Service. Status: " + (responseEndOfStream != null ? responseEndOfStream.getStatusCode() : "No response received"));
                     }
                 }
             }
-            System.out.println("All articles retrieved successfully from collection " + collectionName + ".");
+            logger.info("All articles retrieved successfully from collection " + collectionName + ".");
         }
     }
 }
