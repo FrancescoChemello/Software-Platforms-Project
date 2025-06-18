@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import it.unipd.dei.softplat.datamanager.model.Article;
@@ -55,7 +54,6 @@ public class DataManagerService {
      * and stores them in MongoDB and Elasticsearch.
      * @param articles
      */
-    @Async
     public void storingArticles(List<Article> articles){
 
         ArrayList<JSONObject> mongoArticles = new ArrayList<>();
