@@ -11,6 +11,9 @@ package it.unipd.dei.softplat.monitoring.service;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +48,9 @@ public class MonitoringService {
     @Value("${data.batch.size}")
     private int batchSize;
     private final HttpClientService httpClientService;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(MonitoringService.class);
     
     public MonitoringService(@Value("${guardian.open.api.key}") String apiKey, HttpClientService httpClientService) {
 
@@ -74,9 +80,9 @@ public class MonitoringService {
         }
         
         if (request.getEndDate() == null) {
-            System.out.println("End date is null, monitoring will continue indefinitely.");
+            logger.info("End date is null, monitoring will continue indefinitely.");
         } else {
-            System.out.println("Monitoring completed for the given date range.");
+            logger.info("Monitoring completed for the given date range.");
         }
 
         // Variable to check if the monitoring should continue indefinitely
@@ -103,20 +109,21 @@ public class MonitoringService {
                 response = client.getContent(request.getissueString());
             }
             catch (UnirestException e){
+                logger.error("Error while fetching content from The Guardian API: " + e.getMessage(), e);
                 throw new RuntimeException("Error while fetching content from The Guardian API: " + e.getMessage(), e);
             }
 
             // Here you can implement the logic to process the response and store it in the database
             if (response.getResults().length == 0) {
-                System.out.println("No articles found for the given query and date range.");
+                logger.warn("No articles found for the given query and date range.");
             } else {
-                System.out.println("Found " + response.getResults().length + " articles.");
+                logger.info("Found " + response.getResults().length + " articles.");
                 // Convert the response results to a stream
                 Article [] articles = response.getResults();
                 // Second call to get the body of the articles
                 for (Article article : articles) {
                     if (article == null) {
-                        System.out.println("Received null article.");
+                        logger.warn("Received null article.");
                     } else {
                         /**
                          * The article is as follows:
@@ -137,7 +144,7 @@ public class MonitoringService {
 
                         String apiurl = article.getApiUrl();
                         if( apiurl == null || apiurl.isEmpty()) {
-                            System.out.println("Article API URL is missing.");
+                            logger.warn("Article API URL is missing.");
                             continue;
                         }
 
@@ -173,18 +180,18 @@ public class MonitoringService {
                              */
                             HttpResponse<JsonNode> fullArticle = Unirest.get(apiurl).queryString("api-key", this.apiKey).queryString("show-fields", "bodyText").asJson();
                             if (fullArticle.getStatus() != 200) {
-                                System.out.println("Failed to fetch full article content. Status: " + fullArticle.getStatus());
+                                logger.error("Failed to fetch full article content. Status: " + fullArticle.getStatus());
                                 continue;
                             }
                             // Get the body text from the response
                             JSONObject body = fullArticle.getBody().getObject().getJSONObject("response").getJSONObject("content").getJSONObject("fields");
                             bodyText = body.getString("bodyText");
                             if (bodyText == null || bodyText.isEmpty()) {
-                                System.out.println("Body text is missing for article ID: " + article.getId());
+                                logger.error("Body text is missing for article ID: " + article.getId());
                                 continue;
                             }
                         } catch (UnirestException e) {
-                            System.out.println("Error fetching full article content: " + e.getMessage());
+                            logger.error("Error fetching full article content: " + e.getMessage());
                             continue;
                         }
 
@@ -217,7 +224,7 @@ public class MonitoringService {
                         articleJson.put("bodyText", bodyText);
 
                         retrievedArticles.add(articleJson);
-                        System.out.println("Article processed: " + article.getId());
+                        logger.info("Article processed: " + article.getId());
                     }
                 }
                 // Send the JSON articles to the DataManager Service
@@ -228,12 +235,12 @@ public class MonitoringService {
                     // Send the batch of articles to the DataManager Service
                     ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://datamanager-service:8082/datamanager/save-articles/", articleBatchJsonArray.toString());
                     if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Batch of articles sent to DataManager Service successfully.");
+                        logger.info("Batch of articles sent to DataManager Service successfully.");
                         // Remove the sent articles from the retrievedArticles list
                         retrievedArticles.removeAll(articleBatch);
                     } else {
                         // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                        System.out.println("Failed to send batch of articles to DataManager Service. Status: " + (responseDataManager != null ? responseDataManager.getStatusCode() : "No response received"));
+                        logger.warn("Failed to send batch of articles to DataManager Service. Status: " + (responseDataManager != null ? responseDataManager.getStatusCode() : "No response received"));
                     }
                 }
                 // Send the JSON articles left to the DataManager Service
@@ -244,7 +251,7 @@ public class MonitoringService {
                     JSONArray articleBatchJsonArray = new JSONArray(articleBatch);
                     ResponseEntity<String> responseDataManager = httpClientService.postRequest("http://datamanager-service:8082/datamanager/save-articles/", articleBatchJsonArray.toString());
                     if (responseDataManager != null && responseDataManager.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Batch of articles sent to DataManager Service successfully.");
+                        logger.info("Batch of articles sent to DataManager Service successfully after " + (attempts + 1) + " attempts.");
                         // Remove the sent articles from the retrievedArticles list
                         retrievedArticles.removeAll(articleBatch);
                     } else {
@@ -253,15 +260,15 @@ public class MonitoringService {
                         try {
                             Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                         } catch (InterruptedException e) {
-                            System.out.println("Retry interrupted: " + e.getMessage());
+                            logger.error("Retry interrupted: " + e.getMessage());
                             Thread.currentThread().interrupt(); // Restore the interrupted status
                         }
-                        System.out.println("Failed to send batch of articles to DataManager Service. Status: " + (responseDataManager != null ? responseDataManager.getStatusCode() : "No response received"));
+                        logger.warn("Failed to send batch of articles to DataManager Service. Status: " + (responseDataManager != null ? responseDataManager.getStatusCode() : "No response received"));
                     }
                 }
                 // Check if some articles are left
                 if (!retrievedArticles.isEmpty()) {
-                    System.out.println("Some articles were not sent to the DataManager Service.");
+                    logger.error("Some articles were not sent to the DataManager Service.");
                 }
 
                 // Send to the Client Service that the monitoring is completed
@@ -271,9 +278,9 @@ public class MonitoringService {
                     monitoringCompletion.put("message", "Monitoring completed for query: " + request.getissueString());
                     ResponseEntity<String> responseClientService = httpClientService.postRequest("http://client-service:8080/client/status/", monitoringCompletion.toString());
                     if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Monitoring status sent to Client Service successfully.");
+                        logger.info("Monitoring status sent to Client Service successfully.");
                     } else {
-                        System.out.println("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                        logger.warn("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
                         attempts = 0;
                         while (attempts < 5) {
                             attempts++;
@@ -281,15 +288,15 @@ public class MonitoringService {
                             try {
                                 Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                             } catch (InterruptedException e) {
-                                System.out.println("Retry interrupted: " + e.getMessage());
+                                logger.error("Retry interrupted: " + e.getMessage());
                                 Thread.currentThread().interrupt(); // Restore the interrupted status
                             }
                             responseClientService = httpClientService.postRequest("http://client-service:8080/client/status/", monitoringCompletion.toString());
                             if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
-                                System.out.println("Monitoring status sent to Client Service successfully.");
+                                logger.info("Monitoring status sent to Client Service successfully after " + (attempts + 1) + " attempts.");
                                 break;
                             } else {
-                                System.out.println("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
+                                logger.warn("Failed to send monitoring status to Client Service. Status: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
                             }
                         }
                     }
@@ -297,15 +304,18 @@ public class MonitoringService {
             }
             // Sleep for a while before the next monitoring cycle
             if (continueMonitoring) {
+                logger.info("End a monitoring cycle, waiting for the next cycle to start.");
                 // Set startDate
                 startDate = endDate; // Set the end date to the current date
                 try {
                     Thread.sleep(60000); // Sleep for 60 seconds before the next monitoring cycle
                 } catch (InterruptedException e) {
-                    System.out.println("Monitoring interrupted: " + e.getMessage());
+                    logger.error("Monitoring interrupted: " + e.getMessage());
                     Thread.currentThread().interrupt(); // Restore the interrupted status
                 }
             }
         } while (continueMonitoring);
+
+        logger.info("Monitoring process completed for query: " + request.getissueString());
     }
 }

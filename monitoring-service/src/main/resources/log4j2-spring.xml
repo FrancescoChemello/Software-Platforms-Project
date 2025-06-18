@@ -1,0 +1,28 @@
+<!-- Francesco Chemello -->
+
+<!-- Configuration file for log4j2 -->
+<Configuration status="INFO" monitorInterval="0" name="log4j2-config">
+    <Appenders>
+        <RollingRandomAccessFile name="RFILE" fileName="logs/app.log"
+            filePattern="logs/$${date:yyyy-MM}/app-%d{yyyyMMdd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%date{DEFAULT} %level [%thread] %logger{36} - %msg%n%throwable%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+        </RollingRandomAccessFile>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout>
+                <Pattern>%date{DEFAULT} %level [%thread] %logger{36} - %msg%n%throwable%n</Pattern>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="RFILE"/>
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+    </Loggers>
+</Configuration>
