@@ -10,3 +10,6 @@
 
 # Ignore Maven target directory
 */target/
+
+# Log files
+*.log
