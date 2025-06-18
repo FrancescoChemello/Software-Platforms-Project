@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,27 +78,6 @@ public class MongodbController {
         logger.info("Articles saved successfully in collection: ", collectionName);
 
         return ResponseEntity.ok().body("Articles saved successfully.");
-    }
-    
-    /**
-     * This method drops a collection in MongoDB.
-     * It is expected to be called by the Client service.
-     * @param collectionName
-     * @return
-     */
-    @DeleteMapping("/mongodb/drop-collection/")
-    public ResponseEntity<?> dropCollection(@RequestBody String collectionName) {
-        if (collectionName == null || collectionName.isEmpty()) {
-            logger.error("No collection name provided.");
-            return ResponseEntity.badRequest().body("No collection name provided.");
-        }
-        
-        // Start the service
-        mongodbService.dropCollection(collectionName);
-
-        logger.info("Collection dropped successfully: ", collectionName);
-
-        return ResponseEntity.ok().body("Collection dropped successfully.");
     }
     
     /**

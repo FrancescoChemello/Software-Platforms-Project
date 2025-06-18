@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -45,6 +46,7 @@ import it.unipd.dei.softplat.mongodb.dto.SearchArticleDTO;
  */
 @SpringBootTest
 @Testcontainers
+@Import(TestAsyncConfig.class)
 public class MongodbTest {
 
     // To start an embedded MongoDB instance for testing purposes
@@ -176,36 +178,6 @@ public class MongodbTest {
         assertEquals(HttpStatus.BAD_REQUEST, nullIdResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
-    /**
-     * This test method is intended to test the dropCollection method of the MongodbController.
-     * It calls the dropCollection method with a valid collection name,
-     * an empty collection name, and a null collection name to ensure proper error handling.
-     */
-    @Test
-    public void testDropCollection() {
-        // Call the dropCollection method with a valid collection name
-        ResponseEntity<?> response = mongodbController.dropCollection("test_collection");
-
-        // Assert that the response is not null and has a status code of 200 OK
-        assertNotNull(response, "Response should not be null");
-        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
-
-        // Call the dropCollection method with an empty collection name
-        ResponseEntity<?> emptyResponse = mongodbController.dropCollection("");
-
-        // Assert that the response is not null and has a status code of 400 Bad Request
-        assertNotNull(emptyResponse, "Response should not be null");
-        assertEquals(HttpStatus.BAD_REQUEST, emptyResponse.getStatusCode(), "Response should have status code 400 Bad Request");
-
-        // Call the dropCollection method with a null collection name
-        ResponseEntity<?> nullResponse = mongodbController.dropCollection(null);
-
-        // Assert that the response is not null and has a status code of 400 Bad Request
-        assertNotNull(nullResponse, "Response should not be null");
-        assertEquals(HttpStatus.BAD_REQUEST, nullResponse.getStatusCode(), "Response should have status code 400 Bad Request");
-    }
-
-    
     /**
      * This test method is intended to test the MongoArticle class getters and setters.
      * It creates a MongoArticle object, sets its properties, and asserts that the getters return the expected values.

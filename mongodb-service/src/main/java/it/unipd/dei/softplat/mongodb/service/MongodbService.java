@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoClient;
@@ -57,20 +58,8 @@ public class MongodbService {
     @Autowired
     public MongodbService(MongoClient mongoClient, HttpClientService httpClientService) {
         this.mongoClient = mongoClient;
-        this.database = mongoClient.getDatabase("softplatDB");
+        this.database = this.mongoClient.getDatabase("softplatDB");
         this.httpClientService = httpClientService;
-    }
-
-    /**
-     * This method is responsible for closing the MongoDB connection.
-     */
-    public void closeConnection() {
-        if (this.mongoClient != null) {
-            this.mongoClient.close();
-            logger.info("MongoDB connection closed.");
-        } else {
-            logger.info("No MongoDB connection to close.");
-        }
     }
 
     /**
@@ -88,24 +77,6 @@ public class MongodbService {
         }
         catch (Exception e) {
             logger.info("Error creating collection: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * This method is responsible for dropping a collection in MongoDB.
-     * @param collectionName
-     * @throws Exception if there is an error dropping the collection.
-     */
-    private void dropACollection(String collectionName) {
-        try {
-            // Drop the collection
-            database.getCollection(collectionName).drop();
-
-            logger.info("Collection " + collectionName + " dropped successfully.");
-        }
-        catch (Exception e) {
-            logger.error("Error dropping collection: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -130,6 +101,7 @@ public class MongodbService {
      * This method is responsible for saving articles to MongoDB.
      * @param articles The list of articles to be saved.
      */
+    @Async
     public void saveArticles(List<MongoArticle> articles, String collectionName) {
         // Check if the collection exists, if not create it
         if (!listCollections().contains(collectionName)) {
@@ -165,21 +137,6 @@ public class MongodbService {
             }
         }
         logger.info("All articles saved successfully to collection " + collectionName + ".");
-    }
-
-    /**
-     * This method is responsible for dropping a collection in MongoDB.
-     * It checks if the collection exists before attempting to drop it.
-     * @param collectionName
-     */
-    public void dropCollection(String collectionName) {
-        // Check if the collection exists
-        if (!listCollections().contains(collectionName)) {
-            logger.error("Collection " + collectionName + " does not exist.");
-            return;
-        }
-        // Drop the specified collection
-        dropACollection(collectionName);
     }
 
     /**
