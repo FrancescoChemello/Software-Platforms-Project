@@ -12,6 +12,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,9 @@ public class ClientService {
 
     private final HttpClientService httpClientService;
     boolean isMonitoringEnabled;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(ClientService.class);
     
     /**
      * Default constructor for ClientService.
@@ -53,7 +59,7 @@ public class ClientService {
         // Send the monitoring request to the Monitoring service.
         ResponseEntity<String> response = httpClientService.postRequest("http://monitoring-service:8081/monitoring/start/", monitoringRequest.toString());
         if (response != null && response.getStatusCode() == HttpStatus.OK) {
-            System.out.println("Monitoring request sent successfully.");
+            logger.info("Monitoring request sent successfully.");
         } else {
             // Handle the case where the request failed.
             int attempts = 0;
@@ -62,16 +68,16 @@ public class ClientService {
                     Thread.sleep(2000 * attempts); // Wait for 2s * attempts before retrying
                     response = httpClientService.postRequest("http://monitoring-service:8081/monitoring/start/", monitoringRequest.toString());
                     if (response != null && response.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Monitoring request sent successfully.");
+                        logger.info("Monitoring request sent successfully after " + (attempts + 1) + " attempts.");
                         break;
                     } else {
                         attempts++;
-                        System.out.println("Failed to send monitoring request. Response: " + (response != null ? response.getBody() : "No response received"));
+                        logger.warn("Failed to send monitoring request. Response: " + (response != null ? response.getBody() : "No response received"));
                     }
                 } 
                 catch (InterruptedException e) {
                     Thread.currentThread().interrupt(); // Restore interrupted status
-                    System.out.println("Thread was interrupted while waiting to retry.");
+                    logger.error("Thread was interrupted while waiting to retry.");
                 }
             }
         }
@@ -101,7 +107,7 @@ public class ClientService {
             // Send the query request to the Mallet service
             ResponseEntity<String> response = httpClientService.postRequest("http://mallet-service:8084/mallet/search/", queryRequest.toString());
             if (response != null && response.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Query request sent successfully for query: " + query);
+                logger.info("Query request sent successfully for query: " + query);
             } else {
                 // Handle the case where the request failed.
                 int attempts = 0;
@@ -110,21 +116,21 @@ public class ClientService {
                         Thread.sleep(2000 * attempts); // Wait for 2s * attempts before retrying
                         response = httpClientService.postRequest("http://mallet-service:8084/mallet/search/", queryRequest.toString());
                         if (response != null && response.getStatusCode() == HttpStatus.OK) {
-                            System.out.println("Query request sent successfully for query: " + query);
+                            logger.info("Query request sent successfully for query: " + query + " after " + (attempts + 1) + " attempts.");
                             break;
                         } else {
                             attempts++;
-                            System.out.println("Failed to send query request. Response: " + (response != null ? response.getBody() : "No response received"));
+                            logger.warn("Failed to send query request. Response: " + (response != null ? response.getBody() : "No response received"));
                         }
                     } 
                     catch (InterruptedException e) {
                         Thread.currentThread().interrupt(); // Restore interrupted status
-                        System.out.println("Thread was interrupted while waiting to retry.");
+                        logger.error("Thread was interrupted while waiting to retry.");
                     }
                 }
             }
         } else {
-            System.out.println("Monitoring is not enabled. Cannot send query request.");
+           logger.warn("Monitoring is not enabled. Cannot send query request.");
         }
     }
 
@@ -135,16 +141,20 @@ public class ClientService {
      * @param topics
      */
     public void processQueryResult(String query, ArrayList<QueryTopic> topics) {
+        logger.info("Processing query result for query: " + query);
         System.out.println("Result for query: " + query);
         if (topics.isEmpty()) {
             System.out.println("No articles found for the query: " + query);
+            logger.warn("No articles found for the query: " + query);
         } else {
             System.out.println("Found " + topics.size() + " articles for the query: " + query);
             for (QueryTopic topic : topics) {
                 System.out.println("Article ID: " + topic.getId());
                 System.out.println("Top words: " + String.join(", ", topic.getTopWords()));
             }
+            logger.info("Found " + topics.size() + " articles for the query: " + query);
         }
+        logger.info("Processed query result for query: " + query);
     }
 
     /**
@@ -157,7 +167,8 @@ public class ClientService {
         if (status.equals("MONITORING")) {
             // Monitoring is enabled
             isMonitoringEnabled = true;
-            System.out.println("Monitoring is enabled. Message: " + message);
+            System.out.println("Monitoring is enabled.");
+            logger.info("Monitoring is enabled. Message: " + message);
         }
     }
 }

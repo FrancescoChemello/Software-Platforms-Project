@@ -12,6 +12,9 @@ import jakarta.validation.Valid;
 
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +30,10 @@ import it.unipd.dei.softplat.client.service.ClientService;
 public class ClientController {
 
     private final ClientService clientService;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(ClientController.class);
+
     /**
      * Default constructor for ClientController.
      * @param clientService The service to handle client operations.
@@ -45,19 +52,23 @@ public class ClientController {
     @PostMapping("/client/query-result/")
     public ResponseEntity<?> getQueryResult(@Valid @RequestBody QueryResult queryResult) {
         if (queryResult == null) {
+            logger.error("Query result cannot be null.");
             return ResponseEntity.badRequest().body("Query result cannot be null.");
         }
         String query = queryResult.getQuery();
         if (query == null || query.isEmpty()) {
+            logger.error("Query cannot be null or empty.");
             return ResponseEntity.badRequest().body("Query cannot be null or empty.");
         }
         if (queryResult.getTopics() == null) {
+            logger.error("Topics cannot be null.");
             return ResponseEntity.badRequest().body("Topics cannot be null.");
         }
         ArrayList<QueryTopic> topics = new ArrayList<>(queryResult.getTopics());
+
         // Call the service to process the query result.
         clientService.processQueryResult(query, topics);
-        // For now, we will just return a placeholder response.
+        logger.info("Query result processed successfully for query: ", query);
         return ResponseEntity.ok("Query result processed successfully.");
     }
 
@@ -70,18 +81,22 @@ public class ClientController {
     @PostMapping("/client/status/")
     public ResponseEntity<?> getStatus (@Valid @RequestBody MessageDTO messageDTO) {
         if (messageDTO == null) {
+            logger.error("Message cannot be null.");
             return ResponseEntity.badRequest().body("Message cannot be null.");
         }
         String message = messageDTO.getMessage();
         if (message == null || message.isEmpty()) {
+            logger.error("Message cannot be null or empty.");
             return ResponseEntity.badRequest().body("Message cannot be null or empty.");
         }
         String status = messageDTO.getStatus();
         if (status == null || status.isEmpty()) {
+            logger.error("Status cannot be null or empty.");
             return ResponseEntity.badRequest().body("Status cannot be null or empty.");
         }
         
         clientService.isMonitoringEnabled(status, message);
+        logger.info("Status message processed successfully: ", message);
         return ResponseEntity.ok("Status message processed successfully.");
     }
 }

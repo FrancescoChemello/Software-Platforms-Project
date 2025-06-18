@@ -33,8 +33,6 @@ public class ClientApp {
         var context = SpringApplication.run(ClientApp.class, args);
         System.out.println("Client Service is running...");
         
-        // TODO: configure the application to accept inputs from the user
-        
         // Get the Bean for ClientService from the application context
         var clientService = context.getBean(ClientService.class);
         boolean endInput = false;
