@@ -110,7 +110,7 @@ public class MongodbTest {
     public void testSearchArticles() {
         // Mock configuration
         when(httpClientService.postRequest(
-                eq("http://localhost:8084/mallet/accumulate/"),
+                eq("http://mallet-service:8084/mallet/accumulate/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -130,10 +130,11 @@ public class MongodbTest {
         mongodbController.saveArticles(saveArticleDTO);
 
         String collectionName = "test_collection";
+        String query = "test_query";
         String id = "test_id";
         
         // Call the searchArticles method with a valid collection name and ID
-        SearchArticleDTO searchArticleDTO = new SearchArticleDTO(collectionName, List.of(id));
+        SearchArticleDTO searchArticleDTO = new SearchArticleDTO(collectionName, query, List.of(id));
         ResponseEntity<?> response = mongodbController.searchArticles(searchArticleDTO);
 
         // Assert that the response is not null and has a status code of 200 OK
@@ -141,17 +142,17 @@ public class MongodbTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
         
         // Verify that the postRequest methods of DataManagerService was called with the correct parameters
-        verify(httpClientService, times(2)).postRequest(eq("http://localhost:8084/mallet/accumulate/"), anyString());
+        verify(httpClientService, times(2)).postRequest(eq("http://mallet-service:8084/mallet/accumulate/"), anyString());
         
-        // Call the searchArticles method with an empty collection name
-        SearchArticleDTO emptyCollectionDTO = new SearchArticleDTO("", List.of(id));
+        // Call the searchArticles method with an empty collection name and query
+        SearchArticleDTO emptyCollectionDTO = new SearchArticleDTO("", "", List.of(id));
         ResponseEntity<?> emptyCollectionResponse = mongodbController.searchArticles(emptyCollectionDTO);
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(emptyCollectionResponse, "Response should not be null");
         assertEquals(HttpStatus.BAD_REQUEST, emptyCollectionResponse.getStatusCode(), "Response should have status code 400 Bad Request");
         
-        // Call the searchArticles method with a null collection name
-        SearchArticleDTO nullCollectionDTO = new SearchArticleDTO(null, List.of(id));
+        // Call the searchArticles method with a null collection name and query
+        SearchArticleDTO nullCollectionDTO = new SearchArticleDTO(null, null, List.of(id));
         ResponseEntity<?> nullCollectionResponse = mongodbController.searchArticles(nullCollectionDTO);
         
         // Assert that the response is not null and has a status code of 400 Bad Request
@@ -159,7 +160,7 @@ public class MongodbTest {
         assertEquals(HttpStatus.BAD_REQUEST, nullCollectionResponse.getStatusCode(), "Response should have status code 400 Bad Request");
         
         // Call the searchArticles method with an empty list of IDs
-        SearchArticleDTO emptyIdDTO = new SearchArticleDTO(collectionName, List.of());
+        SearchArticleDTO emptyIdDTO = new SearchArticleDTO(collectionName, query, List.of());
         ResponseEntity<?> emptyIdResponse = mongodbController.searchArticles(emptyIdDTO);
         
         // Assert that the response is not null and has a status code of 400 Bad Request
@@ -167,7 +168,7 @@ public class MongodbTest {
         assertEquals(HttpStatus.BAD_REQUEST, emptyIdResponse.getStatusCode(), "Response should have status code 400 Bad Request");
         
         // Call the searchArticles method with a null list of IDs
-        SearchArticleDTO nullIdDTO = new SearchArticleDTO(collectionName, null);
+        SearchArticleDTO nullIdDTO = new SearchArticleDTO(collectionName, query, null);
         ResponseEntity<?> nullIdResponse = mongodbController.searchArticles(nullIdDTO);
         
         // Assert that the response is not null and has a status code of 400 Bad Request

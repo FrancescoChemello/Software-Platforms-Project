@@ -56,7 +56,7 @@ public class MongodbController {
         // Extract the articles and collection name from the DTO
         List<MongoArticle> articles = saveArticleDTO.getArticles();
         String collectionName = saveArticleDTO.getCollectionName();
-
+        
         // Check if the articles and collection name are valid
         if(articles == null || articles.isEmpty()) {
             System.out.println("No articles received.");
@@ -66,12 +66,12 @@ public class MongodbController {
             System.out.println("No collection name provided.");
             return ResponseEntity.badRequest().body("No collection name provided.");
         } 
-
+        
         // Start the service
         mongodbService.saveArticles(articles, collectionName);
         return ResponseEntity.ok().body("Articles saved successfully.");
     }
-
+    
     /**
      * This method drops a collection in MongoDB.
      * It is expected to be called by the Client service.
@@ -84,12 +84,12 @@ public class MongodbController {
             System.out.println("No collection name provided.");
             return ResponseEntity.badRequest().body("No collection name provided.");
         }
-
+        
         // Start the service
         mongodbService.dropCollection(collectionName);
         return ResponseEntity.ok().body("Collection dropped successfully.");
     }
-
+    
     /**
      * This method retrieves articles from a specific collection in MongoDB
      * based on a search query.
@@ -101,6 +101,7 @@ public class MongodbController {
     public ResponseEntity<?> searchArticles(@RequestBody SearchArticleDTO searchArticleDTO) {
         // Extract the collection name and ids from the DTO
         String collectionName = searchArticleDTO.getCollectionName();
+        String query = searchArticleDTO.getQuery();
         List<String> ids = searchArticleDTO.getIds();
         
         // Check if the collection name and ids are valid
@@ -114,7 +115,7 @@ public class MongodbController {
         }
 
         // Start the service
-        mongodbService.getArticlesById(collectionName, ids);
+        mongodbService.getArticlesById(collectionName, query, ids);
         return ResponseEntity.ok().body("Articles retrieved successfully.");
     }
 }

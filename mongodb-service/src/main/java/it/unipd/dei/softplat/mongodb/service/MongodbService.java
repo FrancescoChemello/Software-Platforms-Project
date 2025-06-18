@@ -176,7 +176,14 @@ public class MongodbService {
         dropACollection(collectionName);
     }
 
-    public void getArticlesById(String collectionName, List<String> ids) {
+    /**
+     * This method retrieves articles from a specific collection in MongoDB
+     * based on a list of article IDs.
+     * @param collectionName
+     * @param query
+     * @param ids
+     */
+    public void getArticlesById(String collectionName, String query, List<String> ids) {
         List<JSONObject> articles = new ArrayList<>();
         // Check if the collection exists
         if (!listCollections().contains(collectionName)) {
@@ -212,9 +219,10 @@ public class MongodbService {
                     JSONObject accumulateMalletArticlesDTO = new JSONObject();
                     accumulateMalletArticlesDTO.put("articles", articleBatch);
                     accumulateMalletArticlesDTO.put("collectionName", collectionName);
+                    accumulateMalletArticlesDTO.put("query", query);
                     accumulateMalletArticlesDTO.put("endOfStream", false);
                     // Send the batch of articles to the Mallet service
-                    ResponseEntity<String> responseQuery = httpClientService.postRequest("http://localhost:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
+                    ResponseEntity<String> responseQuery = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
                     if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
                         System.out.println("Batch of articles sent to Client Service successfully.");
                         // Remove the sent articles from the articles list
@@ -239,9 +247,10 @@ public class MongodbService {
             JSONObject accumulateMalletArticlesDTO = new JSONObject();
             accumulateMalletArticlesDTO.put("articles", articleBatch);
             accumulateMalletArticlesDTO.put("collectionName", collectionName);
+            accumulateMalletArticlesDTO.put("query", query);
             accumulateMalletArticlesDTO.put("endOfStream", false);
             // Send the batch of articles to the Mallet service
-            ResponseEntity<String> responseQuery = httpClientService.postRequest("http://localhost:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
+            ResponseEntity<String> responseQuery = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
             if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
                 System.out.println("Batch of articles sent to Mallet Service successfully.");
                 // Remove the sent articles from the articles list
@@ -266,16 +275,17 @@ public class MongodbService {
             JSONObject endOfStreamDTO = new JSONObject();
             endOfStreamDTO.put("articles", new ArrayList<>());
             endOfStreamDTO.put("collectionName", collectionName);
+            endOfStreamDTO.put("query", query);
             endOfStreamDTO.put("endOfStream", true);
             // Send the end of stream signal to the Mallet service
-            ResponseEntity<String> responseEndOfStream = httpClientService.postRequest("http://localhost:8084/mallet/accumulate/", endOfStreamDTO.toString());
+            ResponseEntity<String> responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
             if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
                 System.out.println("End of stream signal sent to Mallet Service successfully.");
             } else {
                 attempts = 0;
                 while (attempts < 5) {
                     // Retry sending the end of stream signal
-                    responseEndOfStream = httpClientService.postRequest("http://localhost:8084/mallet/accumulate/", endOfStreamDTO.toString());
+                    responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
                     if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
                         System.out.println("End of stream signal sent to Mallet Service successfully.");
                         break; // Exit the loop if successful

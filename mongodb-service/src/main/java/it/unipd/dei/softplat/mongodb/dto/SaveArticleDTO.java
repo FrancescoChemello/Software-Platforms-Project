@@ -35,8 +35,8 @@ public class SaveArticleDTO {
     /**
      * Constructor for SearchArticleDTO.
      * This constructor initializes a SearchArticleDTO object with the provided parameters.
+     * @param articles
      * @param collectionName
-     * @param ids
      */
     public SaveArticleDTO(List<MongoArticle> articles, String collectionName) {
         this.collectionName = collectionName;

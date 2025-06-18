@@ -22,6 +22,8 @@ public class SearchArticleDTO {
     @NotNull @NotEmpty
     private String collectionName;
     @NotNull @NotEmpty
+    private String query;
+    @NotNull @NotEmpty
     private List<String> ids;
 
     /**
@@ -34,10 +36,12 @@ public class SearchArticleDTO {
      * Constructor for SearchArticleDTO.
      * This constructor initializes a SearchArticleDTO object with the provided parameters.
      * @param collectionName
+     * @param query
      * @param ids
      */
-    public SearchArticleDTO(String collectionName, List<String> ids) {
+    public SearchArticleDTO(String collectionName, String query, List<String> ids) {
         this.collectionName = collectionName;
+        this.query = query;
         this.ids = ids;
     }
 
@@ -58,6 +62,22 @@ public class SearchArticleDTO {
     }
 
     /**
+     * Returns the query string to search for articles.
+     * @return the query string
+     */
+    public String getQuery() {
+        return query;
+    }
+
+    /**
+     * Sets the query string to search for articles.
+     * @param query
+     */
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    /**
      * Returns the list of article IDs to search for.
      * @return the list of article IDs
      */
@@ -72,5 +92,4 @@ public class SearchArticleDTO {
     public void setIds(List<String> ids) {
         this.ids = ids;
     }
-
 }
