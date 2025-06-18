@@ -15,6 +15,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +43,9 @@ public class ElasticsearchService {
     
     private final ElasticsearchClient esClient;
     private final HttpClientService httpClientService;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(ElasticsearchService.class);
 
     /**
      * Default constructor for ElasticsearchService.
@@ -78,7 +84,7 @@ public class ElasticsearchService {
             }
         }
         catch (IOException e) {
-            System.out.println("Error creating index: " + e.getMessage());
+            logger.error("Error creating index: " + e.getMessage());
             return;
         }
 
@@ -101,33 +107,32 @@ public class ElasticsearchService {
         try {
             BulkResponse opResult = esClient.bulk(br.build());
             if (opResult.errors()) {
-                System.out.println("Bulk indexing had errors.");
+                logger.error("Bulk indexing had errors.");
                 // Iterate through the items in the response to check for errors
-                System.out.println("Errors occurred while indexing articles in collection: " + collectionName);
+                logger.error("Errors occurred while indexing articles in collection: " + collectionName);
                 for (BulkResponseItem item : opResult.items()) {
                     var error = item.error();
                     if (error != null) {
-                        System.out.println("Error indexing article with ID " + item.id() + ": " + error.reason());
+                        logger.error("Error indexing article with ID " + item.id() + ": " + error.reason());
                     } 
                 }
             } else {
-                System.out.println("Articles indexed successfully in collection: " + collectionName);
+                logger.info("Articles indexed successfully in collection: " + collectionName);
             }
         } 
         catch (IOException e) {
-            System.out.println("Error indexing articles: " + e.getMessage());
+            logger.error("Error indexing articles: " + e.getMessage());
         }
 
         // Refresh the index to make the indexed articles available for search
         try {
             esClient.indices().refresh(r -> r.index(collectionName));
         } catch (IOException e) {
-            System.out.println("Error refreshing index: " + e.getMessage());
+            logger.error("Error refreshing index: " + e.getMessage());
         }
     }
 
     public void getArticlesByQuery(String query, String corpus, Date startDate, Date endDate) {
-        // TODO: Implement the query logic based on the requirements
         ArrayList<String> documentsID = new ArrayList<>();
         
         // To convert Date to ISO 8601 format
@@ -172,13 +177,13 @@ public class ElasticsearchService {
             // Check if the response contains hits
             TotalHits totalHits = response.hits().total();
             if (totalHits != null && totalHits.value() > 0) {
-                System.out.println("Found " + totalHits.value() + " articles matching the query: " + query);
+                logger.info("Found " + totalHits.value() + " articles matching the query: " + query);
                 for (Hit<ElasticArticle> hit : response.hits().hits()) {
                     ElasticArticle article = hit.source();
                     if (article != null) {
                         documentsID.add(article.getId());
                     } else {
-                        System.out.println("Received null article in the response.");
+                        logger.warn("Received null article in the response.");
                     }
                 }
                 // Send the list of article IDs to MongoDB service to get the full articles
@@ -189,14 +194,14 @@ public class ElasticsearchService {
                     articleIDs.put("ids", new JSONArray(documentsID));
                     ResponseEntity<?> mongoRequest = httpClientService.postRequest("http://mongodb-service:8085/mongodb/get-articles/", articleIDs.toString());
                     if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Articles to retreive sent successfully to MongoDB service.");
+                        logger.info("Articles to retreive sent successfully to MongoDB service.");
                     } else {
                         int attempts = 0;
                         while (attempts < 5) {
                             // Retry the request to MongoDB service
                             mongoRequest = httpClientService.postRequest("http://mongodb-service:8085/mongodb/get-articles/", articleIDs.toString());
                             if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
-                                System.out.println("Articles to retreive sent successfully to MongoDB service.");
+                                logger.info("Articles to retreive sent successfully to MongoDB service after "+ (attempts + 1) + " attempts.");
                                 break;
                             } else {
                                 attempts++;
@@ -204,20 +209,20 @@ public class ElasticsearchService {
                                 try {
                                     Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
                                 } catch (InterruptedException e) {
-                                    System.out.println("Retry interrupted: " + e.getMessage());
+                                    logger.error("Retry interrupted: " + e.getMessage());
                                     Thread.currentThread().interrupt(); // Restore the interrupted status
                                 }
-                                System.out.println("Failed to send articles to retreive to MongoDB service. Status: " + (mongoRequest != null ? mongoRequest.getStatusCode() : "No response received"));
+                                logger.warn("Failed to send articles to retreive to MongoDB service. Status: " + (mongoRequest != null ? mongoRequest.getStatusCode() : "No response received"));
                             }
                         }
                     }
                 }
             } else {
-                System.out.println("No articles found matching the query: " + query);
+                logger.info("No articles found matching the query: " + query);
             }
         } 
         catch (IOException e) {
-            System.out.println("Error retrieving articles: " + e.getMessage());
+            logger.error("Error retrieving articles: " + e.getMessage());
         }
     }
 }

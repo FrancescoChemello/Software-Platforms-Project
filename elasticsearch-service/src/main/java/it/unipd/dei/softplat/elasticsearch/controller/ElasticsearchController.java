@@ -11,6 +11,9 @@ package it.unipd.dei.softplat.elasticsearch.controller;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +34,9 @@ import it.unipd.dei.softplat.elasticsearch.model.ElasticArticle;
 public class ElasticsearchController {
 
     private final ElasticsearchService elasticsearchService;
+
+    // For logging
+    private static final Logger logger = LogManager.getLogger(ElasticsearchController.class);
 
     /**
      * Default constructor for ElasticsearchController.
@@ -56,16 +62,19 @@ public class ElasticsearchController {
         
         // Validate the input
         if (articles == null || articles.isEmpty()) {
-            System.out.println("No articles received for indexing.");
+            logger.error("No articles received for indexing.");
             return ResponseEntity.badRequest().body("No articles received for indexing.");
         }
         if (collectionName == null || collectionName.isEmpty()) {
-            System.out.println("Collection name is required for indexing.");
+            logger.error("Collection name is required for indexing.");
             return ResponseEntity.badRequest().body("Collection name is required for indexing.");
         }
 
         // Start the service
         elasticsearchService.indexArticles(articles, collectionName);
+        
+        logger.info("Articles indexed successfully in collection: ", collectionName);
+        
         return ResponseEntity.ok().body("Articles indexed successfully.");
     }
     
@@ -86,16 +95,19 @@ public class ElasticsearchController {
         // Validate the input
 
         if (query == null || query.isEmpty()) {
-            System.out.println("Query is required to retrieve articles.");
+            logger.error("Query is required to retrieve articles.");
             return ResponseEntity.badRequest().body("Query is required to retrieve articles.");
         }
         if (corpus == null || corpus.isEmpty()) {
-            System.out.println("Corpus is required to retrieve articles.");
+            logger.error("Corpus is required to retrieve articles.");
             return ResponseEntity.badRequest().body("Corpus is required to retrieve articles.");
         }
         
         // Retrieve articles by query
         elasticsearchService.getArticlesByQuery(query, corpus, startDate, endDate);
+        
+        logger.info("Search completed successfully for query: ", query);
+        
         return ResponseEntity.ok().body("Search compleated successfully.");
     }
 }
