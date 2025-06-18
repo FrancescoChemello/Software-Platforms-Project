@@ -46,7 +46,7 @@ public class MalletTest {
     public void testSearchArticles() {
         // Mock configuration
         when(httpClientService.postRequest(
-            eq("http://localhost:8083/elastic/search/"),
+            eq("http://elasticsearch-service:8083/elastic/search/"),
             anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -69,14 +69,14 @@ public class MalletTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Verify that the postRequest method of MalletService was called with the correct URL and parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8083/elastic/search/"), anyString());
+        verify(httpClientService).postRequest(eq("http://elasticsearch-service:8083/elastic/search/"), anyString());
     }
 
     @Test
     public void testAccumulationAndProcessResult() {
         // Mock configuration
         when(httpClientService.postRequest(
-                eq("http://localhost:8080/client/query-result/"),
+                eq("http://client-service:8080/client/query-result/"),
                 anyString()
             )
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
@@ -109,6 +109,7 @@ public class MalletTest {
         AccumulateMalletArticlesDTO accumulateMalletArticlesDTO = new AccumulateMalletArticlesDTO();
         accumulateMalletArticlesDTO.setArticles(List.of(article1, article2));
         accumulateMalletArticlesDTO.setCollectionName("test_collection");
+        accumulateMalletArticlesDTO.setQuery("software application development");
         accumulateMalletArticlesDTO.setEndOfStream(true);
 
         ResponseEntity<?> response = malletController.accumulate(accumulateMalletArticlesDTO);
@@ -118,7 +119,7 @@ public class MalletTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
         // Verify that the postRequest method of MalletService was called with the correct URL and parameters
-        verify(httpClientService).postRequest(eq("http://localhost:8080/client/query-result/"), anyString());
+        verify(httpClientService).postRequest(eq("http://client-service:8080/client/query-result/"), anyString());
     }
 
     /**

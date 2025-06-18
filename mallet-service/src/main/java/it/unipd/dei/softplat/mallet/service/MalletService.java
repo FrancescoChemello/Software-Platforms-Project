@@ -10,6 +10,7 @@ package it.unipd.dei.softplat.mallet.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -72,22 +73,24 @@ public class MalletService {
         this.numTopics = numTopics;
         this.numTopWordsPerTopic = numTopWordsPerTopic;
 
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+
         // Request to Elasticsearch Service to retrieve documents
         JSONObject searchRequest = new JSONObject();
         searchRequest.put("query", query);
         searchRequest.put("corpus", corpus);
-        searchRequest.put("startDate", startDate);
-        searchRequest.put("endDate", endDate);
+        searchRequest.put("startDate", formatter.format(startDate.toInstant()));
+        searchRequest.put("endDate", formatter.format(endDate.toInstant()));
         
         // Send the search request to the Elasticsearch Service
-        ResponseEntity<String> response = httpClientService.postRequest("http://localhost:8083/elastic/search/", searchRequest.toString());
+        ResponseEntity<String> response = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/search/", searchRequest.toString());
         if (response != null && response.getStatusCode() == HttpStatus.OK) {
             System.out.println("Search request sent successfully to Elasticsearch Service.");
         } else {
             int attempts = 0;
             while (attempts < 5) {
                 // Retry sending the request
-                response = httpClientService.postRequest("http://localhost:8083/elastic/search/", searchRequest.toString());
+                response = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/search/", searchRequest.toString());
                 if (response != null && response.getStatusCode() == HttpStatus.OK) {
                     System.out.println("Search request sent successfully to Elasticsearch Service after " + (attempts + 1) + " attempts.");
                     break; // Exit the loop if the request was successful
@@ -111,27 +114,28 @@ public class MalletService {
      * Articels comes from a query to the Elasticsearch Service.
      * @param articles
      * @param collectionName
+     * @param query
      * @param endOfStream
      */
-    public void accumulate(List<MalletArticle> articles, String query, boolean endOfStream) {
+    public void accumulate(List<MalletArticle> articles, String collectionName, String query, boolean endOfStream) {
         // Accumulate articles into the internal list
         for (MalletArticle article : articles) {
             if (article != null) {
                 this.articles.add(article);
             } else {
-                System.out.println("Received null article in the stream for query: " + query);
+                System.out.println("Received null article in the stream for query " + query + " in corpus " + collectionName);
             }
         }
         // Check if we have reached the end of the stream
         if (endOfStream) {
             // Process the accumulated articles
-            System.out.println("Processing remaining articles for query: " + query);
-            processArticles(query);
+            System.out.println("Processing remaining articles for query " + query + " in corpus " + collectionName);
+            processArticles(collectionName, query);
         } else {
             if (this.articles.size() >= batchSize) {
                 // Process the articles in batches of batchSize
-                System.out.println("Processing batch of articles for query: " + query);
-                processArticles(query);
+                System.out.println("Processing batch of articles for query " + query + " in corpus " + collectionName);
+                processArticles(collectionName, query);
             }
         }
     }
@@ -139,9 +143,10 @@ public class MalletService {
     /**
      * Perform the topic modeling on the articles.
      * This method processes the articles and applies the necessary transformations.
+     * @param collectionName
      * @param query
      */
-    private void processArticles(String query) {
+    private void processArticles(String collectionName, String query) {
         // Get the file stopwords from resources folder
         // the stoplist file is from https://github.com/mimno/Mallet/blob/master/stoplists/en.txt
         InputStream stoplistInputStream = MalletApp.class.getResourceAsStream("/stopwords_en.txt");
@@ -160,7 +165,7 @@ public class MalletService {
         pipeList.add( new TokenSequenceRemoveStopwords(stoplistInputStream, "UTF-8", false, false, false) );
         pipeList.add( new TokenSequence2FeatureSequence() );
 
-        System.out.println("Pipes created successfully for query: " + query);
+        System.out.println("Pipes created successfully for query " + query + " in corpus " + collectionName);
 
         InstanceList instances = new InstanceList (new SerialPipes(pipeList));
 
@@ -171,7 +176,7 @@ public class MalletService {
         }
         System.out.println(String.format("Number of instances (docs): %s", instances.size()));
         
-        System.out.println("Starting topic modeling for query: " + query);
+        System.out.println("Starting topic modeling for query " + query + " in corpus " + collectionName);
         
         // Prepare the topic model
         ParallelTopicModel topicModel = new ParallelTopicModel(numTopics);
@@ -186,7 +191,7 @@ public class MalletService {
             System.err.println("Error during topic model estimation: " + e.getMessage());
             return; // Exit if there is an error, no data loss
         }
-        System.out.println("Topic model estimation completed for query: " + query);
+        System.out.println("Topic model estimation completed for query " + query + " in corpus " + collectionName);
         
         /**
          * Example of the response sent to the Client Service
@@ -219,6 +224,8 @@ public class MalletService {
                     topics.add((String) obj);
                 }
             }
+            // Sort topics in alphabetical order
+            topics.sort(String::compareTo);
             topwordsArticle.put("id", article.getId());
             topwordsArticle.put("topWords", new JSONArray(topics));
             // Add the article with its topics to the list
@@ -231,7 +238,7 @@ public class MalletService {
         System.out.println("Query Result: " + queryResult.toString(2));
         
         // Send the articles to the CLient Service
-        ResponseEntity<String> responseClientService = httpClientService.postRequest("http://localhost:8080/client/query-result/", queryResult.toString());
+        ResponseEntity<String> responseClientService = httpClientService.postRequest("http://client-service:8080/client/query-result/", queryResult.toString());
         if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
             System.out.println("Successfully sent query result to Client Service.");
             // Clear the articles list after processing
@@ -241,7 +248,7 @@ public class MalletService {
             int attempts = 0;
             while(attempts < 5) {
                 // Retry sending the request
-                responseClientService = httpClientService.postRequest("http://localhost:8080/client/query-result/", queryResult.toString());
+                responseClientService = httpClientService.postRequest("http://client-service:8080/client/query-result/", queryResult.toString());
                 if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
                     System.out.println("Successfully sent query result to Client Service after " + (attempts + 1) + " attempts.");
                     this.articles.clear(); // Clear the articles list after processing

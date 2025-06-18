@@ -72,12 +72,18 @@ public class MalletController {
             System.out.println("Start date is required for search.");
             return ResponseEntity.badRequest().body("Start date is required for search.");
         }
-        if (endDate == null) {
-            System.out.println("End date is required for search.");
-            return ResponseEntity.badRequest().body("End date is required for search.");
+        // if (endDate == null) {
+        //     System.out.println("End date is required for search.");
+        //     return ResponseEntity.badRequest().body("End date is required for search.");
+        // }
+        if (endDate != null && endDate.before(startDate)) {
+            System.out.println("End date cannot be before start date.");
+            return ResponseEntity.badRequest().body("End date cannot be before start date.");
         }
+
         // Start the service
         malletService.search(query, corpus, numTopics, numTopWordsPerTopic, startDate, endDate);
+        
         System.out.println("Search completed successfully for query: " + query);
         return ResponseEntity.ok().body("Search completed successfully for query: " + query);
     }
@@ -92,6 +98,7 @@ public class MalletController {
     public ResponseEntity<?> accumulate(@RequestBody AccumulateMalletArticlesDTO articles) {
         List<MalletArticle> articlesList = articles.getArticles();
         String collectionName = articles.getCollectionName();
+        String query = articles.getQuery();
         boolean endOfStream = articles.isEndOfStream();
         // Validate the input
         if (articlesList == null) {
@@ -102,8 +109,12 @@ public class MalletController {
             System.out.println("Collection name is required for accumulation.");
             return ResponseEntity.badRequest().body("Collection name is required for accumulation.");
         }
+        if (query == null || query.isEmpty()) {
+            System.out.println("Collection name is required for accumulation.");
+            return ResponseEntity.badRequest().body("Collection name is required for accumulation.");
+        }
         // Start the service
-        malletService.accumulate(articlesList, collectionName, endOfStream);
+        malletService.accumulate(articlesList, collectionName, query, endOfStream);
         System.out.println("Mallet accumulation started for collection: " + collectionName);
         return ResponseEntity.ok().body("Mallet accumulation for collection " + collectionName + " started successfully.");
     }

@@ -21,6 +21,8 @@ public class AccumulateMalletArticlesDTO {
     private List<MalletArticle> articles;
     @NotNull @NotEmpty
     private String collectionName;
+    @NotNull @NotEmpty
+    private String query;
     private boolean endOfStream;
 
     /**
@@ -34,11 +36,13 @@ public class AccumulateMalletArticlesDTO {
      * This constructor initializes an AccumulateMalletArticleDTO object with the provided parameters.
      * @param articles
      * @param collectionName
+     * @param query
      * @param endOfStream
      */
-    public AccumulateMalletArticlesDTO(List<MalletArticle> articles, String collectionName, boolean endOfStream) {
+    public AccumulateMalletArticlesDTO(List<MalletArticle> articles, String collectionName, String query, boolean endOfStream) {
         this.articles = articles;
         this.collectionName = collectionName;
+        this.query = query;
         this.endOfStream = endOfStream;
     }
 
@@ -75,6 +79,22 @@ public class AccumulateMalletArticlesDTO {
     }
 
     /**
+     * Returns the name of the collection in Mallet.
+     * @return the collection name
+     */
+    public String getQuery() {
+        return query;
+    }
+
+    /**
+     * Sets the name of the collection in Mallet.
+     * @param query
+     */
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    /**
      * Returns whether the end of the stream has been reached.
      * @return true if the end of the stream has been reached, false otherwise
      */
@@ -89,5 +109,4 @@ public class AccumulateMalletArticlesDTO {
     public void setEndOfStream(boolean endOfStream) {
         this.endOfStream = endOfStream;
     }
-
 }
