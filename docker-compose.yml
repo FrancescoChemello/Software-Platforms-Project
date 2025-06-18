@@ -1,0 +1,107 @@
+# Chemello Francesco
+# Docker compose file
+
+services:
+
+# Client service
+  client-service:
+    container_name: client-service
+    build: ./client-service
+    stdin_open: true
+    tty: true # Basic interactive terminal
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - softplat
+
+# Monitoring service
+  monitoring-service:
+    container_name: monitoring-service
+    build: ./monitoring-service
+    ports:
+      - "8081:8081"
+    restart: always
+    networks:
+      - softplat
+
+# Data Manager service
+  datamanager-service:
+    container_name: datamanager-service
+    build: ./datamanager-service
+    ports:
+      - "8082:8082"
+    restart: always
+    networks:
+      - softplat
+
+# Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.1
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    restart: always
+    networks:
+      - softplat
+
+# Elasticsearch service
+  elasticsearch-service:
+    container_name: elasticsearch-service
+    build: ./elasticsearch-service
+    depends_on:
+      - elasticsearch
+    ports:
+      - "8083:8083"
+    restart: always
+    networks:
+      - softplat
+
+# Mallet service
+  mallet-service:
+    container_name: mallet-service
+    build: ./mallet-service
+    ports:
+      - "8084:8084"
+    restart: always
+    networks:
+      - softplat
+
+# MongoDB
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
+    networks:
+      - softplat
+
+# MongoDB service
+  mongodb-service:
+    container_name: mongodb-service
+    build: ./mongodb-service
+    depends_on:
+      - mongodb
+    ports:
+      - "8085:8085"
+    restart: always
+    networks:
+      - softplat
+
+# Network
+networks:
+  softplat:
+    driver: bridge
+
+# Volumes
+volumes:
+  mongodb_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
