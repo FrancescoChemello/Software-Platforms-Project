@@ -73,7 +73,7 @@ public class ElasticsearchController {
         // Start the service
         elasticsearchService.indexArticles(articles, collectionName);
         
-        logger.info("Articles indexed successfully in collection: ", collectionName);
+        logger.info("Articles indexed successfully in collection: " + collectionName);
         
         return ResponseEntity.ok().body("Articles indexed successfully.");
     }
@@ -106,7 +106,7 @@ public class ElasticsearchController {
         // Retrieve articles by query
         elasticsearchService.getArticlesByQuery(query, corpus, startDate, endDate);
         
-        logger.info("Search completed successfully for query: ", query);
+        logger.info("Search completed successfully for query: " + query);
         
         return ResponseEntity.ok().body("Search compleated successfully.");
     }

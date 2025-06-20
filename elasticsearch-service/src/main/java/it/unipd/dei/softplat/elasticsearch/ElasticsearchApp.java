@@ -11,11 +11,13 @@ package it.unipd.dei.softplat.elasticsearch;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.client.RestTemplate;
 
 /**
  * This class is intended to start the Elasticsearch Service application.
  */
+@EnableAsync
 @SpringBootApplication(scanBasePackages = {"it.unipd.dei.softplat"})
 public class ElasticsearchApp {
 

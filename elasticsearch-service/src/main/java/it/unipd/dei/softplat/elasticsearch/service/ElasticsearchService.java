@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
@@ -67,6 +68,7 @@ public class ElasticsearchService {
      * @param articles
      * @param collectionName
      */
+    @Async
 	public void indexArticles(List<ElasticArticle> articles, String collectionName) {
         // Create the index if it does not exist
         try {
@@ -132,25 +134,51 @@ public class ElasticsearchService {
         }
     }
 
+    /**
+     * Retrieves articles from Elasticsearch based on a query and a corpus.
+     * @param query
+     * @param corpus
+     * @param startDate
+     * @param endDate
+     */
     public void getArticlesByQuery(String query, String corpus, Date startDate, Date endDate) {
         ArrayList<String> documentsID = new ArrayList<>();
         
         // To convert Date to ISO 8601 format
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
+        
         // Search for articles in the specified collection using a match phrase query
         try {
+            // Check if the corpus does not exist in the Elasticsearch index
+            if (!esClient.indices().exists(b -> b.index(corpus)).value()) {
+                logger.warn("Corpus " + corpus + " does not exist in Elasticsearch index.");
+                // Index not found, send end of stream signal to Mallet service
+                indexNotFound(corpus, query);
+                return;
+            }
+
             SearchResponse<ElasticArticle> response = esClient.search(s -> s
                 .index(corpus)
                 .query(q -> q
                     .bool(b -> {
-                        b.must(m -> m
-                            .multiMatch(mm -> mm
-                                .fields("webTitle", "bodyText")
-                                .query(query)
+                        if (query.startsWith("\"") && query.endsWith("\"")) {
+                            b.must(m -> m
+                            .matchPhrase(mp -> mp
+                            .field("bodyText")
+                            .query(query.replace("\"", ""))
                             )
-                        );
+                            );
+                            logger.info("Using match phrase query for: " + query);
+                        } else {
+                            b.must(m -> m
+                                .multiMatch(mm -> mm
+                                    .fields("webTitle", "bodyText")
+                                    .query(query)
+                                )
+                            );
+                            logger.info("Using multi-match query for: " + query);
+                        }
                         // Apply filter date only if startDate or endDate is not null
                         if(startDate != null || endDate != null) {
                             b.filter(f -> f
@@ -186,43 +214,91 @@ public class ElasticsearchService {
                         logger.warn("Received null article in the response.");
                     }
                 }
-                // Send the list of article IDs to MongoDB service to get the full articles
-                if (!documentsID.isEmpty()) {
-                    JSONObject articleIDs = new JSONObject();
-                    articleIDs.put("collectionName", corpus);
-                    articleIDs.put("query", query);
-                    articleIDs.put("ids", new JSONArray(documentsID));
-                    ResponseEntity<?> mongoRequest = httpClientService.postRequest("http://mongodb-service:8085/mongodb/get-articles/", articleIDs.toString());
-                    if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
-                        logger.info("Articles to retreive sent successfully to MongoDB service.");
-                    } else {
-                        int attempts = 0;
-                        while (attempts < 5) {
-                            // Retry the request to MongoDB service
-                            mongoRequest = httpClientService.postRequest("http://mongodb-service:8085/mongodb/get-articles/", articleIDs.toString());
-                            if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
-                                logger.info("Articles to retreive sent successfully to MongoDB service after "+ (attempts + 1) + " attempts.");
-                                break;
-                            } else {
-                                attempts++;
-                                // Sleep for a while before retrying
-                                try {
-                                    Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
-                                } catch (InterruptedException e) {
-                                    logger.error("Retry interrupted: " + e.getMessage());
-                                    Thread.currentThread().interrupt(); // Restore the interrupted status
-                                }
-                                logger.warn("Failed to send articles to retreive to MongoDB service. Status: " + (mongoRequest != null ? mongoRequest.getStatusCode() : "No response received"));
-                            }
-                        }
-                    }
-                }
-            } else {
-                logger.info("No articles found matching the query: " + query);
             }
+            JSONObject articleIDs = new JSONObject();
+            articleIDs.put("collectionName", corpus);
+            articleIDs.put("query", query);
+            articleIDs.put("ids", new JSONArray(documentsID));
+            // Send the article IDs to MongoDB service
+            sendIdsToMongo(articleIDs);
         } 
         catch (IOException e) {
             logger.error("Error retrieving articles: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sends the list of article IDs to MongoDB service to retrieve the full articles.
+     * This method will send the article IDs to MongoDB service to retrieve the full articles.
+     * @param articleIDs
+     */
+    public void sendIdsToMongo(JSONObject articleIDs) {
+        
+        // Send the list of article IDs to MongoDB service
+        ResponseEntity<?> mongoRequest = httpClientService.postRequest("http://mongodb-service:8085/mongodb/get-articles/", articleIDs.toString());
+        if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
+            logger.info("Articles to retreive sent successfully to MongoDB service.");
+        } else {
+            int attempts = 0;
+            while (attempts < 5) {
+                // Retry the request to MongoDB service
+                mongoRequest = httpClientService.postRequest("http://mongodb-service:8085/mongodb/get-articles/", articleIDs.toString());
+                if (mongoRequest != null && mongoRequest.getStatusCode() == HttpStatus.OK) {
+                    logger.info("Articles to retreive sent successfully to MongoDB service after "+ (attempts + 1) + " attempts.");
+                    break;
+                } else {
+                    attempts++;
+                    // Sleep for a while before retrying
+                    try {
+                        Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                    } catch (InterruptedException e) {
+                        logger.error("Retry interrupted: " + e.getMessage());
+                        Thread.currentThread().interrupt(); // Restore the interrupted status
+                    }
+                    logger.warn("Failed to send articles to retreive to MongoDB service. Status: " + (mongoRequest != null ? mongoRequest.getStatusCode() : "No response received"));
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles the case when the index is not found.
+     * This method is called when the specified index does not exist in Elasticsearch.
+     * It sends an end of stream signal to the Mallet service to indicate that no articles were found for the given query and corpus.
+     * @param corpus
+     * @param query
+     */
+    public void indexNotFound(String corpus, String query) {
+        // Send the end of stream signal to the Mallet service
+        JSONObject endOfStreamDTO = new JSONObject();
+        endOfStreamDTO.put("articles", new ArrayList<>());
+        endOfStreamDTO.put("collectionName", corpus);
+        endOfStreamDTO.put("query", query);
+        endOfStreamDTO.put("endOfStream", true);
+        // Send the end of stream signal to the Mallet service
+        ResponseEntity<String> responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
+        if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
+            logger.info("End of stream signal sent to Mallet Service successfully.");
+        } else {
+            int attempts = 0;
+            while (attempts < 5) {
+                // Retry sending the end of stream signal
+                responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
+                if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
+                    logger.info("End of stream signal sent to Mallet Service successfully after " + (attempts + 1) + " attempts.");
+                    break; // Exit the loop if successful
+                } else {
+                    attempts++;
+                    // Sleep for a while before retrying
+                    try {
+                        Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                    } catch (InterruptedException e) {
+                        logger.error("Retry interrupted: " + e.getMessage());
+                        Thread.currentThread().interrupt(); // Restore the interrupted status
+                    }
+                    logger.warn("Failed to send end of stream signal to Mallet Service. Status: " + (responseEndOfStream != null ? responseEndOfStream.getStatusCode() : "No response received"));
+                }
+            }
         }
     }
 }
