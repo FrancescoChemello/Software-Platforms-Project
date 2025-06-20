@@ -30,6 +30,7 @@ public class ClientService {
 
     private final HttpClientService httpClientService;
     boolean isMonitoringEnabled;
+    boolean isApiRateLimitExceeded;
 
     // For logging
     private static final Logger logger = LogManager.getLogger(ClientService.class);
@@ -190,7 +191,7 @@ public class ClientService {
         } else {
             if(status.contains("API rate limit exceeded")){
                 logger.error("API rate limit exceeded.");
-                isMonitoringEnabled = false;
+                isApiRateLimitExceeded = true;
                 // Unable to continue due to API rate limit
                 try {
                     ClientApp.monitoringQueue.put("API rate limit exceeded");
@@ -200,5 +201,23 @@ public class ClientService {
                 }
             }
         }
+    }
+
+    /**
+     * Checks if monitoring is enabled.
+     * This method returns the value of the isMonitoringEnabled flag.
+     * @return
+     */
+    public boolean monitoringStatus() {
+        return isMonitoringEnabled;
+    }
+
+    /**
+     * Checks if the API rate limit has been exceeded.
+     * This method returns the value of the isApiRateLimitExceeded flag.
+     * @return
+     */
+    public boolean apiRateLimitStatus() {
+        return isApiRateLimitExceeded;
     }
 }

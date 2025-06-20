@@ -132,24 +132,39 @@ public class ClientApp {
                             System.out.println("Start date cannot be after end date, please try again.");
                             continue; // Skip to the next iteration to re-prompt for input
                         }
+                        monitoringQueue.clear(); // Clear the queue
                         // Call the service to start the monitoring
                         clientService.sendMonitoringRequest(issue, label, startDate, endDate);
                         // Wait for the monitoring to complete
                         System.out.println("Monitoring request sent. Waiting for confirmation...");
-                        String monitoringStatus = monitoringQueue.take(); // Wait for the status from the queue
+                        String monitoringConfirm = monitoringQueue.take(); // Wait for the status from the queue
                         // Read the status from the queue
-                        if (monitoringStatus.equals("Monitoring is enabled")) {
+                        if (monitoringConfirm.equals("Monitoring is enabled")) {
                             System.out.println("Monitoring started successfully for issue: " + issue);
                             System.out.println("You can now query the articles related to this issue.");
                             System.out.println("Full monitoring will require some time, please be patient.");
-                        } else if (monitoringStatus.equals("API rate limit exceeded")) {
+                        } else if (monitoringConfirm.equals("API rate limit exceeded")) {
                             System.out.println("API rate limit exceeded. Please try again tomorrow.");
                             System.exit(0); // Exit the application
                         }
-                        monitoringQueue.clear();
+                        monitoringQueue.clear(); // Clear the queue for the next monitoring request
                         break;
                     case "query":
                         // Query logic
+                        boolean monitoringStatus = clientService.monitoringStatus();
+                        boolean apiStatus = clientService.apiRateLimitStatus();
+                        if (!monitoringStatus) {
+                            System.out.println("Monitoring is not enabled. Please start monitoring an issue first.");
+                            continue; // Skip to the next iteration to re-prompt for input
+                        }
+                        if (apiStatus && !monitoringStatus) {
+                            System.out.println("API rate limit exceeded and no monitoring issue is enabled. Please try again tomorrow.");
+                            System.exit(0); // Exit the application
+                        }
+                        if (apiStatus && monitoringStatus) {
+                            System.out.println("API rate limit exceeded, but monitoring is enabled. You can still query the articles, but results may be limited.");
+                            System.out.println("Please try again tomorrow for full results.");
+                        }
                         System.out.println("Please enter IN ORDER the following details for the query:"
                                 + "\n1. The query topic (e.g., 'ChatGPT')"
                                 + "\n2. The issue corpus (e.g., 'ai')"
