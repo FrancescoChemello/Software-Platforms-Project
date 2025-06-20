@@ -24,6 +24,7 @@ public class MonitoringRequest {
     private String issueString;
     @NotNull @NotEmpty
     private String label;
+    @NotNull
     private Date startDate;
     private Date endDate;
 

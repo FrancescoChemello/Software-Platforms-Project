@@ -20,6 +20,11 @@
         </Console>
     </Appenders>
     <Loggers>
+        <!-- Ignore Cookies error -->
+        <Logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="error" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RFILE"/>
+        </Logger>
         <Root level="INFO">
             <AppenderRef ref="RFILE"/>
             <AppenderRef ref="STDOUT"/>

@@ -73,7 +73,7 @@ public class MonitoringController {
         // Start the monitoring process
         monitoringService.startMonitoring(request);
 
-        logger.info("Monitoring started for issue query: ", request.getissueString());
+        logger.info("Monitoring started for issue query: " + request.getissueString());
 
         return ResponseEntity.ok("Monitoring for issue query \""+request.getissueString()+"\" started successfully.");
     }
