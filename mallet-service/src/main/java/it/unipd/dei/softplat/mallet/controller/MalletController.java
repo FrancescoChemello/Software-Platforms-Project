@@ -74,11 +74,7 @@ public class MalletController {
             logger.error("Number of top words per topic must be a positive integer.");
             return ResponseEntity.badRequest().body("Number of top words per topic must be a positive integer.");
         }
-        if (startDate == null) {
-            logger.error("Start date is required for search.");
-            return ResponseEntity.badRequest().body("Start date is required for search.");
-        }
-        if (endDate != null && endDate.before(startDate)) {
+        if (endDate != null && startDate != null && endDate.before(startDate)) {
             logger.error("End date cannot be before start date.");
             return ResponseEntity.badRequest().body("End date cannot be before start date.");
         }

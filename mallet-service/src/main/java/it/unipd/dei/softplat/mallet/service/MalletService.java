@@ -85,33 +85,18 @@ public class MalletService {
         JSONObject searchRequest = new JSONObject();
         searchRequest.put("query", query);
         searchRequest.put("corpus", corpus);
-        searchRequest.put("startDate", formatter.format(startDate.toInstant()));
-        searchRequest.put("endDate", formatter.format(endDate.toInstant()));
-        
-        // Send the search request to the Elasticsearch Service
-        ResponseEntity<String> response = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/search/", searchRequest.toString());
-        if (response != null && response.getStatusCode() == HttpStatus.OK) {
-            logger.info("Search request sent successfully to Elasticsearch Service.");
+        if (startDate == null) {
+            searchRequest.put("startDate", startDate);
         } else {
-            int attempts = 0;
-            while (attempts < 5) {
-                // Retry sending the request
-                response = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/search/", searchRequest.toString());
-                if (response != null && response.getStatusCode() == HttpStatus.OK) {
-                    logger.info("Search request sent successfully to Elasticsearch Service after " + (attempts + 1) + " attempts.");
-                    break; // Exit the loop if the request was successful
-                } else {
-                    attempts++;
-                    try {
-                        Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
-                    } catch (InterruptedException e) {
-                        logger.error("Retry interrupted: " + e.getMessage());
-                        Thread.currentThread().interrupt(); // Restore the interrupted status
-                    }
-                    logger.warn("Failed to send search request to Elasticsearch Service. Status code: " + (response != null ? response.getStatusCode() : "No response received"));
-                }
-            }
+            searchRequest.put("startDate", formatter.format(startDate.toInstant()));
         }
+        if (endDate == null) {
+            searchRequest.put("endDate", endDate);
+        } else {
+            searchRequest.put("endDate", formatter.format(endDate.toInstant()));
+        }
+        // Send the search request to the Elasticsearch Service
+        sendQueryToElasticsearchService(searchRequest);
     }
 
     /**
@@ -153,96 +138,153 @@ public class MalletService {
      * @param query
      */
     private void processArticles(String collectionName, String query) {
-        // Get the file stopwords from resources folder
-        // the stoplist file is from https://github.com/mimno/Mallet/blob/master/stoplists/en.txt
-        InputStream stoplistInputStream = MalletApp.class.getResourceAsStream("/stopwords_en.txt");
-        if (stoplistInputStream == null) {
-            throw new RuntimeException("Stopwords file not found in classpath!");
-        }
-
-        logger.info("Stopwords file loaded successfully for query: " + query);
-        
-        // Create a Pipeline for processing the articles
-        ArrayList<Pipe> pipeList = new ArrayList<>();
-        
-        // Pipes: lowercase, tokenize, remove stopwords, map to features
-        pipeList.add( new CharSequenceLowercase() );
-        pipeList.add( new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")) );
-        pipeList.add( new TokenSequenceRemoveStopwords(stoplistInputStream, "UTF-8", false, false, false) );
-        pipeList.add( new TokenSequence2FeatureSequence() );
-
-        logger.info("Pipes created successfully for query " + query + " in corpus " + collectionName);
-
-        InstanceList instances = new InstanceList (new SerialPipes(pipeList));
-
-        // Add the articles to the InstanceList
-        for (MalletArticle article : this.articles) {
-            Instance instance = new Instance(article.getBodyText(), article.getLabel(), article.getId(), "");
-            instances.addThruPipe(instance);
-        }
-        logger.info(String.format("Number of instances (docs): %s", instances.size()));
-        
-        logger.info("Starting topic modeling for query " + query + " in corpus " + collectionName);
-        
-        // Prepare the topic model
-        ParallelTopicModel topicModel = new ParallelTopicModel(numTopics);
-        topicModel.addInstances(instances);
-        topicModel.setNumThreads(numThreads);
-        topicModel.setNumIterations(numIterations);
-        topicModel.setTopicDisplay(100, numTopWordsPerTopic);
-        try {
-            topicModel.estimate();
-        }
-        catch (IOException e) {
-            logger.error("Error during topic model estimation: " + e.getMessage());
-            return; // Exit if there is an error, no data loss
-        }
-        logger.info("Topic model estimation completed for query " + query + " in corpus " + collectionName);
-        
-        /**
-         * Example of the response sent to the Client Service
-         * 
-         * {
-         * "query": "ChatGPT",
-         * "topics": [
-         *      {
-         *          "id": 0,
-         *         "topWords": [
-         *                "word1", "word2", "word3"
-         *           ]
-         *      }, 
-         *   ...
-         *   ]
-         * }
-         */
-
-        // Prepare the articles to be sent to the Client Service
         JSONObject queryResult = new JSONObject();
-        queryResult.put("query", query);
-        ArrayList<JSONObject> articleTopics = new ArrayList<JSONObject>();
-        // Extract the top words from each article
-        for (MalletArticle article : this.articles) {
-            JSONObject topwordsArticle = new JSONObject();
-            // Extract the top words for each topic
-            List<String> topics = new ArrayList<>();
-            for (int t = 0; t < numTopics; t++) {
-                for (Object obj : topicModel.getTopWords(numTopics)[t]) {
-                    topics.add((String) obj);
+        // Check if there are articles to process
+        if (this.articles.isEmpty()) {
+            logger.warn("No articles to process for query " + query + " in corpus " + collectionName);
+            queryResult.put("query", query);
+            queryResult.put("topics", new JSONArray(new ArrayList<String>())); // Empty topics array
+            sendQueryResultToClientService(queryResult);
+        } else {
+            // Get the file stopwords from resources folder
+            // the stoplist file is from https://github.com/mimno/Mallet/blob/master/stoplists/en.txt
+            InputStream stoplistInputStream = MalletApp.class.getResourceAsStream("/stopwords_en.txt");
+            if (stoplistInputStream == null) {
+                throw new RuntimeException("Stopwords file not found in classpath!");
+            }
+            
+            logger.info("Stopwords file loaded successfully for query: " + query);
+            
+            // Create a Pipeline for processing the articles
+            ArrayList<Pipe> pipeList = new ArrayList<>();
+            
+            // Pipes: lowercase, tokenize, remove stopwords, map to features
+            pipeList.add( new CharSequenceLowercase() );
+            pipeList.add( new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")) );
+            pipeList.add( new TokenSequenceRemoveStopwords(stoplistInputStream, "UTF-8", false, false, false) );
+            pipeList.add( new TokenSequence2FeatureSequence() );
+            
+            logger.info("Pipes created successfully for query " + query + " in corpus " + collectionName);
+            
+            InstanceList instances = new InstanceList (new SerialPipes(pipeList));
+            
+            // Add the articles to the InstanceList
+            for (MalletArticle article : this.articles) {
+                Instance instance = new Instance(article.getBodyText(), article.getLabel(), article.getId(), "");
+                instances.addThruPipe(instance);
+            }
+            logger.info(String.format("Number of instances (docs): %s", instances.size()));
+            
+            logger.info("Starting topic modeling for query " + query + " in corpus " + collectionName);
+            
+            // Prepare the topic model
+            ParallelTopicModel topicModel = new ParallelTopicModel(numTopics);
+            topicModel.addInstances(instances);
+            topicModel.setNumThreads(numThreads);
+            topicModel.setNumIterations(numIterations);
+            topicModel.setTopicDisplay(100, numTopWordsPerTopic);
+            try {
+                topicModel.estimate();
+            }
+            catch (IOException e) {
+                logger.error("Error during topic model estimation: " + e.getMessage());
+                return; // Exit if there is an error, no data loss
+            }
+            logger.info("Topic model estimation completed for query " + query + " in corpus " + collectionName);
+            
+            /**
+             * Example of the response sent to the Client Service
+             * 
+             * {
+             * "query": "ChatGPT",
+             * "topics": [
+             *      {
+             *          "id": 0,
+             *         "topWords": [
+             *                "word1", "word2", "word3"
+             *           ]
+             *      }, 
+             *   ...
+             *   ]
+             * }
+             */
+            
+            // Prepare the articles to be sent to the Client Service
+            queryResult.put("query", query);
+            ArrayList<JSONObject> articleTopics = new ArrayList<JSONObject>();
+            // Extract the top words from each article
+            for (MalletArticle article : this.articles) {
+                JSONObject topwordsArticle = new JSONObject();
+                // Extract the top words for each topic
+                List<String> topics = new ArrayList<>();
+                for (int t = 0; t < numTopics; t++) {
+                    for (Object obj : topicModel.getTopWords(numTopics)[t]) {
+                        topics.add((String) obj);
+                    }
+                }
+                // Sort topics in alphabetical order
+                topics.sort(String::compareTo);
+                topwordsArticle.put("id", article.getId());
+                topwordsArticle.put("topWords", new JSONArray(topics));
+                // Add the article with its topics to the list
+                articleTopics.add(topwordsArticle);
+            }
+            // Add the articles to the query result
+            queryResult.put("topics", new JSONArray(articleTopics));
+            
+            // For debugging purposes, print the query result
+            logger.info("Query Result: " + queryResult.toString(2));
+            
+            // Send the query result to the Client Service
+            sendQueryResultToClientService(queryResult);
+            
+            if(!this.articles.isEmpty()) {
+                logger.error("Some articles were not sended to the Client Service for query " + query + " in corpus " + collectionName);
+            } else {
+                logger.info("All articles processed successfully for query " + query + " in corpus " + collectionName);
+            }
+        }
+    }
+
+    /**
+     * Send a search request to the Elasticsearch Service.
+     * This method sends the search request to the Elasticsearch Service and handles retries in case of failure
+     * @param searchRequest
+     */
+    public void sendQueryToElasticsearchService(JSONObject searchRequest) {
+        // Send the search request to the Elasticsearch Service
+        ResponseEntity<String> response = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/search/", searchRequest.toString());
+        if (response != null && response.getStatusCode() == HttpStatus.OK) {
+            logger.info("Search request sent successfully to Elasticsearch Service.");
+        } else {
+            int attempts = 0;
+            while (attempts < 5) {
+                // Retry sending the request
+                response = httpClientService.postRequest("http://elasticsearch-service:8083/elastic/search/", searchRequest.toString());
+                if (response != null && response.getStatusCode() == HttpStatus.OK) {
+                    logger.info("Search request sent successfully to Elasticsearch Service after " + (attempts + 1) + " attempts.");
+                    break; // Exit the loop if the request was successful
+                } else {
+                    attempts++;
+                    try {
+                        Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                    } catch (InterruptedException e) {
+                        logger.error("Retry interrupted: " + e.getMessage());
+                        Thread.currentThread().interrupt(); // Restore the interrupted status
+                    }
+                    logger.warn("Failed to send search request to Elasticsearch Service. Status code: " + (response != null ? response.getStatusCode() : "No response received"));
                 }
             }
-            // Sort topics in alphabetical order
-            topics.sort(String::compareTo);
-            topwordsArticle.put("id", article.getId());
-            topwordsArticle.put("topWords", new JSONArray(topics));
-            // Add the article with its topics to the list
-            articleTopics.add(topwordsArticle);
         }
-        // Add the articles to the query result
-        queryResult.put("topics", new JSONArray(articleTopics));
+    }
 
-        // For debugging purposes, print the query result
-        logger.info("Query Result: " + queryResult.toString(2));
-        
+    /**
+     * Send the query result to the Client Service.
+     * This method sends the query result to the Client Service and handles retries in case of failure.
+     * @param queryResult
+     */
+    public void sendQueryResultToClientService(JSONObject queryResult) {
+        logger.info("Sending query result to Client Service.");
         // Send the articles to the CLient Service
         ResponseEntity<String> responseClientService = httpClientService.postRequest("http://client-service:8080/client/query-result/", queryResult.toString());
         if (responseClientService != null && responseClientService.getStatusCode() == HttpStatus.OK) {
@@ -270,12 +312,6 @@ public class MalletService {
                     logger.warn("Failed to send query result to Client Service. Status code: " + (responseClientService != null ? responseClientService.getStatusCode() : "No response received"));
                 }
             }
-        }
-
-        if(!this.articles.isEmpty()) {
-            logger.error("Some articles were not sended to the Client Service for query " + query + " in corpus " + collectionName);
-        } else {
-            logger.info("All articles processed successfully for query " + query + " in corpus " + collectionName);
         }
     }
 }
