@@ -411,6 +411,10 @@ public class MonitoringService {
                     totalArticles += retrievedArticles.size();
                     // Send the articles to the DataManager Service
                     sendArticlesToDataManager(retrievedArticles);
+                    // Send the status to the Client Service
+                    if (!monitoringStatusSent) {
+                        monitoringStatusSent = sendStatusToClientService("MONITORING", "Monitoring completed" , request.getissueString());
+                    }
                     retrievedArticles.clear(); // Clear the list after sending
                 }
                 // Reset the articles list for the next page
@@ -422,15 +426,15 @@ public class MonitoringService {
                 logger.info("Sending remaining articles (" + retrievedArticles.size() + ") to DataManager Service.");
                 totalArticles += retrievedArticles.size();
                 sendArticlesToDataManager(retrievedArticles);
+                // Send the status to the Client Service
+                if (!monitoringStatusSent) {
+                    monitoringStatusSent = sendStatusToClientService("MONITORING", "Monitoring completed" , request.getissueString());
+                }
                 retrievedArticles.clear(); // Clear the list after sending
             }
 
             logger.info("Retrieved " + totalArticles + " articles for the query: " + request.getissueString() + " from " + startDate + " to " + endDate);
                 
-            // Send to the Client Service that the monitoring is completed
-            if (!monitoringStatusSent) {
-                monitoringStatusSent = sendStatusToClientService("MONITORING", "Monitoring completed" , request.getissueString());
-            }
             // Sleep for a while before the next monitoring cycle
             if (continueMonitoring) {
                 // Clear the total articles count for the next cycle
