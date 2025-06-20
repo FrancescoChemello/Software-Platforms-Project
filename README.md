@@ -97,8 +97,7 @@ mvn clean package spring-boot:repackage
 Then, build all Docker images and start the containers:
 
 ```
-docker compose build --no-cache
-docker compose up -d
+docker compose build --no-cache && docker compose up -d
 ```
 
 ### Execution (Usage) ###
