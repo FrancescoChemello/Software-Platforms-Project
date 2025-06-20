@@ -22,7 +22,7 @@
     <Loggers>
         <Root level="INFO">
             <AppenderRef ref="RFILE"/>
-            <AppenderRef ref="STDOUT"/>
+            <!-- <AppenderRef ref="STDOUT"/> -->
         </Root>
     </Loggers>
 </Configuration>

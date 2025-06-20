@@ -68,7 +68,7 @@ public class ClientController {
 
         // Call the service to process the query result.
         clientService.processQueryResult(query, topics);
-        logger.info("Query result processed successfully for query: ", query);
+        logger.info("Query result processed successfully for query: " + query);
         return ResponseEntity.ok("Query result processed successfully.");
     }
 
@@ -96,7 +96,7 @@ public class ClientController {
         }
         
         clientService.isMonitoringEnabled(status, message);
-        logger.info("Status message processed successfully: ", message);
+        logger.info("Status message processed successfully: " + message);
         return ResponseEntity.ok("Status message processed successfully.");
     }
 }

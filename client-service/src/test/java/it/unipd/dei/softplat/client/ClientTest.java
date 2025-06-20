@@ -211,7 +211,7 @@ public class ClientTest {
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
         // Client configuration to enable monitoring
-        service_test.isMonitoringEnabled("MONITORING", "Monitoring enable!");
+        service_test.isMonitoringEnabled("MONITORING", "Monitoring completed for test");
 
         // Create a valid query request
         String query = "test query";

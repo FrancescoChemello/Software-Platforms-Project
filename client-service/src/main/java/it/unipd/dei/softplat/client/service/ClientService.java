@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import it.unipd.dei.softplat.http.service.HttpClientService;
+import it.unipd.dei.softplat.client.ClientApp;
+import it.unipd.dei.softplat.client.model.QueryResult;
 import it.unipd.dei.softplat.client.model.QueryTopic;
 
 @Service
@@ -55,7 +57,11 @@ public class ClientService {
         monitoringRequest.put("issueString", issueString);
         monitoringRequest.put("label", label);
         monitoringRequest.put("startDate", formatter.format(startDate.toInstant()));
-        monitoringRequest.put("endDate", formatter.format(endDate.toInstant()));
+        if (endDate == null){
+            monitoringRequest.put("endDate", endDate);
+        } else {
+            monitoringRequest.put("endDate", formatter.format(endDate.toInstant()));
+        }
         // Send the monitoring request to the Monitoring service.
         ResponseEntity<String> response = httpClientService.postRequest("http://monitoring-service:8081/monitoring/start/", monitoringRequest.toString());
         if (response != null && response.getStatusCode() == HttpStatus.OK) {
@@ -102,8 +108,16 @@ public class ClientService {
             queryRequest.put("corpus", corpus);
             queryRequest.put("numTopics", numTopics);
             queryRequest.put("numTopWordsPerTopic", numTopWordsPerTopic);
-            queryRequest.put("startDate", formatter.format(startDate.toInstant()));
-            queryRequest.put("endDate", formatter.format(endDate.toInstant()));
+            if (startDate == null) {
+                queryRequest.put("startDate", startDate);
+            } else {
+                queryRequest.put("startDate", formatter.format(startDate.toInstant()));
+            }
+            if (endDate == null) {
+                queryRequest.put("endDate", endDate);
+            } else {
+                queryRequest.put("endDate", formatter.format(endDate.toInstant()));
+            }
             // Send the query request to the Mallet service
             ResponseEntity<String> response = httpClientService.postRequest("http://mallet-service:8084/mallet/search/", queryRequest.toString());
             if (response != null && response.getStatusCode() == HttpStatus.OK) {
@@ -142,33 +156,49 @@ public class ClientService {
      */
     public void processQueryResult(String query, ArrayList<QueryTopic> topics) {
         logger.info("Processing query result for query: " + query);
-        System.out.println("Result for query: " + query);
-        if (topics.isEmpty()) {
-            System.out.println("No articles found for the query: " + query);
-            logger.warn("No articles found for the query: " + query);
-        } else {
-            System.out.println("Found " + topics.size() + " articles for the query: " + query);
-            for (QueryTopic topic : topics) {
-                System.out.println("Article ID: " + topic.getId());
-                System.out.println("Top words: " + String.join(", ", topic.getTopWords()));
-            }
-            logger.info("Found " + topics.size() + " articles for the query: " + query);
+        QueryResult result = new QueryResult(query, topics);
+        try {
+            ClientApp.resultQueue.put(result);
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore interrupted status
+            logger.error("Thread was interrupted while trying to put the result in the queue.");
         }
         logger.info("Processed query result for query: " + query);
     }
 
     /**
      * Checks if monitoring is enabled based on the status and message received from the client.
-     * If the status is "MONITORING", it sets the isMonitoringEnabled flag to true and prints a message.
+     * This method will update the isMonitoringEnabled flag and notify the ClientApp if monitoring is enabled.
      * @param status
      * @param message
      */
     public void isMonitoringEnabled(String status, String message) {
         if (status.equals("MONITORING")) {
-            // Monitoring is enabled
-            isMonitoringEnabled = true;
-            System.out.println("Monitoring is enabled.");
-            logger.info("Monitoring is enabled. Message: " + message);
+            if (message.contains("Monitoring completed"))
+                // Monitoring is enabled
+                isMonitoringEnabled = true;
+                logger.info("Monitoring is enabled. Message: " + message);
+                try {
+                    // Notify the ClientApp that monitoring is now enabled
+                    ClientApp.monitoringQueue.put("Monitoring is enabled");
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restore interrupted status
+                    logger.error("Thread was interrupted while trying to put the message in the queue.");
+                }
+        } else {
+            if(status.contains("API rate limit exceeded")){
+                logger.error("API rate limit exceeded.");
+                isMonitoringEnabled = false;
+                // Unable to continue due to API rate limit
+                try {
+                    ClientApp.monitoringQueue.put("API rate limit exceeded");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restore interrupted status
+                    logger.error("Thread was interrupted while trying to put the message in the queue.");
+                }
+            }
         }
     }
 }
