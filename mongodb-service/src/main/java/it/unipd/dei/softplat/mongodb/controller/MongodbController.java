@@ -75,7 +75,7 @@ public class MongodbController {
         // Start the service
         mongodbService.saveArticles(articles, collectionName);
 
-        logger.info("Articles saved successfully in collection: ", collectionName);
+        logger.info("Articles saved successfully in collection: " + collectionName);
 
         return ResponseEntity.ok().body("Articles saved successfully.");
     }
@@ -99,15 +99,15 @@ public class MongodbController {
             logger.error("No collection name provided.");
             return ResponseEntity.badRequest().body("No collection name provided.");
         }
-        if (ids == null || ids.isEmpty()) {
-            logger.error("No id name list provided.");
-            return ResponseEntity.badRequest().body("No id name list provided.");
+        if (ids == null) {
+            logger.error("The ids list cannot be null.");
+            return ResponseEntity.badRequest().body("The ids list cannot be null.");
         }
 
         // Start the service
         mongodbService.getArticlesById(collectionName, query, ids);
 
-        logger.info("Articles retrieved successfully from collection: ", collectionName);
+        logger.info("Articles retrieved successfully from collection: " + collectionName);
 
         return ResponseEntity.ok().body("Articles retrieved successfully.");
     }

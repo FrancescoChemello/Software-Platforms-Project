@@ -147,7 +147,7 @@ public class MongodbService {
      * @param ids
      */
     public void getArticlesById(String collectionName, String query, List<String> ids) {
-        List<JSONObject> articles = new ArrayList<>();
+        ArrayList<JSONObject> articles = new ArrayList<>();
         // Check if the collection exists
         if (!listCollections().contains(collectionName)) {
             logger.error("Collection " + collectionName + " does not exist.");
@@ -176,24 +176,8 @@ public class MongodbService {
 
                 // Send the article to the Mallet service
                 if (articles.size() >= batchSize) {
-                    // Take the first batchSize articles from the articles list
-                    ArrayList<JSONObject> articleBatch = new ArrayList<>(articles.subList(0, Math.min(batchSize, articles.size())));
-                    // Create an AccumulateMalletArticlesDTO object to send to the Mallet service
-                    JSONObject accumulateMalletArticlesDTO = new JSONObject();
-                    accumulateMalletArticlesDTO.put("articles", articleBatch);
-                    accumulateMalletArticlesDTO.put("collectionName", collectionName);
-                    accumulateMalletArticlesDTO.put("query", query);
-                    accumulateMalletArticlesDTO.put("endOfStream", false);
-                    // Send the batch of articles to the Mallet service
-                    ResponseEntity<String> responseQuery = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
-                    if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
-                        logger.info("Batch of articles sent to Client Service successfully.");
-                        // Remove the sent articles from the articles list
-                        articles.removeAll(articleBatch);
-                    } else {
-                        // If it fails, the array is not cleared and the next iteration will try to send the same set of articles plus a new one again
-                        logger.warn("Failed to send batch of articles to Service Service. Status: " + (responseQuery != null ? responseQuery.getStatusCode() : "No response received"));
-                    }
+                    // Send the articles to the Mallet service
+                    articles = sendArticlesToMalletService(articles, collectionName, query);
                 }
             }
         }
@@ -201,71 +185,108 @@ public class MongodbService {
             logger.error("Error retrieving articles from collection " + collectionName + ": " + e.getMessage());
             e.printStackTrace();
         }
-        // Send the remaining articles if any
-        int attempts = 0;
-        while (!articles.isEmpty() && attempts < 5) {
-            // Take the first batchSize articles from the articles list
-            ArrayList<JSONObject> articleBatch = new ArrayList<>(articles.subList(0, Math.min(batchSize, articles.size())));
-            // Create an AccumulateMalletArticlesDTO object to send to the Mallet service
-            JSONObject accumulateMalletArticlesDTO = new JSONObject();
-            accumulateMalletArticlesDTO.put("articles", articleBatch);
-            accumulateMalletArticlesDTO.put("collectionName", collectionName);
-            accumulateMalletArticlesDTO.put("query", query);
-            accumulateMalletArticlesDTO.put("endOfStream", false);
-            // Send the batch of articles to the Mallet service
-            ResponseEntity<String> responseQuery = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
-            if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
-                logger.info("Batch of articles sent to Mallet Service successfully after " + (attempts + 1) + " attempts.");
-                // Remove the sent articles from the articles list
-                articles.removeAll(articleBatch);
-            } else {
-                attempts++;
-                // Sleep for a while before retrying
-                try {
-                    Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
-                } catch (InterruptedException e) {
-                    logger.error("Retry interrupted: " + e.getMessage());
-                    Thread.currentThread().interrupt(); // Restore the interrupted status
-                }
-                logger.warn("Failed to send batch of articles to Mallet Service. Status: " + (responseQuery != null ? responseQuery.getStatusCode() : "No response received"));
-            }
+        
+        if (!articles.isEmpty()) {
+            // If there are still articles left, send them to the Mallet service
+            articles = sendArticlesToMalletService(articles, collectionName, query);
         }
+
         // Check if some articles are left
         if (!articles.isEmpty()) {
             logger.error("Some articles were not sent to the Mallet Service.");
         } else {
-            // Send the end of stream signal to the Mallet service
-            JSONObject endOfStreamDTO = new JSONObject();
-            endOfStreamDTO.put("articles", new ArrayList<>());
-            endOfStreamDTO.put("collectionName", collectionName);
-            endOfStreamDTO.put("query", query);
-            endOfStreamDTO.put("endOfStream", true);
-            // Send the end of stream signal to the Mallet service
-            ResponseEntity<String> responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
-            if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
-                logger.info("End of stream signal sent to Mallet Service successfully.");
-            } else {
-                attempts = 0;
-                while (attempts < 5) {
-                    // Retry sending the end of stream signal
-                    responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
-                    if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
-                        logger.info("End of stream signal sent to Mallet Service successfully after " + (attempts + 1) + " attempts.");
-                        break; // Exit the loop if successful
-                    } else {
-                        attempts++;
-                        // Sleep for a while before retrying
-                        try {
-                            Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
-                        } catch (InterruptedException e) {
-                            logger.error("Retry interrupted: " + e.getMessage());
-                            Thread.currentThread().interrupt(); // Restore the interrupted status
-                        }
-                        logger.warn("Failed to send end of stream signal to Mallet Service. Status: " + (responseEndOfStream != null ? responseEndOfStream.getStatusCode() : "No response received"));
+            logger.info("All articles retrieved successfully from collection " + collectionName + ".");
+        }
+        // Send the end of stream signal to the Mallet service
+        sendEndOfStreamToMalletService(collectionName, query);
+    }
+
+    /**
+     * This method sends a batch of articles to the Mallet service for processing.
+     * @param articles
+     * @param collectionName
+     * @param query
+     * @return
+     */
+    public ArrayList<JSONObject> sendArticlesToMalletService(ArrayList<JSONObject> articles, String collectionName, String query) {
+        // Take the first batchSize articles from the articles list
+        ArrayList<JSONObject> articleBatch = new ArrayList<>(articles.subList(0, Math.min(batchSize, articles.size())));
+        // Create an AccumulateMalletArticlesDTO object to send to the Mallet service
+        JSONObject accumulateMalletArticlesDTO = new JSONObject();
+        accumulateMalletArticlesDTO.put("articles", articleBatch);
+        accumulateMalletArticlesDTO.put("collectionName", collectionName);
+        accumulateMalletArticlesDTO.put("query", query);
+        accumulateMalletArticlesDTO.put("endOfStream", false);
+        // Send the batch of articles to the Mallet service
+        ResponseEntity<String> responseQuery = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
+        if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
+            logger.info("Batch of articles sent to Mallet Service successfully.");
+            // Remove the sent articles from the articles list
+            articles.removeAll(articleBatch);
+            return articles; // Return the remaining articles
+        } else {
+            int attempts = 0;
+            while (attempts < 5) {
+                responseQuery = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", accumulateMalletArticlesDTO.toString());
+                if (responseQuery != null && responseQuery.getStatusCode() == HttpStatus.OK) {
+                    logger.info("Batch of articles sent to Mallet Service successfully after " + (attempts + 1) + " attempts.");
+                    // Remove the sent articles from the articles list
+                    articles.removeAll(articleBatch);
+                    return articles;
+                } else {
+                    attempts++;
+                    // Sleep for a while before retrying
+                    try {
+                        Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                    } catch (InterruptedException e) {
+                        logger.error("Retry interrupted: " + e.getMessage());
+                        Thread.currentThread().interrupt(); // Restore the interrupted status
                     }
+                    logger.warn("Failed to send batch of articles to Mallet Service. Status: " + (responseQuery != null ? responseQuery.getStatusCode() : "No response received"));
                 }
             }
-            logger.info("All articles retrieved successfully from collection " + collectionName + ".");
+        }
+        logger.error("Failed to send batch of articles to Mallet Service after 5 attempts.");
+        return articles; // Return the remaining articles if the batch could not be sent
+    }
+
+    /**
+     * This method sends an end of stream signal to the Mallet service.
+     * It is called when all articles have been processed and sent to the Mallet service.
+     * @param collectionName
+     * @param query
+     */
+    public void sendEndOfStreamToMalletService(String collectionName, String query) {
+        // Send the end of stream signal to the Mallet service
+        JSONObject endOfStreamDTO = new JSONObject();
+        endOfStreamDTO.put("articles", new ArrayList<>());
+        endOfStreamDTO.put("collectionName", collectionName);
+        endOfStreamDTO.put("query", query);
+        endOfStreamDTO.put("endOfStream", true);
+        // Send the end of stream signal to the Mallet service
+        ResponseEntity<String> responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
+        if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
+            logger.info("End of stream signal sent to Mallet Service successfully.");
+        } else {
+            int attempts = 0;
+            while (attempts < 5) {
+                // Retry sending the end of stream signal
+                responseEndOfStream = httpClientService.postRequest("http://mallet-service:8084/mallet/accumulate/", endOfStreamDTO.toString());
+                if (responseEndOfStream != null && responseEndOfStream.getStatusCode() == HttpStatus.OK) {
+                    logger.info("End of stream signal sent to Mallet Service successfully after " + (attempts + 1) + " attempts.");
+                    break; // Exit the loop if successful
+                } else {
+                    attempts++;
+                    // Sleep for a while before retrying
+                    try {
+                        Thread.sleep(2000 * attempts); // Sleep for 2 * attempts seconds before retrying
+                    } catch (InterruptedException e) {
+                        logger.error("Retry interrupted: " + e.getMessage());
+                        Thread.currentThread().interrupt(); // Restore the interrupted status
+                    }
+                    logger.warn("Failed to send end of stream signal to Mallet Service. Status: " + (responseEndOfStream != null ? responseEndOfStream.getStatusCode() : "No response received"));
+                }
+            }
         }
     }
 }

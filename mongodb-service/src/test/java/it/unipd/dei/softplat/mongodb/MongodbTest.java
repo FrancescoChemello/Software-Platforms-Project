@@ -167,7 +167,7 @@ public class MongodbTest {
         
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(emptyIdResponse, "Response should not be null");
-        assertEquals(HttpStatus.BAD_REQUEST, emptyIdResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        assertEquals(HttpStatus.OK, emptyIdResponse.getStatusCode(), "Response should have status code 200 OK");
         
         // Call the searchArticles method with a null list of IDs
         SearchArticleDTO nullIdDTO = new SearchArticleDTO(collectionName, query, null);
