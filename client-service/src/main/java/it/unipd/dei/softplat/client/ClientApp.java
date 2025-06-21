@@ -39,6 +39,97 @@ public class ClientApp {
         return new RestTemplate();
     }
 
+    /**
+     * Utility method to normalize a string by converting it to lowercase,
+     * replacing spaces with underscores, and removing any non-alphanumeric
+     * @param input
+     * @return
+     */
+    public static String normalizeString(String input) {
+        do {
+            input = input.toLowerCase()
+            .replaceAll("\\s+", "_") // Replace spaces with underscores
+            .replaceAll("[^a-z0-9_]", ""); // Remove any non-alphanumeric characters except underscores
+            if (input.isEmpty()) {
+                System.out.println("The label cannot contain ONLY special characters or spaces. Please enter a valid one.");
+            }
+        } while (input.isEmpty());
+        
+        return input;
+    }
+
+    /**
+     * Utility method to read a non-empty string from the user input.
+     * @param scanner
+     * @param prompt
+     * @return
+     */
+    public static String readNonEmptyString(Scanner scanner, String prompt) {
+        String input = "";
+        do {
+            System.out.println(prompt);
+            input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                System.out.println("Input cannot be empty. Please try again.");
+            }
+        } while (input.isEmpty());
+        return input;
+    }
+
+    /**
+     * Utility method to read an integer value from the user input.
+     * @param scanner
+     * @param prompt
+     * @return
+     */
+    public static int readIntValues(Scanner scanner, String prompt) {
+        int integerNumber = 0;
+        do {
+            System.out.println(prompt);
+            try {
+                integerNumber = Integer.parseInt(scanner.nextLine().trim());
+            }
+            catch (NumberFormatException e) {
+                System.out.println("Invalid number, please enter a positive integer.");
+            }
+        } while (integerNumber <= 0);
+
+        return integerNumber;
+    }
+
+    /**
+     * Utility method to read a date from the user input.
+     * The date should be in ISO 8601 format (yyyy-MM-dd'T'HH:mm:ss'Z').
+     * @param scanner
+     * @param prompt
+     * @param isRequired
+     * @return
+     */
+    public static Date readDate(Scanner scanner, String prompt, boolean isRequired) {
+        Date date = null;
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+        do {
+            System.out.println(prompt);
+            String dateInput = scanner.nextLine().trim();
+            if (isRequired && !dateInput.isEmpty()) {
+                try {
+                    TemporalAccessor dateTemporal = formatter.parse(dateInput); // Assuming the input is in a valid format
+                    date = Date.from(Instant.from(dateTemporal)); // Convert to Date
+                } catch (Exception e) {
+                    System.out.println("Invalid date format. Please use ISO 8601 format (yyyy-MM-dd'T'HH:mm:ss'Z').");
+                }
+                if (date != null && date.after(new Date())) {
+                    System.out.println("The date cannot be in the future. Please enter a valid one.");
+                    date = null; // Reset date to null
+                }
+            } else {
+                return null;
+            }
+        } while (date == null);
+
+        return date;
+    }
+
     public static void main(String[] args) {
         var context = SpringApplication.run(ClientApp.class, args);
         System.out.println("Client Service is running...");
@@ -46,8 +137,12 @@ public class ClientApp {
         // Get the Bean for ClientService from the application context
         var clientService = context.getBean(ClientService.class);
         boolean endInput = false;
+        boolean monitoringStatus = false;
+        boolean apiStatus = false;
+        String issue = "";
+        String label = "";
+        // Create a Scanner to read user input
         Scanner scanner = new Scanner(System.in);
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
 
         System.out.println("Press ENTER to start: ");
         scanner.nextLine(); // Wait for the user to press ENTER
@@ -62,18 +157,51 @@ public class ClientApp {
                 String userInput = scanner.nextLine().trim();
 
                 switch (userInput.toLowerCase()) {
+
                     case "help":
+
                         System.out.println("Available commands are:"
                                 + "\n- help: Show this help message"
                                 + "\n- monitor: Start monitoring a new issue"
                                 + "\n- query: Extract articles related to a specific issue"
+                                + "\n- status: Check the status of the monitoring and API rate limit"
                                 + "\n- exit: Exit the application");
                         break;
+
                     case "exit":
+
                         endInput = true;
                         System.out.println("Goodbye!");
                         break;
+
+                    case "status":
+
+                        // Check the status of the monitoring and API rate limit
+                        monitoringStatus = clientService.monitoringStatus();
+                        apiStatus = clientService.apiRateLimitStatus();
+                        if (monitoringStatus) {
+                            System.out.println("Monitoring is enabled for issue query <" + issue + "> with issue corpus <" + label +">.");
+                        } else {
+                            System.out.println("Monitoring is not enabled. Please start monitoring an issue first.");
+                        
+                        }
+                        if (apiStatus) {
+                            System.out.println("API rate limit is exceeded. Please try again tomorrow.");
+                        } else {
+                            System.out.println("API rate limit is within the allowed limits.");
+                        }
+                        break;
+
                     case "monitor":
+
+                        // Check if monitoring is already enabled
+                        monitoringStatus = clientService.monitoringStatus();
+                        if (monitoringStatus) {
+                            System.out.println("Monitoring is already enabled. You can query the articles related to the monitored issue <" + issue + "> with issue corpus <" + label + ">.");
+                            System.out.println("If you want to monitor a new issue, please restart the application.");
+                            continue; // Skip
+                        }
+
                         // Monitoring logic
                         System.out.println("Please enter IN ORDER the following details for the monitoring:"
                                 +"\n1. The issue you want to monitor (e.g., artificial intelligence)"
@@ -82,56 +210,21 @@ public class ClientApp {
                                 +"\n4. The end date in ISO 8601 format (e.g., 2023-12-31T23:59:59Z)"
                                 +"\n\nNote: For continuous monitoring, write 'continuous' as the end date."
                         );
-                        System.out.print("Enter the issue to monitor (use \"...\" to exact match): ");
-                        String issue = scanner.nextLine().trim();
-                        System.out.print("Enter a label for the issue: ");
-                        String label = "";
-                        do {
-                            label = scanner.nextLine().trim();
-                            label = label.toLowerCase(); // Convert to lowercase
-                            label = label.replaceAll("\\s+", "_"); // Replace spaces with underscores
-                            label = label.replaceAll("[^a-z0-0\\-]", ""); // Remove any non-alphanumeric characters except "-"
-                            if (label.isEmpty()) {
-                                System.out.println("The label cannot contain special characters. Please enter a valid one.");
-                            }
-                        } while (label.isEmpty());
-                        System.out.print("Enter the start date (yyyy-MM-dd'T'HH:mm:ss'Z): ");
-                        Date startDate = null;
-                        String startDateInput = scanner.nextLine().trim();
-                        try {
-                            TemporalAccessor startDateTemporal = formatter.parse(startDateInput); // Assuming the input is in a valid format
-                            startDate = Date.from(Instant.from(startDateTemporal)); // Convert to Date
-                        } catch (Exception e) {
-                            System.out.println("Invalid start date format. Please use Please use (yyyy-MM-dd'T'HH:mm:ss'Z').");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
-                        System.out.print("Enter the end date (Please use yyyy-MM-dd'T'HH:mm:ss'Z') or 'continuous' for ongoing monitoring: ");
+
+                        issue = readNonEmptyString(scanner, "Enter the issue to monitor (use \"...\" to exact match): ");
+
+                        label = normalizeString(readNonEmptyString(scanner, "Enter a label for the issue corpus: "));
+
+                        Date startDate = readDate(scanner, "Enter the start date (yyyy-MM-dd'T'HH:mm:ss'Z): ", true);
+
                         Date endDate = null;
-                        String endDateInput = scanner.nextLine().trim();
-                        if (!endDateInput.equalsIgnoreCase("continuous")) {
-                            try {
-                                TemporalAccessor endDateTemporal = formatter.parse(endDateInput); // Assuming the input is in a valid format
-                                endDate = Date.from(Instant.from(endDateTemporal)); // Convert to Date
-                            } catch (Exception e) {
-                                System.out.println("Invalid end date format. Please use Please use (yyyy-MM-dd'T'HH:mm:ss'Z').");
-                                continue; // Skip to the next iteration to re-prompt for input
+                        do {
+                            endDate = readDate(scanner, "Enter the end date (Please use yyyy-MM-dd'T'HH:mm:ss'Z') or leave it empty for ongoing monitoring: ", false);
+                            if (endDate != null && endDate.before(startDate)) {
+                                System.out.println("End date cannot be before start date. Please enter a valid end date.");
                             }
-                        } else if (endDateInput.equalsIgnoreCase("continuous")) {
-                            endDate = null; // Set to null for continuous monitoring
-                        }
-                        // Validation of inputs
-                        if (issue.isEmpty() || label.isEmpty()) {
-                            System.out.println("Issue and label cannot be empty, please try again.");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
-                        if (startDate == null) {
-                            System.out.println("Start date cannot be null, please try again.");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
-                        if (endDate != null && startDate.after(endDate)) {
-                            System.out.println("Start date cannot be after end date, please try again.");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
+                        } while (endDate != null && endDate.before(startDate));
+                        
                         monitoringQueue.clear(); // Clear the queue
                         // Call the service to start the monitoring
                         clientService.sendMonitoringRequest(issue, label, startDate, endDate);
@@ -149,22 +242,26 @@ public class ClientApp {
                         }
                         monitoringQueue.clear(); // Clear the queue for the next monitoring request
                         break;
+
                     case "query":
+
                         // Query logic
-                        boolean monitoringStatus = clientService.monitoringStatus();
-                        boolean apiStatus = clientService.apiRateLimitStatus();
+                        monitoringStatus = clientService.monitoringStatus();
+                        apiStatus = clientService.apiRateLimitStatus();
                         if (!monitoringStatus) {
                             System.out.println("Monitoring is not enabled. Please start monitoring an issue first.");
                             continue; // Skip to the next iteration to re-prompt for input
                         }
                         if (apiStatus && !monitoringStatus) {
                             System.out.println("API rate limit exceeded and no monitoring issue is enabled. Please try again tomorrow.");
-                            System.exit(0); // Exit the application
+                            endInput = true;
+                            continue;
                         }
                         if (apiStatus && monitoringStatus) {
                             System.out.println("API rate limit exceeded, but monitoring is enabled. You can still query the articles, but results may be limited.");
                             System.out.println("Please try again tomorrow for full results.");
                         }
+
                         System.out.println("Please enter IN ORDER the following details for the query:"
                                 + "\n1. The query topic (e.g., 'ChatGPT')"
                                 + "\n2. The issue corpus (e.g., 'ai')"
@@ -173,72 +270,25 @@ public class ClientApp {
                                 + "\n5. The start date in ISO 8601 format (e.g., 2023-01-01T00:00:00Z) OPTIONAL"
                                 + "\n6. The end date in ISO 8601 format (e.g., 2023-12-31T23:59:59Z) OPTIONAL"
                         );
-                        System.out.print("Enter the query topic (use \"...\" to exact match): ");
-                        String queryTopic = scanner.nextLine().trim();
-                        System.out.print("Enter the issue corpus: ");
-                        String issueCorpus = ""; 
-                        do {
-                            issueCorpus = scanner.nextLine().trim();
-                            issueCorpus = issueCorpus.toLowerCase(); // Convert to lowercase
-                            issueCorpus = issueCorpus.replaceAll("\\s+", "_"); // Replace spaces with underscores
-                            issueCorpus = issueCorpus.replaceAll("[^a-z0-0\\-]", ""); // Remove any non-alphanumeric characters except "-"
-                            if (issueCorpus.isEmpty()) {
-                                System.out.println("The issue corpus cannot contain special characters. Please enter a valid one.");
-                            }
-                        } while (issueCorpus.isEmpty());
-                        System.out.print("Enter the number of topics to extract: ");
-                        int numTopics;
-                        try {
-                            numTopics = Integer.parseInt(scanner.nextLine().trim());
-                        } catch (NumberFormatException e) {
-                            System.out.println("Invalid number format for topics. Please enter a positive integer.");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
-                        System.out.print("Enter the number of top words per topic: ");
-                        int numTopWordsPerTopic;
-                        try {
-                            numTopWordsPerTopic = Integer.parseInt(scanner.nextLine().trim());
-                        } catch (NumberFormatException e) {
-                            System.out.println("Invalid number format for top words per topic. Please enter a positive integer.");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
-                        System.out.print("Enter the start date (yyyy-MM-dd'T'HH:mm:ss'Z') or leave empty for no start date: ");
-                        Date startQueryDate = null;
-                        String startQueryDateInput = scanner.nextLine().trim();
-                        if (!startQueryDateInput.isEmpty()) {
-                            try {
-                                TemporalAccessor startQueryDateTemporal = formatter.parse(startQueryDateInput); // Assuming the input is in a valid format
-                                startQueryDate = Date.from(Instant.from(startQueryDateTemporal)); // Convert to Date
-                            } catch (Exception e) {
-                                System.out.println("Invalid start date format. Please use Please use (yyyy-MM-dd'T'HH:mm:ss'Z').");
-                                continue; // Skip to the next iteration to re-prompt for input
-                            }
-                        }
-                        System.out.print("Enter the end date (yyyy-MM-dd'T'HH:mm:ss'Z') or leave empty for no end date: ");
+
+                        String queryTopic = readNonEmptyString(scanner, "Enter the query topic (use \"...\" to exact match): ");
+
+                        String issueCorpus = normalizeString(readNonEmptyString(scanner, "Enter the issue corpus: ")); 
+
+                        int numTopics = readIntValues(scanner, "Enter the number of topics to extract: ");
+
+                        int numTopWordsPerTopic = readIntValues(scanner, "Enter the number of top words per topic: ");
+                        
+                        Date startQueryDate = readDate(scanner, "Enter the start date (yyyy-MM-dd'T'HH:mm:ss'Z') or leave empty for no start date: ", false);
+                        
                         Date endQueryDate = null;
-                        String endQueryDateInput = scanner.nextLine().trim();
-                        if (endQueryDateInput != null && !endQueryDateInput.isEmpty()) {
-                            try {
-                                TemporalAccessor endQueryDateTemporal = formatter.parse(endQueryDateInput); // Assuming the input is in a valid format
-                                endQueryDate = Date.from(Instant.from(endQueryDateTemporal)); // Convert to Date
-                            } catch (Exception e) {
-                                System.out.println("Invalid end date format. Please use Please use (yyyy-MM-dd'T'HH:mm:ss'Z').");
-                                continue; // Skip to the next iteration to re-prompt for input
+                        do {
+                            endQueryDate = readDate(scanner, "Enter the end date (yyyy-MM-dd'T'HH:mm:ss'Z') or leave empty for no end date: ", false);
+                            if (startQueryDate != null && endQueryDate != null && startQueryDate.after(endQueryDate)) {
+                                System.out.println("End date cannot be before start date. Please enter a valid end date.");
                             }
-                        }
-                        // Validation of inputs
-                        if (queryTopic.isEmpty() || issueCorpus.isEmpty()) {
-                            System.out.println("Query topic and issue corpus cannot be empty, please try again.");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
-                        if (numTopics <= 0 || numTopWordsPerTopic <= 0) {
-                            System.out.println("Number of topics and top words per topic must be positive integers, please try again.");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
-                        if (startQueryDate != null && endQueryDate != null && startQueryDate.after(endQueryDate)) {
-                            System.out.println("Start date cannot be after end date, please try again.");
-                            continue; // Skip to the next iteration to re-prompt for input
-                        }
+                        } while (startQueryDate != null && endQueryDate != null && startQueryDate.after(endQueryDate));
+                        
                         // Call the service to send the query request
                         clientService.sendQueryRequest(queryTopic, issueCorpus, numTopics, numTopWordsPerTopic, startQueryDate, endQueryDate);
                         System.out.println("Query sent. Waiting for results...");
@@ -246,7 +296,7 @@ public class ClientApp {
                         clientService.processQueryResult(result.getQuery(), new ArrayList<>(result.getTopics()));
                         // Read the result from the queue
                         System.out.println("Result for query: " + result.getQuery() + "\n");
-                        if (result.getQuery().isEmpty()) {
+                        if (result.getQuery().isEmpty() || result.getTopics().size() == 0) {
                             System.out.println("No articles found for the query: " + result.getQuery());
                             System.out.println("Please try a different query or check the issue corpus.");
                         } else {
@@ -257,9 +307,11 @@ public class ClientApp {
                                 System.out.println();
                             }
                         }
-                        resultQueue.clear(); // Clear the queue for the next query
+                        resultQueue.clear(); // Clear the queue for the next query    
                         break;
+                    
                     default:
+                        
                         System.out.println("Unknown command. Type 'help' for assistance.");
                         break;
                 }
