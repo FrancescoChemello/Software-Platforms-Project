@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-package it.unipd.dei.softplat.monitoring;
+package it.unipd.dei.softplat.testutil;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

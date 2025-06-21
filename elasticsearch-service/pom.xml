@@ -122,5 +122,12 @@
             <artifactId>common-httpclient</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <!-- Dependency for test utilities -->
+        <dependency>
+            <groupId>it.unipd.dei.softplat</groupId>
+            <artifactId>test-util</artifactId>
+            <version>1.0.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

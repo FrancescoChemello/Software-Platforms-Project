@@ -10,11 +10,13 @@ package it.unipd.dei.softplat.mallet;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.client.RestTemplate;
 
 /**
  * This class is intended to start the Mallet Service application.
  */
+@EnableAsync
 @SpringBootApplication(scanBasePackages = {"it.unipd.dei.softplat"})
 public class MalletApp {
     

@@ -31,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import it.unipd.dei.softplat.http.service.HttpClientService;
 import it.unipd.dei.softplat.monitoring.controller.MonitoringController;
 import it.unipd.dei.softplat.monitoring.model.MonitoringRequest;
+import it.unipd.dei.softplat.testutil.TestAsyncConfig;
 
 /**
  * This class is intended to test the MonitoringService.

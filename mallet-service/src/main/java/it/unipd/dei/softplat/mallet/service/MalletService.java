@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import cc.mallet.pipe.CharSequence2TokenSequence;
@@ -74,6 +75,7 @@ public class MalletService {
      * @param startDate
      * @param endDate
      */
+    @Async
     public void search(String query, String corpus, Integer numTopics, Integer numTopWordsPerTopic, Date startDate, Date endDate) {
         // Set values for numTopics and numTopWordsPerTopic
         this.numTopics = numTopics;

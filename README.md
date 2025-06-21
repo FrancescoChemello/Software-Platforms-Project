@@ -75,6 +75,9 @@ Software-Platforms-Project/
 │
 ├── common-http/                   # Module for common HTTP utilities
 │   └── ...
+|
+├── test-util/                     # Module for common test utilities
+│   └── ...
 │
 ├── docker-compose.yml             # Docker orchestration file
 ├── README.md

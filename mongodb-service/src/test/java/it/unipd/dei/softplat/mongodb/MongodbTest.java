@@ -37,6 +37,7 @@ import it.unipd.dei.softplat.mongodb.controller.MongodbController;
 import it.unipd.dei.softplat.mongodb.model.MongoArticle;
 import it.unipd.dei.softplat.mongodb.dto.SaveArticleDTO;
 import it.unipd.dei.softplat.mongodb.dto.SearchArticleDTO;
+import it.unipd.dei.softplat.testutil.TestAsyncConfig;
 
 /**
  * This class is intended to test the MongodbController and MongodbService.

@@ -32,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import it.unipd.dei.softplat.datamanager.controller.DataManagerController;
 import it.unipd.dei.softplat.datamanager.model.Article;
 import it.unipd.dei.softplat.http.service.HttpClientService;
+import it.unipd.dei.softplat.testutil.TestAsyncConfig;
 
 /**
  * This class contains unit tests for the DataManagerController.

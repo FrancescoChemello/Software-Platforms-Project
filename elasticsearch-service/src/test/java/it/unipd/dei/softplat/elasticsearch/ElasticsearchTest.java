@@ -40,6 +40,7 @@ import it.unipd.dei.softplat.elasticsearch.dto.IndexArticleDTO;
 import it.unipd.dei.softplat.elasticsearch.dto.SearchArticleDTO;
 import it.unipd.dei.softplat.elasticsearch.model.ElasticArticle;
 import it.unipd.dei.softplat.http.service.HttpClientService;
+import it.unipd.dei.softplat.testutil.TestAsyncConfig;
 
 @Testcontainers
 @SpringBootTest

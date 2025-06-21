@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -32,8 +33,10 @@ import it.unipd.dei.softplat.mallet.controller.MalletController;
 import it.unipd.dei.softplat.mallet.dto.AccumulateMalletArticlesDTO;
 import it.unipd.dei.softplat.mallet.model.MalletArticle;
 import it.unipd.dei.softplat.mallet.model.MalletSearch;
+import it.unipd.dei.softplat.testutil.TestAsyncConfig;
 
 @SpringBootTest
+@Import(TestAsyncConfig.class)
 public class MalletTest {
 
     @MockBean
