@@ -113,7 +113,7 @@ public class MonitoringTest {
      * It checks all the getters and setters of the MonitoringRequest class.
      */
     @Test
-    public void testRequestValidationGetterSetter() {
+    public void testMonitoringRequestValidationGetterSetter() {
         MonitoringRequest request = new MonitoringRequest();
 
         // Set the issue query
@@ -141,7 +141,7 @@ public class MonitoringTest {
      * If any of these values are null, it should throw an IllegalArgumentException.
      */
     @Test
-    public void testRequestValidationNullValues() {
+    public void testMonitoringRequestValidationNullValues() {
         MonitoringRequest request = new MonitoringRequest();
         // Check if the request rejects null values, empty strings, or invalid formats
         // setissueString with null value
@@ -173,7 +173,7 @@ public class MonitoringTest {
      * If any of these values are empty, it should throw an IllegalArgumentException.
      */
     @Test
-    public void testRequestValidationEmptyValues() {
+    public void testMonitoringRequestValidationEmptyValues() {
         MonitoringRequest request = new MonitoringRequest();
         // setissueString with empty string
         try {
@@ -197,7 +197,7 @@ public class MonitoringTest {
      * If the dates are in the wrong order, it should throw an IllegalArgumentException.
      */
     @Test
-    public void testRequestValidationDateOrder() {
+    public void testMonitoringRequestValidationDateOrder() {
         MonitoringRequest request = new MonitoringRequest();
         Calendar cal_01_01_2023 = Calendar.getInstance();
         cal_01_01_2023.set(2023, Calendar.JANUARY, 2, 0, 0, 0);

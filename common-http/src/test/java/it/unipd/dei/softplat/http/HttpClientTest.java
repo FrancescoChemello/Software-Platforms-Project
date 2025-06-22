@@ -110,4 +110,33 @@ public class HttpClientTest {
         // Verify that the getRequest method is called
         verify(restTemplate).getForEntity(eq(url), eq(String.class));
     }
+
+    @Test
+    public void testGetRequest_nullUrl() {
+        ResponseEntity<String> response = httpClientService.getRequest(null);
+        
+        // Check if the response is not null and has the expected status code
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Error: URL cannot be null or empty", response.getBody());
+    }
+
+    @Test
+    public void testGetRequest_exception() {
+        String url = "http://client-service:8080/test";
+
+        org.mockito.Mockito.when(
+            restTemplate.getForEntity(eq(url), eq(String.class))
+        ).thenThrow(new org.springframework.web.client.HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request"));
+
+        ResponseEntity<String> response = httpClientService.getRequest(url);
+        
+        // Check if the response is not null and has the expected status code
+        assertNotNull(response);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertNotNull(response.getBody());
+        
+        // Verify that the getRequest method is called
+        verify(restTemplate).getForEntity(eq(url), eq(String.class));
+    }
 }

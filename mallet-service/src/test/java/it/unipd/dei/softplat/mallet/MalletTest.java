@@ -393,4 +393,101 @@ public class MalletTest {
             assertEquals("Body text cannot be null", e.getMessage(), "Expected exception for null body text");
         }
     }
+
+    /**
+     * Test the AccumulateMalletArticlesDTO model.
+     * This test verifies that the AccumulateMalletArticlesDTO class can be instantiated
+     * and that its properties can be set and retrieved correctly.
+     */
+    @Test
+    public void testAccumulateMalletArticlesDTOGetterSetter() {
+        // Create an instance of AccumulateMalletArticlesDTO
+        AccumulateMalletArticlesDTO malletArticleDTO = new AccumulateMalletArticlesDTO();
+
+        MalletArticle article1 = new MalletArticle();
+        article1.setId("test_id_1");
+        article1.setissueString("issue_query_test");
+        article1.setLabel("test_label");
+        article1.setType("test_type_1");
+        article1.setTopics(List.of("topic1", "topic2", "topic3"));
+        article1.setSectionId("section_id_test_1");
+        article1.setSectionName("section_name_test_1");
+        article1.setWebPublicationDate("2023-10-01T12:00:00Z");
+        article1.setWebTitle("Test Web Title");
+        article1.setWebUrl("https://example.com/test-web-url");
+        article1.setBodyText("This is a test body text for the MongoDB article.");
+
+        MalletArticle article2 = new MalletArticle();
+        article2.setId("test_id_2");
+        article2.setissueString("issue_query_test");
+        article2.setLabel("test_label");
+        article2.setType("test_type_2");
+        article2.setTopics(List.of("topic4", "topic5"));
+        article2.setSectionId("section_id_test_2");
+        article2.setSectionName("section_name_test_2");
+        article2.setWebPublicationDate("2023-10-02T12:00:00Z");
+        article2.setWebTitle("Test Web Title 2");
+        article2.setWebUrl("https://example.com/test-web-url-2");
+        article2.setBodyText("This is another test body text for the MongoDB article.");
+
+        // Set the articles, collection name, query, and end of stream flag
+        List<MalletArticle> articles = List.of(article1, article2);
+        malletArticleDTO.setArticles(articles);
+        malletArticleDTO.setCollectionName("test_collection");
+        malletArticleDTO.setQuery("test query");
+        malletArticleDTO.setEndOfStream(true);
+
+        // Assertions to verify the properties
+        assertEquals(articles, malletArticleDTO.getArticles(), "Expected articles to match");
+        assertEquals("test_collection", malletArticleDTO.getCollectionName(), "Expected collection name to match");
+        assertEquals("test query", malletArticleDTO.getQuery(), "Expected query to match");
+        assertEquals(true, malletArticleDTO.isEndOfStream(), "Expected end of stream flag to be true");
+    }
+
+    /**
+     * Test the AccumulateMalletArticlesDTO model with empty values.
+     * This test verifies that the AccumulateMalletArticlesDTO class throws exceptions
+     * when trying to set empty or null values for its properties.
+     */
+    @Test
+    public void testAccumulateMalletArticlesDTOWithEmptyValues() {
+        AccumulateMalletArticlesDTO malletArticleDTO = new AccumulateMalletArticlesDTO();
+
+        try {
+            malletArticleDTO.setCollectionName("");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Collection name cannot be empty", e.getMessage(), "Expected exception for empty collection name");
+        }
+        try {
+            malletArticleDTO.setQuery("");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Query cannot be empty", e.getMessage(), "Expected exception for empty query");
+        }
+    }
+
+    /**
+     * Test the AccumulateMalletArticlesDTO model with null values.
+     * This test verifies that the AccumulateMalletArticlesDTO class throws exceptions
+     * when trying to set null values for its properties.
+     */
+    @Test
+    public void testAccumulateMalletArticlesDTOWithNullValues() {
+        AccumulateMalletArticlesDTO malletArticleDTO = new AccumulateMalletArticlesDTO();
+
+        try {
+            malletArticleDTO.setArticles(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Articles cannot be null", e.getMessage(), "Expected exception for null articles");
+        }
+        try {
+            malletArticleDTO.setCollectionName(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Collection name cannot be null", e.getMessage(), "Expected exception for null collection name");
+        }
+        try {
+            malletArticleDTO.setQuery(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Query cannot be null", e.getMessage(), "Expected exception for null query");
+        }
+    }
 }

@@ -135,6 +135,10 @@ public class ElasticsearchTest {
         assertEquals(HttpStatus.BAD_REQUEST, response3.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
+    /**
+     * This test verifies that the ElasticsearchController's getArticlesByQuery method
+     * correctly retrieves articles based on a query and corpus.
+     */
     @Test
     public void testGetArticlesByQuery() {
         // Mock configuration for Elasticsearch
@@ -222,8 +226,11 @@ public class ElasticsearchTest {
         verify(httpClientService, times(2)).postRequest(eq("http://mongodb-service:8085/mongodb/get-articles/"), anyString());
     }
 
+    /**
+     * This test verifies the getter and setter methods of the ElasticArticle class.
+     */
     @Test
-    public void testElasticArticle(){
+    public void testElasticArticleGetterSetter(){
         // Create an instance of ElasticArticle
         ElasticArticle article = new ElasticArticle();
         // Set properties
@@ -237,6 +244,7 @@ public class ElasticsearchTest {
         article.setWebPublicationDate(date);
         article.setWebTitle("Test Web Title");
         article.setBodyText("This is a test body text for the ElasticArticle class.");
+        
         // Assert that the properties are set correctly
         assertEquals("test_id", article.getId(), "ID should match");
         assertEquals("test_issue_query", article.getissueString(), "Issue query should match");
@@ -247,6 +255,10 @@ public class ElasticsearchTest {
         assertEquals("This is a test body text for the ElasticArticle class.", article.getBodyText(), "Body text should match");
     }
 
+    /**
+     * This test method is intended to test the ElasticArticle setter methods with null values.
+     * It verifies that the setters throw IllegalArgumentException when null values are passed.
+     */
     @Test
     public void testElasticArticleWithNullValues() {
         // Create an instance of ElasticArticle with null values
@@ -296,6 +308,10 @@ public class ElasticsearchTest {
         }
     }
 
+    /**
+     * This test method is intended to test the ElasticArticle setter methods with empty values.
+     * It verifies that the setters throw IllegalArgumentException when empty values are passed.
+     */
     @Test
     public void testElasticArticleWithEmptyValues() {
         // Create an instance of ElasticArticle with empty values
@@ -339,4 +355,84 @@ public class ElasticsearchTest {
         }
     }
 
+    /**
+     * This test method is intended to test the IndexArticleDTO getter and setter methods.
+     * It verifies that the getter and setter methods work correctly for the IndexArticleDTO class.
+     */
+    @Test
+    public void testIndexArticleDTOGetterSetter() {
+        IndexArticleDTO indexArticleDTO = new IndexArticleDTO();
+
+        ElasticArticle article = new ElasticArticle();
+        article.setId("test_id1");
+        article.setissueString("test_issue_query");
+        article.setLabel("test_label");
+        article.setType("test_type");
+        Calendar cal = Calendar.getInstance();
+        cal.set(2025, Calendar.JANUARY, 1, 0, 0, 0);
+        Date date = cal.getTime();
+        article.setWebPublicationDate(date);
+        article.setWebTitle("Test Web Title");
+        article.setBodyText("This is a test body text for the ElasticArticle class.");
+
+        ElasticArticle article2 = new ElasticArticle();
+        article2.setId("test_id2");
+        article2.setissueString("test_issue_query");
+        article2.setLabel("test_label");
+        article2.setType("test_type");
+        Calendar cal2 = Calendar.getInstance();
+        cal2.set(2025, Calendar.JANUARY, 2, 0, 0, 0);
+        Date date2 = cal.getTime();
+        article2.setWebPublicationDate(date2);
+        article2.setWebTitle("Test Web Title");
+        article2.setBodyText("This is a test body text for the ElasticArticle class.");
+        List<ElasticArticle> articles = List.of(article, article2);
+
+        indexArticleDTO.setCollectionName("test_collection");
+        indexArticleDTO.setArticles(articles);
+
+        // Assert that the getter methods return the expected values
+        assertEquals("test_collection", indexArticleDTO.getCollectionName(), "Collection name should match");
+        assertEquals(articles, indexArticleDTO.getArticles(), "Articles should match");
+    }
+
+    /**
+     * This test method is intended to test the IndexArticleDTO setter methods with null values.
+     * It verifies that the setters throw IllegalArgumentException when null values are passed.
+     */
+    @Test
+    public void testIndexArticleDTOWithNullValues() {
+        IndexArticleDTO indexArticleDTO = new IndexArticleDTO();
+
+        try {
+            indexArticleDTO.setCollectionName(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Collection name cannot be null", e.getMessage(), "Exception message should match");
+        }
+        try {
+            indexArticleDTO.setArticles(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Articles cannot be null", e.getMessage(), "Exception message should match");
+        }
+    }
+
+    /**
+     * This test method is intended to test the IndexArticleDTO setter methods with empty values.
+     * It verifies that the setters throw IllegalArgumentException when empty values are passed.
+     */
+    @Test
+    public void testIndexArticleDTOWithEmptyValues() {
+        IndexArticleDTO indexArticleDTO = new IndexArticleDTO();
+        
+        try {
+            indexArticleDTO.setCollectionName("");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Collection name cannot be empty", e.getMessage(), "Exception message should match");
+        }
+        try {
+            indexArticleDTO.setArticles(List.of());
+        } catch (IllegalArgumentException e) {
+            assertEquals("Articles cannot be empty", e.getMessage(), "Exception message should match");
+        }
+    }
 }

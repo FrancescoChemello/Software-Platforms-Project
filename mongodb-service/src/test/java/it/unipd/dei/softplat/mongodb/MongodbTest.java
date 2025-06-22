@@ -325,4 +325,157 @@ public class MongodbTest {
             assertEquals("Body text cannot be empty", e.getMessage(), "Expected exception for empty Body text");
         }
     }
+
+    /**
+     * This test method is intended to test the SaveArticleDTO class getters and setters.
+     * It creates a SaveArticleDTO object, sets its properties, and asserts that the getters 
+     * return the expected values.
+     */
+    @Test
+    public void testSaveArticlesDTOGetterSetter() {
+        SaveArticleDTO saveArticleDTO = new SaveArticleDTO();
+
+        MongoArticle article1 = new MongoArticle();
+        article1.setId("test_id");
+        article1.setType("test_type");
+        article1.setSectionId("section_id_test");
+        article1.setSectionName("section_name_test");
+        article1.setWebPublicationDate("2023-10-01T12:00:00Z");
+        article1.setWebTitle("Test Web Title");
+        article1.setWebUrl("https://example.com/test-web-url");
+        article1.setBodyText("This is a test body text for the MongoDB article.");
+        
+        MongoArticle article2 = new MongoArticle();
+        article2.setId("test_id_2");
+        article2.setType("test_type");
+        article2.setSectionId("section_id_test");
+        article2.setSectionName("section_name_test");
+        article2.setWebPublicationDate("2023-10-15T15:00:00Z");
+        article2.setWebTitle("Test Web Title 2");
+        article2.setWebUrl("https://example.com/test-2-web-url");
+        article2.setBodyText("This is a test body text for another MongoDB article.");
+
+        List<MongoArticle> articles = List.of(article1, article2);
+
+        saveArticleDTO.setArticles(articles);
+        saveArticleDTO.setCollectionName("test_collection");
+
+        // Assert that the getters return the expected values
+        assertEquals(articles, saveArticleDTO.getArticles(), "Articles should match the set value");
+        assertEquals("test_collection", saveArticleDTO.getCollectionName(), "Collection name should match the set value");
+    }
+
+    /**
+     * This test method is intended to test the SaveArticleDTO class for empty values.
+     * It checks if the setters throw IllegalArgumentException when empty values are passed.
+     */
+    @Test
+    public void testSaveArticlesDTOWithEmptyValues() {
+        SaveArticleDTO saveArticleDTO = new SaveArticleDTO();
+
+        // Assert that the empty values are not accepted
+        try {
+            saveArticleDTO.setArticles(List.of());
+        } catch (IllegalArgumentException e) {
+            assertEquals("Articles cannot be empty", e.getMessage(), "Expected exception for empty articles list");
+        }
+        
+        try {
+            saveArticleDTO.setCollectionName("");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Collection name cannot be empty", e.getMessage(), "Expected exception for empty collection name");
+        }
+    }
+
+    /**
+     * This test method is intended to test the SaveArticleDTO class for null values.
+     * It checks if the setters throw IllegalArgumentException when null values are passed.
+     */
+    @Test
+    public void testSaveArticlesDTOWithNullValues() {
+        SaveArticleDTO saveArticleDTO = new SaveArticleDTO();
+
+        // Assert that the null values are not accepted
+        try {
+            saveArticleDTO.setArticles(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Articles cannot be null", e.getMessage(), "Expected exception for null articles list");
+        }
+        
+        try {
+            saveArticleDTO.setCollectionName(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Collection name cannot be null", e.getMessage(), "Expected exception for null collection name");
+        }
+    }
+
+    /**
+     * This test method is intended to test the SearchArticleDTO class getters and setters.
+     * It creates a SearchArticleDTO object, sets its properties, and asserts that the getters
+     * return the expected values.
+     */
+    @Test
+    public void testSearchArticleDTOGetterSetter() {
+        SearchArticleDTO searchArticleDTO = new SearchArticleDTO();
+
+        List<String> ids = List.of("test_id_1", "test_id_2");
+        searchArticleDTO.setCollectionName("test_collection");
+        searchArticleDTO.setQuery("test_query");
+        searchArticleDTO.setIds(ids);
+
+        // Assert that the getters return the expected values
+        assertEquals("test_collection", searchArticleDTO.getCollectionName(), "Collection name should match the set value");
+        assertEquals("test_query", searchArticleDTO.getQuery(), "Query should match the set value");
+        assertEquals(ids, searchArticleDTO.getIds(), "IDs should match the set value");
+    }
+
+    /**
+     * This test method is intended to test the SearchArticleDTO class for empty values.
+     * It checks if the setters throw IllegalArgumentException when empty values are passed.
+     */
+    @Test
+    public void testSearchArticleDTOWithEmptyValues() {
+        SearchArticleDTO searchArticleDTO = new SearchArticleDTO();
+
+        // Assert that the empty values are not accepted
+        try {
+            searchArticleDTO.setCollectionName("");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Collection name cannot be empty", e.getMessage(), "Expected exception for empty collection name");
+        }
+        
+        try {
+            searchArticleDTO.setQuery("");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Query cannot be empty", e.getMessage(), "Expected exception for empty query");
+        }        
+    }
+
+    /**
+     * This test method is intended to test the SearchArticleDTO class for null values.
+     * It checks if the setters throw IllegalArgumentException when null values are passed.
+     */
+    @Test
+    public void testSearchArticleDTOWithNullValues() {
+        SearchArticleDTO searchArticleDTO = new SearchArticleDTO();
+
+        // Assert that the null values are not accepted
+        try {
+            searchArticleDTO.setCollectionName(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Collection name cannot be null", e.getMessage(), "Expected exception for null collection name");
+        }
+        
+        try {
+            searchArticleDTO.setQuery(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Query cannot be null", e.getMessage(), "Expected exception for null query");
+        }
+        
+        try {
+            searchArticleDTO.setIds(null);
+        } catch (IllegalArgumentException e) {
+            assertEquals("IDs cannot be null", e.getMessage(), "Expected exception for null IDs");
+        }
+    }
 }

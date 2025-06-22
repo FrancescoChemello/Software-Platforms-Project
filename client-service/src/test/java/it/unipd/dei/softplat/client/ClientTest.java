@@ -211,7 +211,7 @@ public class ClientTest {
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
         // Client configuration to enable monitoring
-        service_test.isMonitoringEnabled("MONITORING", "Monitoring completed for test");
+        service_test.monitoringStatus("MONITORING", "Monitoring completed for test");
 
         // Create a valid query request
         String query = "test query";
@@ -226,5 +226,160 @@ public class ClientTest {
         
         // Verify that the postRequest method of HttpClientService was called with the correct parameters
         verify(httpClientService).postRequest(eq("http://mallet-service:8084/mallet/search/"), anyString());
+    }
+
+    /**
+     * This test method is intended to test the QueryTopic getter and setter methods.
+     * It creates a QueryTopic object, sets its properties, and verifies that the getters return
+     * the expected values.
+     */
+    @Test
+    public void testQueryTopicGetterSetter() {
+        QueryTopic queryTopic = new QueryTopic();
+        String id = "test_id";
+        List<String> topWords = List.of("word1", "word2");
+        queryTopic.setId(id);
+        queryTopic.setTopWords(topWords);
+
+        // Assert that the getters return the expected values
+        assertEquals("test_id", queryTopic.getId(), "QueryTopic ID should match");
+        assertEquals(List.of("word1", "word2"), queryTopic.getTopWords(), "QueryTopic top words should match");
+    }
+
+    /**
+     * This test method is intended to test the QueryTopic setter methods with null values.
+     * It verifies that the setters throw IllegalArgumentException when null values are passed.
+     */
+    @Test
+    public void testQueryTopicWithNullValues() {
+        QueryTopic queryTopic = new QueryTopic();
+        try {
+            queryTopic.setId(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("ID cannot be null", e.getMessage(), "Expected exception for null ID");
+        }
+        try {
+            queryTopic.setTopWords(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Top words cannot be null", e.getMessage(), "Expected exception for null top words");
+        }
+    }
+
+    /**
+     * This test method is intended to test the QueryResult getter and setter methods.
+     * It creates a QueryResult object, sets its properties, and verifies that the getters return
+     * the expected values.
+     */
+    @Test
+    public void testQueryResultGetterSetter() {
+        QueryResult queryResult = new QueryResult();
+        String query = "test_query";
+        List<String> topWords = List.of("word1", "word2");
+        QueryTopic queryTopic = new QueryTopic("article1", topWords);
+        List<QueryTopic> topics = List.of(queryTopic);
+        queryResult.setQuery(query);
+        queryResult.setTopics(topics);
+
+        // Assert that the getters return the expected values
+        assertEquals("test_query", queryResult.getQuery(), "QueryResult query should match");
+        assertEquals(List.of(queryTopic), queryResult.getTopics(), "QueryResult topics should match");
+    }
+
+    /**
+     * This test method is intended to test the QueryResult setter methods with null values.
+     * It verifies that the setters throw IllegalArgumentException when null values are passed.
+     */
+    @Test
+    public void testQueryResultWithNullValues() {
+        QueryResult queryResult = new QueryResult();
+        try {
+            queryResult.setQuery(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Query cannot be null or empty", e.getMessage(), "Expected exception for null query");
+        }
+        try {
+            queryResult.setTopics(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Topics cannot be null", e.getMessage(), "Expected exception for null topics");
+        }
+    }
+
+    /**
+     * This test method is intended to test the QueryResult setter methods with empty values.
+     * It verifies that the setters throw IllegalArgumentException when empty values are passed.
+     */
+    @Test
+    public void testQueryResultWithEmptyQuery() {
+        QueryResult queryResult = new QueryResult();
+        try {
+            queryResult.setQuery("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Query cannot be null or empty", e.getMessage(), "Expected exception for empty query");
+        }
+    }
+
+    /**
+     * This test method is intended to test the MessageDTO getter and setter methods.
+     * It creates a MessageDTO object, sets its properties, and verifies that the getters return
+     * the expected values.
+     */
+    @Test
+    public void testMessageDTOGetterSetter() {
+        MessageDTO messageDTO = new MessageDTO();
+        String message = "Test message";
+        String status = "Test status";
+        messageDTO.setMessage(message);
+        messageDTO.setStatus(status);
+
+        // Assert that the getters return the expected values
+        assertEquals("Test message", messageDTO.getMessage(), "MessageDTO message should match");
+        assertEquals("Test status", messageDTO.getStatus(), "MessageDTO status should match");
+    }
+
+    /**
+     * This test method is intended to test the MessageDTO setter methods with null values.
+     * It verifies that the setters throw IllegalArgumentException when null values are passed.
+     */
+    @Test
+    public void testMessageDTOWithNullValues() {
+        MessageDTO messageDTO = new MessageDTO();
+        try {
+            messageDTO.setMessage(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Message cannot be null or empty", e.getMessage(), "Expected exception for null message");
+        }
+        try {
+            messageDTO.setStatus(null);
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Status cannot be null or empty", e.getMessage(), "Expected exception for null status");
+        }
+    }
+
+    /**
+     * This test method is intended to test the MessageDTO setter methods with empty values.
+     * It verifies that the setters throw IllegalArgumentException when empty values are passed.
+     */
+    @Test
+    public void testMessageDTOWithEmptyValues() {
+        MessageDTO messageDTO = new MessageDTO();
+        try {
+            messageDTO.setMessage("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Message cannot be null or empty", e.getMessage(), "Expected exception for empty message");
+        }
+        try {
+            messageDTO.setStatus("");
+        }
+        catch (IllegalArgumentException e) {
+            assertEquals("Status cannot be null or empty", e.getMessage(), "Expected exception for empty status");
+        }
     }
 }
