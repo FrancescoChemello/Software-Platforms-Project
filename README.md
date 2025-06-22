@@ -33,7 +33,7 @@ docker --version
 ```
 
 > **Note:**  
-> - For other Linux distributions or operating systems, refer to the official documentation for [Java](https://adoptium.net/), [Maven](https://maven.apache.org/install.html), and [Docker](https://docs.docker.com/get-docker/).
+> - For other Linux distributions or operating systems, refer to the official documentation for [Java](https://www.java.com/en/download/help/download_options.html), [Maven](https://maven.apache.org/install.html), and [Docker](https://docs.docker.com/get-docker/).
 
 
 ## Repository Structure ##
