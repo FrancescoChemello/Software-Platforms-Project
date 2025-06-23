@@ -10,6 +10,7 @@ package it.unipd.dei.softplat.elasticsearch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -112,9 +113,8 @@ public class ElasticsearchTest {
         assertNotNull(response, "Response should not be null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
-        IndexArticleDTO indexArticleDTO2 = new IndexArticleDTO();
-        indexArticleDTO2.setArticles(List.of());
-        indexArticleDTO2.setCollectionName("");
+        // Example of bad request
+        IndexArticleDTO indexArticleDTO2 = new IndexArticleDTO(List.of(), "");
 
         // Call the method with empty articles and collection name
         ResponseEntity<?> response2 = elasticsearchController.indexArticles(indexArticleDTO2);
@@ -123,9 +123,8 @@ public class ElasticsearchTest {
         assertNotNull(response2, "Response should not be null");
         assertEquals(HttpStatus.BAD_REQUEST, response2.getStatusCode(), "Response should have status code 400 Bad Request");
 
-        IndexArticleDTO indexArticleDTO3 = new IndexArticleDTO();
-        indexArticleDTO3.setArticles(null);
-        indexArticleDTO3.setCollectionName(null);
+        // Example of bad request
+        IndexArticleDTO indexArticleDTO3 = new IndexArticleDTO(null, null);
 
         // Call the method with null articles and collection name
         ResponseEntity<?> response3 = elasticsearchController.indexArticles(indexArticleDTO3);
@@ -263,49 +262,15 @@ public class ElasticsearchTest {
     public void testElasticArticleWithNullValues() {
         // Create an instance of ElasticArticle with null values
         ElasticArticle article = new ElasticArticle();
-        // Assert that the properties are null
-        try {
-            article.setId(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("ID cannot be null", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setissueString(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Issue query cannot be null", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setLabel(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Label cannot be null", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setType(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Type cannot be null", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setWebPublicationDate(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web publication date cannot be null", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setWebTitle(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web title cannot be null", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setBodyText(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Body text cannot be null", e.getMessage(), "Exception message should match");
-        }
+        
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setissueString(null), "Expected exception for null issue query");
+        assertThrows(IllegalArgumentException.class, () -> article.setLabel(null), "Expected exception for null label");
+        assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null type");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null web publication date");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(null), "Expected exception for null values");
+        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(null), "Expected exception for null values");
     }
 
     /**
@@ -316,43 +281,14 @@ public class ElasticsearchTest {
     public void testElasticArticleWithEmptyValues() {
         // Create an instance of ElasticArticle with empty values
         ElasticArticle article = new ElasticArticle();
-        // Assert that the properties are empty
-        try {
-            article.setId("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("ID cannot be empty", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setissueString("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Issue query cannot be empty", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setLabel("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Label cannot be empty", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setType("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Type cannot be empty", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setWebTitle("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web title cannot be empty", e.getMessage(), "Exception message should match");
-        }
-        try {
-            article.setBodyText("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Body text cannot be empty", e.getMessage(), "Exception message should match");
-        }
+        
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setissueString(""), "Expected exception for empty issue query");
+        assertThrows(IllegalArgumentException.class, () -> article.setLabel(""), "Expected exception for empty label");
+        assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty type");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(""), "Expected exception for empty web title");
+        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(""), "Expected exception for empty body text");
     }
 
     /**
@@ -382,7 +318,7 @@ public class ElasticsearchTest {
         article2.setType("test_type");
         Calendar cal2 = Calendar.getInstance();
         cal2.set(2025, Calendar.JANUARY, 2, 0, 0, 0);
-        Date date2 = cal.getTime();
+        Date date2 = cal2.getTime();
         article2.setWebPublicationDate(date2);
         article2.setWebTitle("Test Web Title");
         article2.setBodyText("This is a test body text for the ElasticArticle class.");
@@ -404,16 +340,9 @@ public class ElasticsearchTest {
     public void testIndexArticleDTOWithNullValues() {
         IndexArticleDTO indexArticleDTO = new IndexArticleDTO();
 
-        try {
-            indexArticleDTO.setCollectionName(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Collection name cannot be null", e.getMessage(), "Exception message should match");
-        }
-        try {
-            indexArticleDTO.setArticles(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Articles cannot be null", e.getMessage(), "Exception message should match");
-        }
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> indexArticleDTO.setCollectionName(null), "Expected exception for null collection name");
+        assertThrows(IllegalArgumentException.class, () -> indexArticleDTO.setArticles(null), "Expected exception for null articles list");
     }
 
     /**
@@ -424,15 +353,8 @@ public class ElasticsearchTest {
     public void testIndexArticleDTOWithEmptyValues() {
         IndexArticleDTO indexArticleDTO = new IndexArticleDTO();
         
-        try {
-            indexArticleDTO.setCollectionName("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Collection name cannot be empty", e.getMessage(), "Exception message should match");
-        }
-        try {
-            indexArticleDTO.setArticles(List.of());
-        } catch (IllegalArgumentException e) {
-            assertEquals("Articles cannot be empty", e.getMessage(), "Exception message should match");
-        }
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> indexArticleDTO.setCollectionName(""), "Expected exception for empty collection name");
+        assertThrows(IllegalArgumentException.class, () -> indexArticleDTO.setArticles(List.of()), "Expected exception for empty articles list");
     }
 }

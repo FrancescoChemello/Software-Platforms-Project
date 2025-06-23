@@ -53,8 +53,12 @@ public class SearchArticleDTO {
     /**
      * Sets the search query.
      * @param query The search query to set.
+     * @throws IllegalArgumentException if the query is null or empty
      */
     public void setQuery(String query) {
+        if (query == null || query.isEmpty()) {
+            throw new IllegalArgumentException("Query cannot be null or empty");
+        }
         this.query = query;
     }
 
@@ -69,8 +73,12 @@ public class SearchArticleDTO {
     /**
      * Sets the corpus to search in.
      * @param corpus The corpus to set.
+     * @throws IllegalArgumentException if the corpus is null or empty
      */
     public void setCorpus(String corpus) {
+        if (corpus == null || corpus.isEmpty()) {
+            throw new IllegalArgumentException("Corpus cannot be null or empty");
+        }
         this.corpus = corpus;
     }
 

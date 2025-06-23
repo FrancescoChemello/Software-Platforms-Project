@@ -45,8 +45,12 @@ public class MessageDTO {
     /**
      * Sets the message.
      * @param message the message to set
+     * @throws IllegalArgumentException if the message is null or empty
      */
     public void setMessage(String message) {
+        if (message == null || message.isEmpty()) {
+            throw new IllegalArgumentException("Message cannot be null or empty");
+        }
         this.message = message;
     }
 
@@ -61,8 +65,12 @@ public class MessageDTO {
     /**
      * Sets the status.
      * @param status the status to set
+     * @throws IllegalArgumentException if the status is null or empty
      */
     public void setStatus(String status) {
+        if (status == null || status.isEmpty()) {
+            throw new IllegalArgumentException("Status cannot be null or empty");
+        }
         this.status = status;
     }
 }

@@ -10,6 +10,7 @@ package it.unipd.dei.softplat.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -211,7 +212,7 @@ public class ClientTest {
         ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
         // Client configuration to enable monitoring
-        service_test.monitoringStatus("MONITORING", "Monitoring completed for test");
+        service_test.processMessageStatus("MONITORING", "Monitoring completed for test");
 
         // Create a valid query request
         String query = "test query";
@@ -253,18 +254,10 @@ public class ClientTest {
     @Test
     public void testQueryTopicWithNullValues() {
         QueryTopic queryTopic = new QueryTopic();
-        try {
-            queryTopic.setId(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("ID cannot be null", e.getMessage(), "Expected exception for null ID");
-        }
-        try {
-            queryTopic.setTopWords(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Top words cannot be null", e.getMessage(), "Expected exception for null top words");
-        }
+
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> queryTopic.setId(null), "Expected exception for null ID");
+        assertThrows(IllegalArgumentException.class, () -> queryTopic.setTopWords(null), "Expected exception for null top words");
     }
 
     /**
@@ -294,18 +287,10 @@ public class ClientTest {
     @Test
     public void testQueryResultWithNullValues() {
         QueryResult queryResult = new QueryResult();
-        try {
-            queryResult.setQuery(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Query cannot be null or empty", e.getMessage(), "Expected exception for null query");
-        }
-        try {
-            queryResult.setTopics(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Topics cannot be null", e.getMessage(), "Expected exception for null topics");
-        }
+        
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> queryResult.setQuery(null), "Expected exception for null query");
+        assertThrows(IllegalArgumentException.class, () -> queryResult.setTopics(null), "Expected exception for null topics");
     }
 
     /**
@@ -315,12 +300,9 @@ public class ClientTest {
     @Test
     public void testQueryResultWithEmptyQuery() {
         QueryResult queryResult = new QueryResult();
-        try {
-            queryResult.setQuery("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Query cannot be null or empty", e.getMessage(), "Expected exception for empty query");
-        }
+        
+        // Assert that the setter throws IllegalArgumentException when an empty query is passed
+        assertThrows(IllegalArgumentException.class, () -> queryResult.setQuery(""), "Expected exception for empty query");
     }
 
     /**
@@ -348,18 +330,10 @@ public class ClientTest {
     @Test
     public void testMessageDTOWithNullValues() {
         MessageDTO messageDTO = new MessageDTO();
-        try {
-            messageDTO.setMessage(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Message cannot be null or empty", e.getMessage(), "Expected exception for null message");
-        }
-        try {
-            messageDTO.setStatus(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Status cannot be null or empty", e.getMessage(), "Expected exception for null status");
-        }
+        
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> messageDTO.setMessage(null), "Expected exception for null message");
+        assertThrows(IllegalArgumentException.class, () -> messageDTO.setStatus(null), "Expected exception for null status");
     }
 
     /**
@@ -369,17 +343,9 @@ public class ClientTest {
     @Test
     public void testMessageDTOWithEmptyValues() {
         MessageDTO messageDTO = new MessageDTO();
-        try {
-            messageDTO.setMessage("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Message cannot be null or empty", e.getMessage(), "Expected exception for empty message");
-        }
-        try {
-            messageDTO.setStatus("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Status cannot be null or empty", e.getMessage(), "Expected exception for empty status");
-        }
+        
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> messageDTO.setMessage(""), "Expected exception for empty message");
+        assertThrows(IllegalArgumentException.class, () -> messageDTO.setStatus(""), "Expected exception for empty status");
     }
 }

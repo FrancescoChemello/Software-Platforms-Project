@@ -57,8 +57,12 @@ public class AccumulateMalletArticlesDTO {
     /**
      * Sets the list of articles to accumulate.
      * @param articles
+     * @throws IllegalArgumentException if articles is null
      */
     public void setArticles(List<MalletArticle> articles) {
+        if (articles == null) {
+            throw new IllegalArgumentException("Articles list cannot be null");
+        }
         this.articles = articles;
     }
 
@@ -73,8 +77,12 @@ public class AccumulateMalletArticlesDTO {
     /**
      * Sets the name of the collection in Mallet.
      * @param collectionName
+     * @throws IllegalArgumentException if the collection name is null or empty
      */
     public void setCollectionName(String collectionName) {
+        if (collectionName == null || collectionName.isEmpty()) {
+            throw new IllegalArgumentException("Collection name cannot be null or empty");
+        }
         this.collectionName = collectionName;
     }
 
@@ -89,8 +97,12 @@ public class AccumulateMalletArticlesDTO {
     /**
      * Sets the name of the collection in Mallet.
      * @param query
+     * @throws IllegalArgumentException if the query is null or empty
      */
     public void setQuery(String query) {
+        if (query == null || query.isEmpty()) {
+            throw new IllegalArgumentException("Query cannot be null or empty");
+        }
         this.query = query;
     }
 

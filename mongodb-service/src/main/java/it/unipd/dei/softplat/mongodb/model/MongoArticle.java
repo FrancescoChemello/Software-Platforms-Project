@@ -80,8 +80,12 @@ public class MongoArticle {
     /**
      * Sets the unique identifier of the article.
      * @param id
+     * @throws IllegalArgumentException if the ID is null or empty
      */
     public void setId(String id) {
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be null or empty");
+        }
         this.id = id;
     }
 
@@ -96,8 +100,12 @@ public class MongoArticle {
     /**
      * Sets the type of the article.
      * @param type
+     * @throws IllegalArgumentException if the type is null or empty
      */
     public void setType(String type) {
+        if (type == null || type.isEmpty()) {
+            throw new IllegalArgumentException("Type cannot be null or empty");
+        }
         this.type = type;
     }
 
@@ -112,8 +120,12 @@ public class MongoArticle {
     /**
      * Sets the section ID of the article.
      * @param sectionId
+     * @throws IllegalArgumentException if the section ID is null or empty
      */
     public void setSectionId(String sectionId) {
+        if (sectionId == null || sectionId.isEmpty()) {
+            throw new IllegalArgumentException("Section ID cannot be null or empty");
+        }
         this.sectionId = sectionId;
     }
 
@@ -128,8 +140,12 @@ public class MongoArticle {
     /**
      * Sets the section name of the article.
      * @param sectionName
+     * @throws IllegalArgumentException if the section name is null or empty
      */
     public void setSectionName(String sectionName) {
+        if (sectionName == null || sectionName.isEmpty()) {
+            throw new IllegalArgumentException("Section name cannot be null or empty");
+        }
         this.sectionName = sectionName;
     }
 
@@ -144,8 +160,12 @@ public class MongoArticle {
     /**
      * Sets the web publication date of the article.
      * @param webPublicationDate
+     * @throws IllegalArgumentException if the web publication date is null or empty
      */
     public void setWebPublicationDate(String webPublicationDate) {
+        if (webPublicationDate == null || webPublicationDate.isEmpty()) {
+            throw new IllegalArgumentException("Web publication date cannot be null or empty");
+        }
         this.webPublicationDate = webPublicationDate;
     }
 
@@ -160,8 +180,12 @@ public class MongoArticle {
     /**
      * Sets the web title of the article.
      * @param webTitle
+     * @throws IllegalArgumentException if the web title is null or empty
      */
     public void setWebTitle(String webTitle) {
+        if (webTitle == null || webTitle.isEmpty()) {
+            throw new IllegalArgumentException("Web title cannot be null or empty");
+        }
         this.webTitle = webTitle;
     }
 
@@ -178,6 +202,9 @@ public class MongoArticle {
      * @param webUrl
      */
     public void setWebUrl(String webUrl) {
+        if (webUrl == null || webUrl.isEmpty()) {
+            throw new IllegalArgumentException("Web URL cannot be null or empty");
+        }
         this.webUrl = webUrl;
     }
 
@@ -192,8 +219,12 @@ public class MongoArticle {
     /**
      * Sets the body text of the article.
      * @param bodyText
+     * @throws IllegalArgumentException if the body text is null or empty
      */
     public void setBodyText(String bodyText) {
+        if (bodyText == null || bodyText.isEmpty()) {
+            throw new IllegalArgumentException("Body text cannot be null or empty");
+        }
         this.bodyText = bodyText;
     }
 }

@@ -45,8 +45,12 @@ public class QueryTopic {
     /**
      * Sets the topic ID.
      * @param id the topic ID to set
+     * @throws IllegalArgumentException if the ID is null
      */
     public void setId(String id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Topic ID cannot be null");
+        }
         this.id = id;
     }
 
@@ -63,6 +67,9 @@ public class QueryTopic {
      * @param topWords the list of top words to set
      */
     public void setTopWords(List<String> topWords) {
+        if (topWords == null) {
+            throw new IllegalArgumentException("Top words cannot be null");
+        }
         this.topWords = topWords;
     }
 }

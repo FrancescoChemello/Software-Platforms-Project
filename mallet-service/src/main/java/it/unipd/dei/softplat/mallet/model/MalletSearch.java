@@ -24,10 +24,8 @@ public class MalletSearch {
     private Integer numTopics;
     @NotNull @NotEmpty
     private Integer numTopWordsPerTopic;
-    @NotNull
     @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z", message = "Start date must be in the format YYYY-MM-DDTHH:MM:SSZ")
     private Date startDate;
-    @NotNull
     @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z", message = "End date must be in the format YYYY-MM-DDTHH:MM:SSZ")
     private Date endDate;
 
@@ -66,8 +64,12 @@ public class MalletSearch {
     /**
      * Sets the query string for the search.
      * @param query
+     * @throws IllegalArgumentException if the query is null or empty
      */
     public void setQuery(String query) {
+        if (query == null || query.isEmpty()) {
+            throw new IllegalArgumentException("Query cannot be null or empty");
+        }
         this.query = query;
     }
 
@@ -82,8 +84,12 @@ public class MalletSearch {
     /**
      * Sets the corpus to search in.
      * @param corpus
+     * @throws IllegalArgumentException if the corpus is null or empty
      */
     public void setCorpus(String corpus) {
+        if (corpus == null || corpus.isEmpty()) {
+            throw new IllegalArgumentException("Corpus cannot be null or empty");
+        }
         this.corpus = corpus;
     }
 
@@ -98,8 +104,12 @@ public class MalletSearch {
     /**
      * Sets the number of topics to search for.
      * @param numTopics
+     * @throws IllegalArgumentException if the number of topics is null or not a positive integer
      */
     public void setNumTopics(Integer numTopics) {
+        if (numTopics == null || numTopics <= 0) {
+            throw new IllegalArgumentException("Number of topics must be a positive integer");
+        }
         this.numTopics = numTopics;
     }
 
@@ -114,8 +124,12 @@ public class MalletSearch {
     /**
      * Sets the number of top words per topic.
      * @param numTopWordsPerTopic
+     * @throws IllegalArgumentException if the number of top words is null or not a positive integer
      */
     public void setNumTopWordsPerTopic(Integer numTopWordsPerTopic) {
+        if (numTopWordsPerTopic == null || numTopWordsPerTopic <= 0) {
+            throw new IllegalArgumentException("Number of top words per topic must be a positive integer");
+        }
         this.numTopWordsPerTopic = numTopWordsPerTopic;
     }
 

@@ -10,6 +10,7 @@ package it.unipd.dei.softplat.mongodb;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -216,55 +217,15 @@ public class MongodbTest {
     public void testMongoArticleNullValues() {
         MongoArticle article = new MongoArticle();
 
-        // Assert that the null values are not accepted
-        try {
-            article.setId(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("ID cannot be null", e.getMessage(), "Expected exception for null ID");
-        }
-        try {
-            article.setType(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Type cannot be null", e.getMessage(), "Expected exception for null Type");
-        }
-        try {
-            article.setSectionId(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Section ID cannot be null", e.getMessage(), "Expected exception for null Section ID");
-        }
-        try {
-            article.setSectionName(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Section name cannot be null", e.getMessage(), "Expected exception for null Section name");
-        }
-        try {
-            article.setWebPublicationDate(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web publication date cannot be null", e.getMessage(), "Expected exception for null Web publication date");
-        }
-        try {
-            article.setWebTitle(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web title cannot be null", e.getMessage(), "Expected exception for null Web title");
-        }
-        try {
-            article.setWebUrl(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web URL cannot be null", e.getMessage(), "Expected exception for null Web URL");
-        }
-        try {
-            article.setBodyText(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Body text cannot be null", e.getMessage(), "Expected exception for null Body text");
-        }
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null Type");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(null), "Expected exception for null Section ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(null), "Expected exception for null Section name");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null Web publication date");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(null), "Expected exception for null Web title");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(null), "Expected exception for null Web URL");
+        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(null), "Expected exception for null Body text");
     }
 
     /**
@@ -275,55 +236,15 @@ public class MongodbTest {
     public void testMongoArticleEmptyValues() {
         MongoArticle article = new MongoArticle();
 
-        // Assert that the empty values are not accepted
-        try {
-            article.setId("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("ID cannot be empty", e.getMessage(), "Expected exception for empty ID");
-        }
-        try {
-            article.setType("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Type cannot be empty", e.getMessage(), "Expected exception for empty Type");
-        }
-        try {
-            article.setSectionId("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Section ID cannot be empty", e.getMessage(), "Expected exception for empty Section ID");
-        }
-        try {
-            article.setSectionName("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Section name cannot be empty", e.getMessage(), "Expected exception for empty Section name");
-        }
-        try {
-            article.setWebPublicationDate("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web publication date cannot be empty", e.getMessage(), "Expected exception for empty Web publication date");
-        }
-        try {
-            article.setWebTitle("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web title cannot be empty", e.getMessage(), "Expected exception for empty Web title");
-        }
-        try {
-            article.setWebUrl("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web URL cannot be empty", e.getMessage(), "Expected exception for empty Web URL");
-        }
-        try {
-            article.setBodyText("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Body text cannot be empty", e.getMessage(), "Expected exception for empty Body text");
-        }
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty Type");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(""), "Expected exception for empty Section ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(""), "Expected exception for empty Section name");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(""), "Expected exception for empty Web publication date");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(""), "Expected exception for empty Web title");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(""), "Expected exception for empty Web URL");
+        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(""), "Expected exception for empty Body text");
     }
 
     /**
@@ -373,18 +294,9 @@ public class MongodbTest {
     public void testSaveArticlesDTOWithEmptyValues() {
         SaveArticleDTO saveArticleDTO = new SaveArticleDTO();
 
-        // Assert that the empty values are not accepted
-        try {
-            saveArticleDTO.setArticles(List.of());
-        } catch (IllegalArgumentException e) {
-            assertEquals("Articles cannot be empty", e.getMessage(), "Expected exception for empty articles list");
-        }
-        
-        try {
-            saveArticleDTO.setCollectionName("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Collection name cannot be empty", e.getMessage(), "Expected exception for empty collection name");
-        }
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> saveArticleDTO.setArticles(List.of()), "Expected exception for empty articles list");
+        assertThrows(IllegalArgumentException.class, () -> saveArticleDTO.setCollectionName(""), "Expected exception for empty collection name");
     }
 
     /**
@@ -395,18 +307,9 @@ public class MongodbTest {
     public void testSaveArticlesDTOWithNullValues() {
         SaveArticleDTO saveArticleDTO = new SaveArticleDTO();
 
-        // Assert that the null values are not accepted
-        try {
-            saveArticleDTO.setArticles(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Articles cannot be null", e.getMessage(), "Expected exception for null articles list");
-        }
-        
-        try {
-            saveArticleDTO.setCollectionName(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Collection name cannot be null", e.getMessage(), "Expected exception for null collection name");
-        }
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> saveArticleDTO.setArticles(null), "Expected exception for null articles list");
+        assertThrows(IllegalArgumentException.class, () -> saveArticleDTO.setCollectionName(null), "Expected exception for null collection name");
     }
 
     /**
@@ -437,18 +340,9 @@ public class MongodbTest {
     public void testSearchArticleDTOWithEmptyValues() {
         SearchArticleDTO searchArticleDTO = new SearchArticleDTO();
 
-        // Assert that the empty values are not accepted
-        try {
-            searchArticleDTO.setCollectionName("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Collection name cannot be empty", e.getMessage(), "Expected exception for empty collection name");
-        }
-        
-        try {
-            searchArticleDTO.setQuery("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Query cannot be empty", e.getMessage(), "Expected exception for empty query");
-        }        
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setCollectionName(""), "Expected exception for empty collection name");
+        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setQuery(""), "Expected exception for empty query");
     }
 
     /**
@@ -459,23 +353,9 @@ public class MongodbTest {
     public void testSearchArticleDTOWithNullValues() {
         SearchArticleDTO searchArticleDTO = new SearchArticleDTO();
 
-        // Assert that the null values are not accepted
-        try {
-            searchArticleDTO.setCollectionName(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Collection name cannot be null", e.getMessage(), "Expected exception for null collection name");
-        }
-        
-        try {
-            searchArticleDTO.setQuery(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Query cannot be null", e.getMessage(), "Expected exception for null query");
-        }
-        
-        try {
-            searchArticleDTO.setIds(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("IDs cannot be null", e.getMessage(), "Expected exception for null IDs");
-        }
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setCollectionName(null), "Expected exception for null collection name");
+        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setQuery(null), "Expected exception for null query");
+        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setIds(null), "Expected exception for null IDs");
     }
 }

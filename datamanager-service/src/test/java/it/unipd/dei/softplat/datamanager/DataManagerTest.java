@@ -10,6 +10,7 @@ package it.unipd.dei.softplat.datamanager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -158,66 +159,16 @@ public class DataManagerTest {
         Article article = new Article();
         
         // Assert that the null values are not accepted
-        try {
-        article.setId(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Id cannot be null", e.getMessage(), "Expected exception for null ID");
-        }
-        try {
-            article.setissueString(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Issue query cannot be null", e.getMessage(), "Expected exception for null issue query");
-        }
-        try {
-            article.setLabel(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Label cannot be null", e.getMessage(), "Expected exception for null label");
-        }
-        try {
-            article.setType(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Type cannot be null", e.getMessage(), "Expected exception for null type");
-        }
-        try {
-            article.setSectionId(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Section ID cannot be null", e.getMessage(), "Expected exception for null section ID");
-        }
-        try {
-            article.setSectionName(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Section name cannot be null", e.getMessage(), "Expected exception for null section name");
-        }
-        try {
-            article.setWebPublicationDate(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web publication date cannot be null", e.getMessage(), "Expected exception for null web publication date");
-        }
-        try {
-            article.setWebTitle(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web title cannot be null", e.getMessage(), "Expected exception for null web title");
-        }
-        try {
-            article.setWebUrl(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web URL cannot be null", e.getMessage(), "Expected exception for null web URL");
-        }
-        try {
-            article.setBodyText(null);
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Body text cannot be null", e.getMessage(), "Expected exception for null body text");
-        }        
+        assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setissueString(null), "Expected exception for null issue query");
+        assertThrows(IllegalArgumentException.class, () -> article.setLabel(null), "Expected exception for null label");
+        assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null type");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(null), "Expected exception for null section ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(null), "Expected exception for null section name");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null web publication date");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(null), "Expected exception for null web title");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(null), "Expected exception for null web URL");
+        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(null), "Expected exception for null body text");
     }
 
     /**
@@ -230,60 +181,15 @@ public class DataManagerTest {
     public void testArticleEmptyValues() {
         Article article = new Article();
         
-        // Assert that the empty strings are not accepted
-        try {
-            article.setId("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Id cannot be empty", e.getMessage(), "Expected exception for empty ID");
-        }
-        try {
-            article.setissueString("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Issue query cannot be empty", e.getMessage(), "Expected exception for empty issue query");
-        }
-        try {
-            article.setLabel("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Label cannot be empty", e.getMessage(), "Expected exception for empty label");
-        }
-        try {
-            article.setType("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Type cannot be empty", e.getMessage(), "Expected exception for empty type");
-        }
-        try {
-            article.setSectionId("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Section ID cannot be empty", e.getMessage(), "Expected exception for empty section ID");
-        }
-        try {
-            article.setSectionName("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Section name cannot be empty", e.getMessage(), "Expected exception for empty section name");
-        }
-        try {
-            article.setWebTitle("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web title cannot be empty", e.getMessage(), "Expected exception for empty web title");
-        }
-        try {
-            article.setWebUrl("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Web URL cannot be empty", e.getMessage(), "Expected exception for empty web URL");
-        }
-        try {
-            article.setBodyText("");
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Body text cannot be empty", e.getMessage(), "Expected exception for empty body text");
-        }
+        // Assert that the empty values are not accepted
+        assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setissueString(""), "Expected exception for empty issue query");
+        assertThrows(IllegalArgumentException.class, () -> article.setLabel(""), "Expected exception for empty label");
+        assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty type");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(""), "Expected exception for empty section ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(""), "Expected exception for empty section name");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(""), "Expected exception for empty web title");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(""), "Expected exception for empty web URL");
+        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(""), "Expected exception for empty body text");
     }   
 }   

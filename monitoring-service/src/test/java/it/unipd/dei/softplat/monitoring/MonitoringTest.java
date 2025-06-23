@@ -10,6 +10,7 @@ package it.unipd.dei.softplat.monitoring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -20,6 +21,7 @@ import java.util.Date;
 import java.util.Calendar;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -84,28 +86,53 @@ public class MonitoringTest {
         assertNotNull(response, "Response should not be null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response should have status code 200 OK");
 
+        // To check if the API usage is exceeded
+        ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(httpClientService, atLeastOnce()).postRequest(eq("http://client-service:8080/client/status/"), bodyCaptor.capture());
+
+        // Parse the request body to check if the API usage is exceeded
+        // I need to find: {"message":"API rate limit exceeded for query: example issue query","status":"MONITORING"}
+        boolean found = bodyCaptor.getAllValues().stream().anyMatch(
+            body -> body.contains("\"status\":\"MONITORING\"") &&
+                    body.contains("\"message\":\"API rate limit exceeded for query: example issue query\"")
+        );
+
         // Verify that the postRequest method of MonitoringService was called with the correct parameters
-        verify(httpClientService, atLeastOnce()).postRequest(eq("http://datamanager-service:8082/datamanager/save-articles/"), anyString());
-        verify(httpClientService, atLeastOnce()).postRequest(eq("http://client-service:8080/client/status/"), anyString());
+        if (!found) {
+            verify(httpClientService, atLeastOnce()).postRequest(eq("http://datamanager-service:8082/datamanager/save-articles/"), anyString());
+        } else {
+            System.out.println("API usage limit exceeded!");
+        }
 
-        // Example of an invalid request
-        MonitoringRequest invalidRequest = new MonitoringRequest();
-        invalidRequest.setissueString("");
-        invalidRequest.setLabel("example label");
-        cal = Calendar.getInstance();
-        cal.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
-        startDate = cal.getTime();
-        request.setStartDate(startDate);
-        cal.set(2023, Calendar.DECEMBER, 31, 23, 59, 59);
-        endDate = cal.getTime();
-        request.setEndDate(endDate);
-
-        // Call the startMonitoring method with an invalid request and check if it returns a bad request response.
+        // Example of an invalid request (start date null)
+        MonitoringRequest invalidRequest = new MonitoringRequest("example issue query", "example label", null, null);
+        
+        // Call the startMonitoring method with an invalid request
         ResponseEntity <?> invalidResponse = controller_test.startMonitoring(invalidRequest);
+        
+        // Assert that the response is not null and has a status code of 400 BAD REQUEST
+        assertNotNull(invalidResponse, "Invalid response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Invalid response should have status code 400 BAD REQUEST");
 
-        // Assert that the response is not null and has a status code of 400 Bad Request
-        assertNotNull(response, "Response should not be null");
-        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+        // Example of an invalid request (issue string empty and label empty)
+        MonitoringRequest invalidRequest2 = new MonitoringRequest("", "", startDate, endDate);
+
+        // Call the startMonitoring method with an invalid request
+        ResponseEntity <?> invalidResponse2 = controller_test.startMonitoring(invalidRequest2);
+
+        // Assert that the response is not null and has a status code of 400 BAD REQUEST
+        assertNotNull(invalidResponse2, "Invalid response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse2.getStatusCode(), "Invalid response should have status code 400 BAD REQUEST");
+
+        // Example of invalid request (issue string null and label null)
+        MonitoringRequest invalidRequest3 = new MonitoringRequest(null, null, startDate, endDate);
+
+        // Call the startMonitoring method with an invalid request
+        ResponseEntity <?> invalidResponse3 = controller_test.startMonitoring(invalidRequest3);
+
+        // Assert that the response is not null and has a status code of 400 BAD REQUEST
+        assertNotNull(invalidResponse3, "Invalid response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse3.getStatusCode(), "Invalid response should have status code 400 BAD REQUEST");
     }
 
     /**
@@ -143,28 +170,11 @@ public class MonitoringTest {
     @Test
     public void testMonitoringRequestValidationNullValues() {
         MonitoringRequest request = new MonitoringRequest();
-        // Check if the request rejects null values, empty strings, or invalid formats
-        // setissueString with null value
-        try {
-            request.setissueString(null);
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Issue query cannot be null or empty.", e.getMessage(), "Should throw an exception for null issue query");
-        }
-        // setLabel with null value
-        try {
-            request.setLabel(null);
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Label cannot be null or empty.", e.getMessage(), "Should throw an exception for null label");
-        }
-        // setStartDate with null value
-        try {
-            request.setStartDate(null);
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Start date cannot be null or empty.", e.getMessage(), "Should throw an exception for null start date");
-        }
+        
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> request.setissueString(null), "Expected exception for null issue query");
+        assertThrows(IllegalArgumentException.class, () -> request.setLabel(null), "Expected exception for null label");
+        assertThrows(IllegalArgumentException.class, () -> request.setStartDate(null), "Expected exception for null start date");
     }
 
     /**
@@ -175,20 +185,10 @@ public class MonitoringTest {
     @Test
     public void testMonitoringRequestValidationEmptyValues() {
         MonitoringRequest request = new MonitoringRequest();
-        // setissueString with empty string
-        try {
-            request.setissueString("");
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Issue query cannot be null or empty.", e.getMessage(), "Should throw an exception for empty issue query");
-        }
-        // setLabel with empty string
-        try {
-            request.setLabel("");
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Label cannot be null or empty.", e.getMessage(), "Should throw an exception for empty label");
-        }
+        
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> request.setissueString(""), "Expected exception for empty issue query");
+        assertThrows(IllegalArgumentException.class, () -> request.setLabel(""), "Expected exception for empty label");
     }
 
     /**
@@ -199,28 +199,23 @@ public class MonitoringTest {
     @Test
     public void testMonitoringRequestValidationDateOrder() {
         MonitoringRequest request = new MonitoringRequest();
+        MonitoringRequest request2 = new MonitoringRequest();
+        
         Calendar cal_01_01_2023 = Calendar.getInstance();
-        cal_01_01_2023.set(2023, Calendar.JANUARY, 2, 0, 0, 0);
-        Date endDate = cal_01_01_2023.getTime();
+        cal_01_01_2023.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
         Calendar cal_02_01_2023 = Calendar.getInstance();
-        cal_02_01_2023.set(2023, Calendar.JANUARY, 1, 23, 59, 59);
+        cal_02_01_2023.set(2023, Calendar.JANUARY, 2, 23, 59, 59);
+        Date endDate = cal_01_01_2023.getTime();
         Date startDate = cal_02_01_2023.getTime();
-        try{
-            request.setStartDate(startDate);
-            request.setEndDate(endDate); // End date before start date
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("End date cannot be before start date.", e.getMessage(), "Should throw an exception for end date before start date");
-        }
-        request = new MonitoringRequest();
-        endDate = cal_01_01_2023.getTime();
-        startDate = cal_02_01_2023.getTime(); 
-        try {
-            request.setEndDate(endDate);
-            request.setStartDate(startDate); // Start date after end date
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Start date cannot be after end date.", e.getMessage(), "Should throw an exception for start date after end date");
-        }
+        Date endDate2 = cal_01_01_2023.getTime();
+        Date startDate2 = cal_02_01_2023.getTime(); 
+        
+        // Assert that the setters throw IllegalArgumentException when end date is before start date
+        request.setStartDate(startDate);
+        assertThrows(IllegalArgumentException.class, () -> request.setEndDate(endDate), "Expected exception for end date before start date");
+        
+        // Assert that the setters throw IllegalArgumentException when start date is after end date
+        request2.setEndDate(endDate2);
+        assertThrows(IllegalArgumentException.class, () -> request2.setStartDate(startDate2), "Expected exception for start date after end date");
     }
 }

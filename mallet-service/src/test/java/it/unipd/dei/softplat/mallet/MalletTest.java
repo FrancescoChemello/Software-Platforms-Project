@@ -10,13 +10,13 @@ package it.unipd.dei.softplat.mallet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -73,6 +73,36 @@ public class MalletTest {
 
         // Verify that the postRequest method of MalletService was called with the correct URL and parameters
         verify(httpClientService).postRequest(eq("http://elasticsearch-service:8083/elastic/search/"), anyString());
+
+        // Example of invalid request (numTopics and numTopWordsPerTopic are null)
+        MalletSearch invalidSearchQuery = new MalletSearch("software application development", "test_corpus", null, null, null, null);
+    
+        // Call the search method of MalletController with invalid parameters
+        ResponseEntity<?> invalidResponse = malletController.search(invalidSearchQuery);
+
+        // Check if the response is not null and has status code 400 (Bad Request)
+        assertNotNull(invalidResponse, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+    
+        // Example of invalid request (query and corpus are null)
+        MalletSearch anotherInvalidSearchQuery = new MalletSearch(null, null, 5, 10, null, null);
+
+        // Call the search method of MalletController with another set of invalid parameters
+        ResponseEntity<?> anotherInvalidResponse = malletController.search(anotherInvalidSearchQuery);
+
+        // Check if the response is not null and has status code 400 (Bad Request)
+        assertNotNull(anotherInvalidResponse, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, anotherInvalidResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+
+        // Example of invalid request (query and coprus are empty)
+        MalletSearch emptySearchQuery = new MalletSearch("", "", 5, 10, null, null);
+
+        // Call the search method of MalletController with empty parameters
+        ResponseEntity<?> emptyResponse = malletController.search(emptySearchQuery);
+
+        // Check if the response is not null and has status code 400 (Bad Request)
+        assertNotNull(emptyResponse, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, emptyResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
     @Test
@@ -123,6 +153,36 @@ public class MalletTest {
 
         // Verify that the postRequest method of MalletService was called with the correct URL and parameters
         verify(httpClientService).postRequest(eq("http://client-service:8080/client/query-result/"), anyString());
+
+        // Example of invalid request (articles list is null)
+        AccumulateMalletArticlesDTO invalidAccumulateMalletArticlesDTO = new AccumulateMalletArticlesDTO(null, "test_collection", "software application development", true);
+
+        // Call the accumulate method of MalletController with invalid parameters
+        ResponseEntity<?> invalidResponse = malletController.accumulate(invalidAccumulateMalletArticlesDTO);
+
+        // Check if the response is not null and has status code 400 (Bad Request)
+        assertNotNull(invalidResponse, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, invalidResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+
+        // Example of invalid request (collection name and query are null)
+        AccumulateMalletArticlesDTO anotherInvalidAccumulateMalletArticlesDTO = new AccumulateMalletArticlesDTO(List.of(article1, article2), null, null, true);
+
+        // Call the accumulate method of MalletController with another set of invalid parameters
+        ResponseEntity<?> anotherInvalidResponse = malletController.accumulate(anotherInvalidAccumulateMalletArticlesDTO);
+
+        // Check if the response is not null and has status code 400 (Bad Request)
+        assertNotNull(anotherInvalidResponse, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, anotherInvalidResponse.getStatusCode(), "Response should have status code 400 Bad Request");
+
+        // Example of invalid request (collection name and query are empty)
+        AccumulateMalletArticlesDTO emptyAccumulateMalletArticlesDTO = new AccumulateMalletArticlesDTO(List.of(article1, article2), "", "", true);
+
+        // Call the accumulate method of MalletController with empty parameters
+        ResponseEntity<?> emptyResponse = malletController.accumulate(emptyAccumulateMalletArticlesDTO);
+        
+        // Check if the response is not null and has status code 400 (Bad Request)
+        assertNotNull(emptyResponse, "Response should not be null");
+        assertEquals(HttpStatus.BAD_REQUEST, emptyResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
     /**
@@ -163,30 +223,9 @@ public class MalletTest {
     public void testMalletSearchWithEmptyValues() {
         MalletSearch malletSearch = new MalletSearch();
 
-        try {
-            malletSearch.setQuery("");
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Query cannot be empty", e.getMessage(), "Expected exception for empty query");
-        }
-        try {
-            malletSearch.setCorpus("");
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("Corpus cannot be empty", e.getMessage(), "Expected exception for empty corpus");
-        }
-        try {
-            malletSearch.setStartDate(new Date());
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("Start date cannot be null", e.getMessage(), "Expected exception for null start date");
-        }
-        try {
-            malletSearch.setEndDate(new Date());
-        }
-        catch (IllegalArgumentException e) {
-            assertEquals("End date cannot be null", e.getMessage(), "Expected exception for null end date");
-        }
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> malletSearch.setQuery(""), "Expected exception for empty query");
+        assertThrows(IllegalArgumentException.class, () -> malletSearch.setCorpus(""), "Expected exception for empty corpus");
     }
 
     /**
@@ -198,36 +237,11 @@ public class MalletTest {
     public void testMalletSearchWithNullValues() {
         MalletSearch malletSearch = new MalletSearch();
 
-        try {
-            malletSearch.setQuery(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Query cannot be null", e.getMessage(), "Expected exception for null query");
-        }
-        try {
-            malletSearch.setCorpus(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Corpus cannot be null", e.getMessage(), "Expected exception for null corpus");
-        }
-        try {
-            malletSearch.setNumTopics(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Number of topics cannot be null", e.getMessage(), "Expected exception for null number of topics");
-        }
-        try {
-            malletSearch.setNumTopWordsPerTopic(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Number of top words per topic cannot be null", e.getMessage(), "Expected exception for null number of top words per topic");
-        }
-        try {
-            malletSearch.setStartDate(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Start date cannot be null", e.getMessage(), "Expected exception for null start date");
-        }
-        try {
-            malletSearch.setEndDate(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("End date cannot be null", e.getMessage(), "Expected exception for null end date");
-        }
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> malletSearch.setQuery(null), "Expected exception for null query");
+        assertThrows(IllegalArgumentException.class, () -> malletSearch.setCorpus(null), "Expected exception for null corpus");
+        assertThrows(IllegalArgumentException.class, () -> malletSearch.setNumTopics(null), "Expected exception for null number of topics");
+        assertThrows(IllegalArgumentException.class, () ->  malletSearch.setNumTopWordsPerTopic(null), "Expected exception for null number of top words per topic");
     }
 
     /**
@@ -275,57 +289,17 @@ public class MalletTest {
     public void testMalletArticleWithEmptyValues() {
        MalletArticle article = new MalletArticle();
     
-       try {
-        article.setId("");
-        } 
-        catch (IllegalArgumentException e) {
-            assertEquals("ID cannot be empty", e.getMessage(), "Expected exception for empty ID");
-        }
-        try {
-            article.setissueString("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Issue query cannot be empty", e.getMessage(), "Expected exception for empty issue query");
-        }
-        try {
-            article.setLabel("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Label cannot be empty", e.getMessage(), "Expected exception for empty label");
-        }
-        try {
-            article.setType("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Type cannot be empty", e.getMessage(), "Expected exception for empty type");
-        }
-        try {
-            article.setSectionId("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Section ID cannot be empty", e.getMessage(), "Expected exception for empty section ID");
-        }
-        try {
-            article.setSectionName("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Section name cannot be empty", e.getMessage(), "Expected exception for empty section name");
-        }
-        try {
-            article.setWebPublicationDate("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Web publication date cannot be empty", e.getMessage(), "Expected exception for empty web publication date");
-        }
-        try {
-            article.setWebTitle("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Web title cannot be empty", e.getMessage(), "Expected exception for empty web title");
-        }
-        try {
-            article.setWebUrl("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Web URL cannot be empty", e.getMessage(), "Expected exception for empty web URL");
-        }
-        try {
-            article.setBodyText("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Body text cannot be empty", e.getMessage(), "Expected exception for empty body text");
-        }
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setissueString(""), "Expected exception for empty issue query");
+        assertThrows(IllegalArgumentException.class, () -> article.setLabel(""), "Expected exception for empty label");
+        assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty type");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(""), "Expected exception for empty section ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(""), "Expected exception for empty section name");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(""), "Expected exception for empty web publication date");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(""), "Expected exception for empty web title");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(""), "Expected exception for empty web URL");
+        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(""), "Expected exception for empty body text");
     }
 
     /**
@@ -337,61 +311,18 @@ public class MalletTest {
     public void testMalletArticleWithNullValues() {
         MalletArticle article = new MalletArticle();
 
-        try {
-            article.setId(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("ID cannot be null", e.getMessage(), "Expected exception for null ID");
-        }
-        try {
-            article.setissueString(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Issue query cannot be null", e.getMessage(), "Expected exception for null issue query");
-        }
-        try {
-            article.setLabel(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Label cannot be null", e.getMessage(), "Expected exception for null label");
-        }
-        try {
-            article.setType(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Type cannot be null", e.getMessage(), "Expected exception for null type");
-        }
-        try {
-            article.setTopics(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Topics cannot be null", e.getMessage(), "Expected exception for null topics");
-        }
-        try {
-            article.setSectionId(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Section ID cannot be null", e.getMessage(), "Expected exception for null section ID");
-        }
-        try {
-            article.setSectionName(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Section name cannot be null", e.getMessage(), "Expected exception for null section name");
-        }
-        try {
-            article.setWebPublicationDate(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Web publication date cannot be null", e.getMessage(), "Expected exception for null web publication date");
-        }
-        try {
-            article.setWebTitle(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Web title cannot be null", e.getMessage(), "Expected exception for null web title");
-        }
-        try {
-            article.setWebUrl(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Web URL cannot be null", e.getMessage(), "Expected exception for null web URL");
-        }
-        try {
-            article.setBodyText(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Body text cannot be null", e.getMessage(), "Expected exception for null body text");
-        }
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setissueString(null), "Expected exception for null issue query");
+        assertThrows(IllegalArgumentException.class, () -> article.setLabel(null), "Expected exception for null label");
+        assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null type");
+        assertThrows(IllegalArgumentException.class, () -> article.setTopics(null), "Expected exception for null topics");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(null), "Expected exception for null section ID");
+        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(null), "Expected exception for null section name");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null web publication date");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(null), "Expected exception for null web title");
+        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(null), "Expected exception for null web URL");
+        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(null), "Expected exception for null body text");
     }
 
     /**
@@ -453,16 +384,9 @@ public class MalletTest {
     public void testAccumulateMalletArticlesDTOWithEmptyValues() {
         AccumulateMalletArticlesDTO malletArticleDTO = new AccumulateMalletArticlesDTO();
 
-        try {
-            malletArticleDTO.setCollectionName("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Collection name cannot be empty", e.getMessage(), "Expected exception for empty collection name");
-        }
-        try {
-            malletArticleDTO.setQuery("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Query cannot be empty", e.getMessage(), "Expected exception for empty query");
-        }
+        // Assert that the setters throw IllegalArgumentException when empty values are passed
+        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setCollectionName(""), "Expected exception for empty collection name");
+        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setQuery(""), "Expected exception for empty query");
     }
 
     /**
@@ -474,20 +398,9 @@ public class MalletTest {
     public void testAccumulateMalletArticlesDTOWithNullValues() {
         AccumulateMalletArticlesDTO malletArticleDTO = new AccumulateMalletArticlesDTO();
 
-        try {
-            malletArticleDTO.setArticles(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Articles cannot be null", e.getMessage(), "Expected exception for null articles");
-        }
-        try {
-            malletArticleDTO.setCollectionName(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Collection name cannot be null", e.getMessage(), "Expected exception for null collection name");
-        }
-        try {
-            malletArticleDTO.setQuery(null);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Query cannot be null", e.getMessage(), "Expected exception for null query");
-        }
+        // Assert that the setters throw IllegalArgumentException when null values are passed
+        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setArticles(null), "Expected exception for null articles");
+        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setCollectionName(null), "Expected exception for null collection name");
+        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setQuery(null), "Expected exception for null query");
     }
 }
