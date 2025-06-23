@@ -120,10 +120,22 @@ public class MonitoringService {
                 responseTheGuardian = client.getContent(request.getissueString());
             }
             catch (UnirestException e){
-                if (e.getMessage().contains("API rate limit exceeded")) {
+                // Check if the exception is due to API rate limit exceeded
+                Throwable cause = e.getCause();
+                boolean found = false;
+                while (!found) {
+                    if (cause.getMessage().contains("API rate limit exceeded")) {
+                        found = true; // Stop searching for the cause
+                        break;
+                    }
+                    cause = cause.getCause();
+                }
+                // If it is caused by API limit, log the error and stop monitoring
+                if (found) {
                     logger.error("API rate limit exceeded. Stopping monitoring.");
                     continueMonitoring = false; // Stop monitoring if an error occurs
                     sendStatusToClientService("MONITORING", "API rate limit exceeded", request.getissueString());
+                    return; // Exit
                 }
                 logger.error("Error while fetching content from The Guardian API: " + e.getMessage(), e);
                 return; // Exit
@@ -159,10 +171,22 @@ public class MonitoringService {
                             .asJson();
                 }
                 catch (UnirestException e) {
-                    if (e.getMessage().contains("API rate limit exceeded")) {
+                    // Check if the exception is due to API rate limit exceeded
+                    Throwable cause = e.getCause();
+                    boolean found = false;
+                    while (!found) {
+                        if (cause.getMessage().contains("API rate limit exceeded")) {
+                            found = true; // Stop searching for the cause
+                            break;
+                        }
+                        cause = cause.getCause();
+                    }
+                    // If it is caused by API limit, log the error and stop monitoring
+                    if (found) {
                         logger.error("API rate limit exceeded. Stopping monitoring.");
                         continueMonitoring = false; // Stop monitoring if an error occurs
                         sendStatusToClientService("MONITORING", "API rate limit exceeded", request.getissueString());
+                        return; // Exit
                     }
                     logger.error("Error while fetching articles from The Guardian at page " + page + ": " + e.getMessage(), e);
                     return; // Exit
@@ -177,6 +201,12 @@ public class MonitoringService {
 
                 // Check if I did too many attempts to fetch articles from a page
                 if (pageAttempts >= 5 && response != null && response.getStatus() == 429) {
+                    if (response != null && response.getBody().toString().contains("API rate limit exceeded")) {
+                        logger.error("API rate limit exceeded. Stopping monitoring.");
+                        continueMonitoring = false; // Stop monitoring if an error occurs
+                        sendStatusToClientService("MONITORING", "API rate limit exceeded", request.getissueString());
+                        return; // Exit
+                    }
                     logger.error("Unable to fetch articles from The Guardian at page: " + page + " due to too many requests. Status: " + response.getStatus());
                     logger.error("Skipping page: " + page);
                     pageAttempts = 0; // Reset the attempts counter
@@ -192,7 +222,13 @@ public class MonitoringService {
                 
                 // Check if I reached the limit of requests per day
                 if (pageAttempts < 5 && response != null && response.getStatus() == 429) {
-                    logger.warn("Reached the limit of requests per day for The Guardian API. Status: " + response.getStatus());
+                    if (response != null && response.getBody().toString().contains("API rate limit exceeded")) {
+                        logger.error("API rate limit exceeded. Stopping monitoring.");
+                        continueMonitoring = false; // Stop monitoring if an error occurs
+                        sendStatusToClientService("MONITORING", "API rate limit exceeded", request.getissueString());
+                        return; // Exit
+                    }
+                    logger.warn("Too much attempt. Status: " + response.getStatus());
                     pageAttempts++;
                     // Increase the sleep time to avoid hitting the API rate limit
                     sleepTime += incrementSleepTime * Math.pow(2, pageAttempts); // Increase the sleep time by incrementSleepTime milliseconds * 2^pageAttempts
@@ -315,6 +351,12 @@ public class MonitoringService {
 
                         // Check if I did too many attempts to fetch the full article content
                         if (articleAttempts >= 5 && response != null && response.getStatus() == 429) {
+                            if (response != null && response.getBody().toString().contains("API rate limit exceeded")) {
+                                logger.error("API rate limit exceeded. Stopping monitoring.");
+                                continueMonitoring = false; // Stop monitoring if an error occurs
+                                sendStatusToClientService("MONITORING", "API rate limit exceeded", request.getissueString());
+                                return; // Exit
+                            }
                             logger.error("Unable to fetch the content of an article from The Guardian due to too many requests. Status: " + response.getStatus());
                             logger.error("Skipping article: " + article.getId());
                             articleAttempts = 0; // Reset the attempts counter
@@ -330,7 +372,13 @@ public class MonitoringService {
 
                         // Check if I reached the limit of requests per day
                         if (articleAttempts < 5 && fullArticle != null && fullArticle.getStatus() == 429) {
-                            logger.warn("Reached the limit of requests per day for The Guardian API. Status: " + fullArticle.getStatus());
+                            if (response != null && response.getBody().toString().contains("API rate limit exceeded")) {
+                                logger.error("API rate limit exceeded. Stopping monitoring.");
+                                continueMonitoring = false; // Stop monitoring if an error occurs
+                                sendStatusToClientService("MONITORING", "API rate limit exceeded", request.getissueString());
+                                return; // Exit
+                            }
+                            logger.warn("Too much attempt. Status: " + fullArticle.getStatus());
                             articleAttempts++;
                             sleepTime += incrementSleepTime * Math.pow(2, articleAttempts); // Increase the sleep time by incrementSleepTime milliseconds * 2^articleAttempts
                             // Wait for a while before retrying
@@ -364,7 +412,18 @@ public class MonitoringService {
                             continue;
                         }
                     } catch (UnirestException e) {
-                        if (e.getMessage().contains("API rate limit exceeded")) {
+                        // Check if the exception is due to API rate limit exceeded
+                        Throwable cause = e.getCause();
+                        boolean found = false;
+                        while (!found) {
+                            if (cause.getMessage().contains("API rate limit exceeded")) {
+                                found = true; // Stop searching for the cause
+                                break;
+                            }
+                            cause = cause.getCause();
+                        }
+                        // If it is caused by API limit, log the error and stop monitoring
+                        if (found) {
                             logger.error("API rate limit exceeded. Stopping monitoring.");
                             continueMonitoring = false; // Stop monitoring if an error occurs
                             sendStatusToClientService("MONITORING", "API rate limit exceeded", request.getissueString());
