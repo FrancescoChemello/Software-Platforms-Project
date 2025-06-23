@@ -88,7 +88,7 @@ public class MongodbController {
      * @return
      */
     @PostMapping("/mongodb/get-articles/")
-    public ResponseEntity<?> searchArticles(@RequestBody SearchArticleDTO searchArticleDTO) {
+    public ResponseEntity<?> searchArticles(@Valid @RequestBody SearchArticleDTO searchArticleDTO) {
         // Extract the collection name and ids from the DTO
         String collectionName = searchArticleDTO.getCollectionName();
         String query = searchArticleDTO.getQuery();
