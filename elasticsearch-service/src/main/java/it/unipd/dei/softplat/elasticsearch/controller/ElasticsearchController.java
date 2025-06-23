@@ -87,7 +87,7 @@ public class ElasticsearchController {
      * @return ResponseEntity with the result of the search operation.
      */
     @PostMapping("/elastic/search/")
-    public ResponseEntity<?> getArticlesByQuery(@RequestBody SearchArticleDTO searchArticleDTO) {
+    public ResponseEntity<?> getArticlesByQuery(@Valid @RequestBody SearchArticleDTO searchArticleDTO) {
         String query = searchArticleDTO.getQuery();
         String corpus = searchArticleDTO.getCorpus();
         Date startDate = searchArticleDTO.getStartDate();

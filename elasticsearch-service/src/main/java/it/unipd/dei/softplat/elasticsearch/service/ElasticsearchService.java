@@ -158,55 +158,68 @@ public class ElasticsearchService {
                 return;
             }
 
-            SearchResponse<ElasticArticle> response = esClient.search(s -> s
-                .index(corpus)
-                .query(q -> q
-                    .bool(b -> {
-                        if (query.startsWith("\"") && query.endsWith("\"")) {
-                            b.must(m -> m
-                            .matchPhrase(mp -> mp
-                            .field("bodyText")
-                            .query(query.replace("\"", ""))
-                            )
-                            );
-                            logger.info("Using match phrase query for: " + query);
-                        } else {
-                            b.must(m -> m
-                                .multiMatch(mm -> mm
-                                    .fields("webTitle", "bodyText")
-                                    .query(query)
-                                )
-                            );
-                            logger.info("Using multi-match query for: " + query);
-                        }
-                        // Apply filter date only if startDate or endDate is not null
-                        if(startDate != null || endDate != null) {
-                            b.filter(f -> f
-                                .range(r -> {
-                                    r.field("webPublicationDate");
-                                    // Set the range for the date filter
-                                    // If startDate or endDate is null, it will not be included in the range
-                                    if (startDate != null) {
-                                        r.gte(JsonData.of(isoFormat.format(startDate)));
-                                    }
-                                    if (endDate != null) {
-                                        r.lte(JsonData.of(isoFormat.format(endDate)));
-                                    }
-                                    return r;
-                                })
-                            );
-                        }
-                        return b;
-                    })
-                ),
-                ElasticArticle.class
-            );
+            int pageSize = 100;
+            int from = 0;
+            long totalHits = 0;
+            boolean firstPage = true;
 
-            // Check if the response contains hits
-            TotalHits totalHits = response.hits().total();
-            if (totalHits != null && totalHits.value() > 0) {
-                logger.info("Found " + totalHits.value() + " articles matching the query: " + query);
-                for (Hit<ElasticArticle> hit : response.hits().hits()) {
+            // Perform the search query
+            while (true) {
+                final int fromFinal = from;
+                SearchResponse<ElasticArticle> response = esClient.search(s -> s
+                    .index(corpus)
+                    .from(fromFinal)
+                    .size(pageSize)
+                    .query(q -> q
+                        .bool(b -> {
+                            if (query.startsWith("\"") && query.endsWith("\"")) {
+                                b.must(m -> m
+                                    .matchPhrase(mp -> mp
+                                        .field("bodyText")
+                                        .query(query.replace("\"", ""))
+                                    )
+                                );
+                                logger.info("Using match phrase query for: " + query);
+                            } else {
+                                b.must(m -> m
+                                    .multiMatch(mm -> mm
+                                        .fields("webTitle", "bodyText")
+                                        .query(query)
+                                    )
+                                );
+                                logger.info("Using multi-match query for: " + query);
+                            }
+                            if (startDate != null || endDate != null) {
+                                b.filter(f -> f
+                                    .range(r -> {
+                                        r.field("webPublicationDate");
+                                        if (startDate != null) {
+                                            r.gte(JsonData.of(isoFormat.format(startDate)));
+                                        }
+                                        if (endDate != null) {
+                                            r.lte(JsonData.of(isoFormat.format(endDate)));
+                                        }
+                                        return r;
+                                    })
+                                );
+                            }
+                            return b;
+                        })
+                    ),
+                    ElasticArticle.class
+                );
+
+                if (firstPage) {
+                    TotalHits th = response.hits().total();
+                    totalHits = (th != null) ? th.value() : 0;
+                    logger.info("Found " + totalHits + " articles matching the query: " + query);
+                    firstPage = false;
+                }
+
+                List<Hit<ElasticArticle>> hits = response.hits().hits();
+                if (hits.isEmpty()) break;
+
+                for (Hit<ElasticArticle> hit : hits) {
                     ElasticArticle article = hit.source();
                     if (article != null) {
                         documentsID.add(article.getId());
@@ -214,15 +227,20 @@ public class ElasticsearchService {
                         logger.warn("Received null article in the response.");
                     }
                 }
+
+                if (hits.size() < pageSize) {
+                    break; // No more articles to retrieve
+                }
+                // Move to the next page
+                from += pageSize;
             }
+
             JSONObject articleIDs = new JSONObject();
             articleIDs.put("collectionName", corpus);
             articleIDs.put("query", query);
             articleIDs.put("ids", new JSONArray(documentsID));
-            // Send the article IDs to MongoDB service
             sendIdsToMongo(articleIDs);
-        } 
-        catch (IOException e) {
+        } catch (IOException e) {
             logger.error("Error retrieving articles: " + e.getMessage());
         }
     }
