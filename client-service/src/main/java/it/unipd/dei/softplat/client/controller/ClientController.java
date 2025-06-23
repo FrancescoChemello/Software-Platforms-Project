@@ -95,7 +95,7 @@ public class ClientController {
             return ResponseEntity.badRequest().body("Status cannot be null or empty.");
         }
         
-        clientService.isMonitoringEnabled(status, message);
+        clientService.processMessageStatus(status, message);
         logger.info("Status message processed successfully: " + message);
         return ResponseEntity.ok("Status message processed successfully.");
     }

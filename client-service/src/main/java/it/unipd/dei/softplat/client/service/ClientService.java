@@ -174,7 +174,7 @@ public class ClientService {
      * @param status
      * @param message
      */
-    public void isMonitoringEnabled(String status, String message) {
+    public void processMessageStatus(String status, String message) {
         if (status.equals("MONITORING")) {
             if (message.contains("Monitoring completed"))
                 // Monitoring is enabled

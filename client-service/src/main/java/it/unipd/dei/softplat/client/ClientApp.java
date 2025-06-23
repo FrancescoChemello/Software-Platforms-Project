@@ -45,11 +45,14 @@ public class ClientApp {
      * @param input
      * @return
      */
-    public static String normalizeString(String input) {
+    public static String normalizeString(Scanner scanner, String prompt) {
+        String input = "";
         do {
+            System.out.println(prompt);
+            input = scanner.nextLine().trim();
             input = input.toLowerCase()
-            .replaceAll("\\s+", "_") // Replace spaces with underscores
-            .replaceAll("[^a-z0-9_]", ""); // Remove any non-alphanumeric characters except underscores
+                .replaceAll("\\s+", "_") // Replace spaces with underscores
+                .replaceAll("[^a-z0-9_]", ""); // Remove any non-alphanumeric characters except underscores
             if (input.isEmpty()) {
                 System.out.println("The label cannot contain ONLY special characters or spaces. Please enter a valid one.");
             }
@@ -111,22 +114,32 @@ public class ClientApp {
         do {
             System.out.println(prompt);
             String dateInput = scanner.nextLine().trim();
-            if (isRequired && !dateInput.isEmpty()) {
+            if (dateInput.isEmpty()) {  // The user just pressed ENTER
+                if (!isRequired) {
+                    return null; // Return null, the date is not mandatory
+                } else {
+                    System.out.println(("Date is required. Please enter a valid date in ISO 8601 format (yyyy-MM-dd'T'HH:mm:ss'Z')."));
+                }
+            } else {  // The user entered a date
                 try {
-                    TemporalAccessor dateTemporal = formatter.parse(dateInput); // Assuming the input is in a valid format
-                    date = Date.from(Instant.from(dateTemporal)); // Convert to Date
-                } catch (Exception e) {
-                    System.out.println("Invalid date format. Please use ISO 8601 format (yyyy-MM-dd'T'HH:mm:ss'Z').");
+                    TemporalAccessor ta = formatter.parse(dateInput);
+                    Instant instant = Instant.from(ta);
+                    date = Date.from(instant);
+
+                    // Check if the date is in the future
+                    if (date.after(new Date())) {
+                        System.out.println("The date cannot be in the future. Please enter a valid date in ISO 8601 format (yyyy-MM-dd'T'HH:mm:ss'Z').");
+                        date = null; // Reset date to null to re-prompt
+                    }
                 }
-                if (date != null && date.after(new Date())) {
-                    System.out.println("The date cannot be in the future. Please enter a valid one.");
-                    date = null; // Reset date to null
+                catch (Exception e) {
+                    System.out.println("Invalid date format. Please enter a valid date in ISO 8601 format (yyyy-MM-dd'T'HH:mm:ss'Z').");
+                    date = null; // Reset date to null to re-prompt
                 }
-            } else {
-                return null;
             }
         } while (date == null);
 
+        // Valid date is entered, return it
         return date;
     }
 
@@ -213,7 +226,7 @@ public class ClientApp {
 
                         issue = readNonEmptyString(scanner, "Enter the issue to monitor (use \"...\" to exact match): ");
 
-                        label = normalizeString(readNonEmptyString(scanner, "Enter a label for the issue corpus: "));
+                        label = normalizeString(scanner, "Enter a label for the issue corpus: ");
 
                         Date startDate = readDate(scanner, "Enter the start date (yyyy-MM-dd'T'HH:mm:ss'Z): ", true);
 
@@ -273,8 +286,6 @@ public class ClientApp {
 
                         String queryTopic = readNonEmptyString(scanner, "Enter the query topic (use \"...\" to exact match): ");
 
-                        String issueCorpus = normalizeString(readNonEmptyString(scanner, "Enter the issue corpus: ")); 
-
                         int numTopics = readIntValues(scanner, "Enter the number of topics to extract: ");
 
                         int numTopWordsPerTopic = readIntValues(scanner, "Enter the number of top words per topic: ");
@@ -290,7 +301,7 @@ public class ClientApp {
                         } while (startQueryDate != null && endQueryDate != null && startQueryDate.after(endQueryDate));
                         
                         // Call the service to send the query request
-                        clientService.sendQueryRequest(queryTopic, issueCorpus, numTopics, numTopWordsPerTopic, startQueryDate, endQueryDate);
+                        clientService.sendQueryRequest(queryTopic, label, numTopics, numTopWordsPerTopic, startQueryDate, endQueryDate);
                         System.out.println("Query sent. Waiting for results...");
                         QueryResult result = resultQueue.take(); // Wait for the result from the queue
                         clientService.processQueryResult(result.getQuery(), new ArrayList<>(result.getTopics()));
@@ -298,7 +309,7 @@ public class ClientApp {
                         System.out.println("Result for query: " + result.getQuery() + "\n");
                         if (result.getQuery().isEmpty() || result.getTopics().size() == 0) {
                             System.out.println("No articles found for the query: " + result.getQuery());
-                            System.out.println("Please try a different query or check the issue corpus.");
+                            System.out.println("Please try a different query.");
                         } else {
                             System.out.println("Found " + result.getTopics().size() + " articles for the query: " + result.getQuery());
                             for (QueryTopic topic : result.getTopics()) {
