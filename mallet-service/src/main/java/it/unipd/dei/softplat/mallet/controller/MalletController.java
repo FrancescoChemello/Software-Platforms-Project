@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.unipd.dei.softplat.mallet.model.MalletArticle;
 import it.unipd.dei.softplat.mallet.model.MalletSearch;
 import it.unipd.dei.softplat.mallet.service.MalletService;
+import jakarta.validation.Valid;
 import it.unipd.dei.softplat.mallet.dto.AccumulateMalletArticlesDTO;
 
 @RestController
@@ -50,7 +51,7 @@ public class MalletController {
      * @return
      */
     @PostMapping("/mallet/search/")
-    public ResponseEntity<?> search(@RequestBody MalletSearch queryString) {
+    public ResponseEntity<?> search(@Valid @RequestBody MalletSearch queryString) {
         String query = queryString.getQuery();
         String corpus = queryString.getCorpus();
         Integer numTopics = queryString.getNumTopics();
@@ -94,7 +95,7 @@ public class MalletController {
      * @return ResponseEntity indicating the result of the operation.
      */
     @PostMapping("/mallet/accumulate/")
-    public ResponseEntity<?> accumulate(@RequestBody AccumulateMalletArticlesDTO articles) {
+    public ResponseEntity<?> accumulate(@Valid @RequestBody AccumulateMalletArticlesDTO articles) {
         List<MalletArticle> articlesList = articles.getArticles();
         String collectionName = articles.getCollectionName();
         String query = articles.getQuery();

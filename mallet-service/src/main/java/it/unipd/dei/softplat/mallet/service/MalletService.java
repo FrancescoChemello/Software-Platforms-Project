@@ -234,9 +234,6 @@ public class MalletService {
             // Add the articles to the query result
             queryResult.put("topics", new JSONArray(articleTopics));
             
-            // For debugging purposes, print the query result
-            logger.info("Query Result: " + queryResult.toString(2));
-            
             // Send the query result to the Client Service
             sendQueryResultToClientService(queryResult);
             
