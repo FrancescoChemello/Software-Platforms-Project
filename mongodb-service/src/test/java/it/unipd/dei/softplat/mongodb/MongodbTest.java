@@ -184,7 +184,7 @@ public class MongodbTest {
      * It creates a MongoArticle object, sets its properties, and asserts that the getters return the expected values.
      */
     @Test
-    public void testMongoArticleGettersSetters() {
+    public void testMongoArticleGetterSetter() {
         MongoArticle article = new MongoArticle();
         
         // Set the properties of the article object
