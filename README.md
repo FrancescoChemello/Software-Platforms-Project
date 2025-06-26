@@ -94,7 +94,7 @@ Every microservice follows the same basic structure (`controller/`, `dto/`, `mod
 First, build all Java services using **Maven** (required only the first time or after code changes):
 
 ```
-mvn clean package spring-boot:repackage
+mvn clean install
 ```
 
 Then, build all Docker images and start the containers:
