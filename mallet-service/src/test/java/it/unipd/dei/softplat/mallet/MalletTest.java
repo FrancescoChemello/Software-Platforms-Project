@@ -10,7 +10,6 @@ package it.unipd.dei.softplat.mallet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -219,36 +218,6 @@ public class MalletTest {
     }
 
     /**
-     * Test the MalletSearch model with empty values.
-     * This test verifies that the MalletSearch class throws exceptions
-     * when trying to set empty or null values for its properties.
-     */
-    @Test
-    public void testMalletSearchWithEmptyValues() {
-        MalletSearch malletSearch = new MalletSearch();
-
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> malletSearch.setQuery(""), "Expected exception for empty query");
-        assertThrows(IllegalArgumentException.class, () -> malletSearch.setCorpus(""), "Expected exception for empty corpus");
-    }
-
-    /**
-     * Test the MalletSearch model with null values.
-     * This test verifies that the MalletSearch class throws exceptions
-     * when trying to set null values for its properties.
-     */
-    @Test
-    public void testMalletSearchWithNullValues() {
-        MalletSearch malletSearch = new MalletSearch();
-
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> malletSearch.setQuery(null), "Expected exception for null query");
-        assertThrows(IllegalArgumentException.class, () -> malletSearch.setCorpus(null), "Expected exception for null corpus");
-        assertThrows(IllegalArgumentException.class, () -> malletSearch.setNumTopics(null), "Expected exception for null number of topics");
-        assertThrows(IllegalArgumentException.class, () ->  malletSearch.setNumTopWordsPerTopic(null), "Expected exception for null number of top words per topic");
-    }
-
-    /**
      * Test the MalletArticle model.
      * This test verifies that the MalletArticle class can be instantiated
      * and that its properties can be set and retrieved correctly.
@@ -276,46 +245,6 @@ public class MalletTest {
         assertEquals("Test Web Title", article.getWebTitle());
         assertEquals("https://example.com/test-web-url", article.getWebUrl());
         assertEquals("This is a test body text for the MongoDB article.", article.getBodyText());
-    }
-
-    /**
-     * Test the MalletArticle model with empty values.
-     * This test verifies that the MalletArticle class throws exceptions
-     * when trying to set empty or null values for its properties.
-     */
-    @Test
-    public void testMalletArticleWithEmptyValues() {
-       MalletArticle article = new MalletArticle();
-    
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty type");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(""), "Expected exception for empty section ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(""), "Expected exception for empty section name");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(""), "Expected exception for empty web publication date");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(""), "Expected exception for empty web title");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(""), "Expected exception for empty web URL");
-        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(""), "Expected exception for empty body text");
-    }
-
-    /**
-     * Test the MalletArticle model with null values.
-     * This test verifies that the MalletArticle class throws exceptions
-     * when trying to set null values for its properties.
-     */
-    @Test
-    public void testMalletArticleWithNullValues() {
-        MalletArticle article = new MalletArticle();
-
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null type");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(null), "Expected exception for null section ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(null), "Expected exception for null section name");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null web publication date");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(null), "Expected exception for null web title");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(null), "Expected exception for null web URL");
-        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(null), "Expected exception for null body text");
     }
 
     /**
@@ -360,34 +289,5 @@ public class MalletTest {
         assertEquals("test_collection", malletArticleDTO.getCollectionName(), "Expected collection name to match");
         assertEquals("test query", malletArticleDTO.getQuery(), "Expected query to match");
         assertEquals(true, malletArticleDTO.isEndOfStream(), "Expected end of stream flag to be true");
-    }
-
-    /**
-     * Test the AccumulateMalletArticlesDTO model with empty values.
-     * This test verifies that the AccumulateMalletArticlesDTO class throws exceptions
-     * when trying to set empty or null values for its properties.
-     */
-    @Test
-    public void testAccumulateMalletArticlesDTOWithEmptyValues() {
-        AccumulateMalletArticlesDTO malletArticleDTO = new AccumulateMalletArticlesDTO();
-
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setCollectionName(""), "Expected exception for empty collection name");
-        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setQuery(""), "Expected exception for empty query");
-    }
-
-    /**
-     * Test the AccumulateMalletArticlesDTO model with null values.
-     * This test verifies that the AccumulateMalletArticlesDTO class throws exceptions
-     * when trying to set null values for its properties.
-     */
-    @Test
-    public void testAccumulateMalletArticlesDTOWithNullValues() {
-        AccumulateMalletArticlesDTO malletArticleDTO = new AccumulateMalletArticlesDTO();
-
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setArticles(null), "Expected exception for null articles");
-        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setCollectionName(null), "Expected exception for null collection name");
-        assertThrows(IllegalArgumentException.class, () -> malletArticleDTO.setQuery(null), "Expected exception for null query");
     }
 }

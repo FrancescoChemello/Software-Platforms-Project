@@ -10,7 +10,6 @@ package it.unipd.dei.softplat.monitoring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -160,62 +159,5 @@ public class MonitoringTest {
         Date endDate = cal.getTime();
         request.setEndDate(endDate);
         assertEquals(endDate, request.getEndDate(), "End date should match the set value");
-    }
-
-    /**
-     * This test method is intended to test the validation of the MonitoringRequest object for null values.
-     * It checks if the issue query, label, start date, and end date are not null.
-     * If any of these values are null, it should throw an IllegalArgumentException.
-     */
-    @Test
-    public void testMonitoringRequestValidationNullValues() {
-        MonitoringRequest request = new MonitoringRequest();
-        
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> request.setissueString(null), "Expected exception for null issue query");
-        assertThrows(IllegalArgumentException.class, () -> request.setLabel(null), "Expected exception for null label");
-        assertThrows(IllegalArgumentException.class, () -> request.setStartDate(null), "Expected exception for null start date");
-    }
-
-    /**
-     * This test method is intended to test the validation of the MonitoringRequest object for empty values.
-     * It checks if the issue query, label, start date, and end date are not empty strings.
-     * If any of these values are empty, it should throw an IllegalArgumentException.
-     */
-    @Test
-    public void testMonitoringRequestValidationEmptyValues() {
-        MonitoringRequest request = new MonitoringRequest();
-        
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> request.setissueString(""), "Expected exception for empty issue query");
-        assertThrows(IllegalArgumentException.class, () -> request.setLabel(""), "Expected exception for empty label");
-    }
-
-    /**
-     * This test method is intended to test the validation of the MonitoringRequest object for date order.
-     * It checks if the start date is before the end date and vice versa.
-     * If the dates are in the wrong order, it should throw an IllegalArgumentException.
-     */
-    @Test
-    public void testMonitoringRequestValidationDateOrder() {
-        MonitoringRequest request = new MonitoringRequest();
-        MonitoringRequest request2 = new MonitoringRequest();
-        
-        Calendar cal_01_01_2023 = Calendar.getInstance();
-        cal_01_01_2023.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
-        Calendar cal_02_01_2023 = Calendar.getInstance();
-        cal_02_01_2023.set(2023, Calendar.JANUARY, 2, 23, 59, 59);
-        Date endDate = cal_01_01_2023.getTime();
-        Date startDate = cal_02_01_2023.getTime();
-        Date endDate2 = cal_01_01_2023.getTime();
-        Date startDate2 = cal_02_01_2023.getTime(); 
-        
-        // Assert that the setters throw IllegalArgumentException when end date is before start date
-        request.setStartDate(startDate);
-        assertThrows(IllegalArgumentException.class, () -> request.setEndDate(endDate), "Expected exception for end date before start date");
-        
-        // Assert that the setters throw IllegalArgumentException when start date is after end date
-        request2.setEndDate(endDate2);
-        assertThrows(IllegalArgumentException.class, () -> request2.setStartDate(startDate2), "Expected exception for start date after end date");
     }
 }

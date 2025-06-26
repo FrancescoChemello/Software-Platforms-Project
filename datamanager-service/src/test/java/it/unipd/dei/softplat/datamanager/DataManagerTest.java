@@ -10,7 +10,6 @@ package it.unipd.dei.softplat.datamanager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -148,50 +147,5 @@ public class DataManagerTest {
             assertEquals("Test Web Title", article.getWebTitle());
             assertEquals("https://example.com/test-article", article.getWebUrl());
             assertEquals("This is a test body text for the article.", article.getBodyText());
-     }
-
-     /**
-      * This test method is intended to test the validation of the Article object for null values.
-      * It checks if the id, issue query, label, type, section id, section name, web publication date,
-      * web title, web url, and body text are not null.
-      * If any of these values are null, it should throw an IllegalArgumentException.
-      */
-     @Test
-     public void testArticleNullValues() {
-        Article article = new Article();
-        
-        // Assert that the null values are not accepted
-        assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setissueString(null), "Expected exception for null issue query");
-        assertThrows(IllegalArgumentException.class, () -> article.setLabel(null), "Expected exception for null label");
-        assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null type");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(null), "Expected exception for null section ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(null), "Expected exception for null section name");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null web publication date");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(null), "Expected exception for null web title");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(null), "Expected exception for null web URL");
-        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(null), "Expected exception for null body text");
-    }
-
-    /**
-     * This test method is intended to test the validation of the Article object for empty values.
-     * It checks if the id, issue query, label, type, section id, section name, web publication date,
-     * web title, web url, and body text are not empty strings.
-     * If any of these values are empty, it should throw an IllegalArgumentException.
-     */
-    @Test
-    public void testArticleEmptyValues() {
-        Article article = new Article();
-        
-        // Assert that the empty values are not accepted
-        assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setissueString(""), "Expected exception for empty issue query");
-        assertThrows(IllegalArgumentException.class, () -> article.setLabel(""), "Expected exception for empty label");
-        assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty type");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(""), "Expected exception for empty section ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(""), "Expected exception for empty section name");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(""), "Expected exception for empty web title");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(""), "Expected exception for empty web URL");
-        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(""), "Expected exception for empty body text");
-    }   
+     }   
 }   

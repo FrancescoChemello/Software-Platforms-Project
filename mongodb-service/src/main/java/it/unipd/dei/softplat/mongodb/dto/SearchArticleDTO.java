@@ -56,12 +56,8 @@ public class SearchArticleDTO {
     /**
      * Sets the name of the collection in MongoDB.
      * @param collectionName
-     * @throws IllegalArgumentException if the collection name is null or empty
      */
     public void setCollectionName(String collectionName) {
-        if (collectionName == null || collectionName.isEmpty()) {
-            throw new IllegalArgumentException("Collection name cannot be null or empty");
-        }
         this.collectionName = collectionName;
     }
 
@@ -76,12 +72,8 @@ public class SearchArticleDTO {
     /**
      * Sets the query string to search for articles.
      * @param query
-     * @throws IllegalArgumentException if the query is null or empty
      */
     public void setQuery(String query) {
-        if (query == null || query.isEmpty()) {
-            throw new IllegalArgumentException("Query cannot be null or empty");
-        }
         this.query = query;
     }
 
@@ -96,12 +88,8 @@ public class SearchArticleDTO {
     /**
      * Sets the list of article IDs to search for.
      * @param ids
-     * @throws IllegalArgumentException if the list of IDs is null
      */
     public void setIds(List<String> ids) {
-        if (ids == null) {
-            throw new IllegalArgumentException("IDs cannot be null");
-        }
         this.ids = ids;
     }
 }

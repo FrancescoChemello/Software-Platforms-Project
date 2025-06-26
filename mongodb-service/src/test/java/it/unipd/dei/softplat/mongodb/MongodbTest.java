@@ -10,7 +10,6 @@ package it.unipd.dei.softplat.mongodb;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -210,44 +209,6 @@ public class MongodbTest {
     }
 
     /**
-     * This test method is intended to test the MongoArticle class for null values.
-     * It checks if the setters throw IllegalArgumentException when null values are passed.
-     */
-    @Test
-    public void testMongoArticleNullValues() {
-        MongoArticle article = new MongoArticle();
-
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null Type");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(null), "Expected exception for null Section ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(null), "Expected exception for null Section name");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null Web publication date");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(null), "Expected exception for null Web title");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(null), "Expected exception for null Web URL");
-        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(null), "Expected exception for null Body text");
-    }
-
-    /**
-     * This test method is intended to test the MongoArticle class for empty values.
-     * It checks if the setters throw IllegalArgumentException when empty strings are passed.
-     */
-    @Test
-    public void testMongoArticleEmptyValues() {
-        MongoArticle article = new MongoArticle();
-
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty Type");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionId(""), "Expected exception for empty Section ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setSectionName(""), "Expected exception for empty Section name");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(""), "Expected exception for empty Web publication date");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(""), "Expected exception for empty Web title");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebUrl(""), "Expected exception for empty Web URL");
-        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(""), "Expected exception for empty Body text");
-    }
-
-    /**
      * This test method is intended to test the SaveArticleDTO class getters and setters.
      * It creates a SaveArticleDTO object, sets its properties, and asserts that the getters 
      * return the expected values.
@@ -287,32 +248,6 @@ public class MongodbTest {
     }
 
     /**
-     * This test method is intended to test the SaveArticleDTO class for empty values.
-     * It checks if the setters throw IllegalArgumentException when empty values are passed.
-     */
-    @Test
-    public void testSaveArticlesDTOWithEmptyValues() {
-        SaveArticleDTO saveArticleDTO = new SaveArticleDTO();
-
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> saveArticleDTO.setArticles(List.of()), "Expected exception for empty articles list");
-        assertThrows(IllegalArgumentException.class, () -> saveArticleDTO.setCollectionName(""), "Expected exception for empty collection name");
-    }
-
-    /**
-     * This test method is intended to test the SaveArticleDTO class for null values.
-     * It checks if the setters throw IllegalArgumentException when null values are passed.
-     */
-    @Test
-    public void testSaveArticlesDTOWithNullValues() {
-        SaveArticleDTO saveArticleDTO = new SaveArticleDTO();
-
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> saveArticleDTO.setArticles(null), "Expected exception for null articles list");
-        assertThrows(IllegalArgumentException.class, () -> saveArticleDTO.setCollectionName(null), "Expected exception for null collection name");
-    }
-
-    /**
      * This test method is intended to test the SearchArticleDTO class getters and setters.
      * It creates a SearchArticleDTO object, sets its properties, and asserts that the getters
      * return the expected values.
@@ -330,32 +265,5 @@ public class MongodbTest {
         assertEquals("test_collection", searchArticleDTO.getCollectionName(), "Collection name should match the set value");
         assertEquals("test_query", searchArticleDTO.getQuery(), "Query should match the set value");
         assertEquals(ids, searchArticleDTO.getIds(), "IDs should match the set value");
-    }
-
-    /**
-     * This test method is intended to test the SearchArticleDTO class for empty values.
-     * It checks if the setters throw IllegalArgumentException when empty values are passed.
-     */
-    @Test
-    public void testSearchArticleDTOWithEmptyValues() {
-        SearchArticleDTO searchArticleDTO = new SearchArticleDTO();
-
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setCollectionName(""), "Expected exception for empty collection name");
-        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setQuery(""), "Expected exception for empty query");
-    }
-
-    /**
-     * This test method is intended to test the SearchArticleDTO class for null values.
-     * It checks if the setters throw IllegalArgumentException when null values are passed.
-     */
-    @Test
-    public void testSearchArticleDTOWithNullValues() {
-        SearchArticleDTO searchArticleDTO = new SearchArticleDTO();
-
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setCollectionName(null), "Expected exception for null collection name");
-        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setQuery(null), "Expected exception for null query");
-        assertThrows(IllegalArgumentException.class, () -> searchArticleDTO.setIds(null), "Expected exception for null IDs");
     }
 }

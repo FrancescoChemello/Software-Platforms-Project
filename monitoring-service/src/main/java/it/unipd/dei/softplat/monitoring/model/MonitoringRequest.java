@@ -61,12 +61,8 @@ public class MonitoringRequest {
     /**
      * Sets the query to be used for searching issues.
      * @param issueString
-     * @throws IllegalArgumentException if the issue string is null or empty
      */
     public void setissueString(String issueString) {
-        if (issueString == null || issueString.isEmpty()) {
-            throw new IllegalArgumentException("Issue string cannot be null or empty");
-        }
         this.issueString = issueString;
     }
 
@@ -81,12 +77,8 @@ public class MonitoringRequest {
     /**
      * Sets the label to filter issues.
      * @param label
-     * @throws IllegalArgumentException if the label is null or empty
      */
     public void setLabel(String label) {
-        if (label == null || label.isEmpty()) {
-            throw new IllegalArgumentException("Label cannot be null or empty");
-        }
         this.label = label;
     }
 
@@ -101,15 +93,8 @@ public class MonitoringRequest {
     /**
      * Sets the start date for the monitoring period.
      * @param startDate
-     * @throws IllegalArgumentException if the start date is null,
      */
     public void setStartDate(Date startDate) {
-        if(startDate == null) {
-            throw new IllegalArgumentException("Start date cannot be null.");
-        }
-        if(this.endDate != null && startDate.compareTo(this.endDate) > 0) {
-            throw new IllegalArgumentException("Start date cannot be after end date.");
-        }
         this.startDate = startDate;
     }
 
@@ -124,12 +109,8 @@ public class MonitoringRequest {
     /**
      * Sets the end date for the monitoring period.
      * @param endDate
-     * @throws IllegalArgumentException if the end date is null or before the start date
      */
     public void setEndDate(Date endDate) {
-        if(this.startDate != null && this.startDate.compareTo(endDate) > 0) {
-            throw new IllegalArgumentException("End date cannot be before start date.");
-        }
         this.endDate = endDate;
     }
 }

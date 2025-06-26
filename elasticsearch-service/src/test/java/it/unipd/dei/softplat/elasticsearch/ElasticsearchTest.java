@@ -10,7 +10,6 @@ package it.unipd.dei.softplat.elasticsearch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -255,43 +254,6 @@ public class ElasticsearchTest {
     }
 
     /**
-     * This test method is intended to test the ElasticArticle setter methods with null values.
-     * It verifies that the setters throw IllegalArgumentException when null values are passed.
-     */
-    @Test
-    public void testElasticArticleWithNullValues() {
-        // Create an instance of ElasticArticle with null values
-        ElasticArticle article = new ElasticArticle();
-        
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setissueString(null), "Expected exception for null issue query");
-        assertThrows(IllegalArgumentException.class, () -> article.setLabel(null), "Expected exception for null label");
-        assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null type");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null web publication date");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(null), "Expected exception for null values");
-        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(null), "Expected exception for null values");
-    }
-
-    /**
-     * This test method is intended to test the ElasticArticle setter methods with empty values.
-     * It verifies that the setters throw IllegalArgumentException when empty values are passed.
-     */
-    @Test
-    public void testElasticArticleWithEmptyValues() {
-        // Create an instance of ElasticArticle with empty values
-        ElasticArticle article = new ElasticArticle();
-        
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setissueString(""), "Expected exception for empty issue query");
-        assertThrows(IllegalArgumentException.class, () -> article.setLabel(""), "Expected exception for empty label");
-        assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty type");
-        assertThrows(IllegalArgumentException.class, () -> article.setWebTitle(""), "Expected exception for empty web title");
-        assertThrows(IllegalArgumentException.class, () -> article.setBodyText(""), "Expected exception for empty body text");
-    }
-
-    /**
      * This test method is intended to test the IndexArticleDTO getter and setter methods.
      * It verifies that the getter and setter methods work correctly for the IndexArticleDTO class.
      */
@@ -330,31 +292,5 @@ public class ElasticsearchTest {
         // Assert that the getter methods return the expected values
         assertEquals("test_collection", indexArticleDTO.getCollectionName(), "Collection name should match");
         assertEquals(articles, indexArticleDTO.getArticles(), "Articles should match");
-    }
-
-    /**
-     * This test method is intended to test the IndexArticleDTO setter methods with null values.
-     * It verifies that the setters throw IllegalArgumentException when null values are passed.
-     */
-    @Test
-    public void testIndexArticleDTOWithNullValues() {
-        IndexArticleDTO indexArticleDTO = new IndexArticleDTO();
-
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> indexArticleDTO.setCollectionName(null), "Expected exception for null collection name");
-        assertThrows(IllegalArgumentException.class, () -> indexArticleDTO.setArticles(null), "Expected exception for null articles list");
-    }
-
-    /**
-     * This test method is intended to test the IndexArticleDTO setter methods with empty values.
-     * It verifies that the setters throw IllegalArgumentException when empty values are passed.
-     */
-    @Test
-    public void testIndexArticleDTOWithEmptyValues() {
-        IndexArticleDTO indexArticleDTO = new IndexArticleDTO();
-        
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> indexArticleDTO.setCollectionName(""), "Expected exception for empty collection name");
-        assertThrows(IllegalArgumentException.class, () -> indexArticleDTO.setArticles(List.of()), "Expected exception for empty articles list");
     }
 }

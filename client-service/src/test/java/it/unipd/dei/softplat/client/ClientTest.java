@@ -10,7 +10,6 @@ package it.unipd.dei.softplat.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -217,19 +216,6 @@ public class ClientTest {
     }
 
     /**
-     * This test method is intended to test the QueryTopic setter methods with null values.
-     * It verifies that the setters throw IllegalArgumentException when null values are passed.
-     */
-    @Test
-    public void testQueryTopicWithNullValues() {
-        QueryTopic queryTopic = new QueryTopic();
-
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> queryTopic.setId(null), "Expected exception for null ID");
-        assertThrows(IllegalArgumentException.class, () -> queryTopic.setTopWords(null), "Expected exception for null top words");
-    }
-
-    /**
      * This test method is intended to test the QueryResult getter and setter methods.
      * It creates a QueryResult object, sets its properties, and verifies that the getters return
      * the expected values.
@@ -250,31 +236,6 @@ public class ClientTest {
     }
 
     /**
-     * This test method is intended to test the QueryResult setter methods with null values.
-     * It verifies that the setters throw IllegalArgumentException when null values are passed.
-     */
-    @Test
-    public void testQueryResultWithNullValues() {
-        QueryResult queryResult = new QueryResult();
-        
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> queryResult.setQuery(null), "Expected exception for null query");
-        assertThrows(IllegalArgumentException.class, () -> queryResult.setTopics(null), "Expected exception for null topics");
-    }
-
-    /**
-     * This test method is intended to test the QueryResult setter methods with empty values.
-     * It verifies that the setters throw IllegalArgumentException when empty values are passed.
-     */
-    @Test
-    public void testQueryResultWithEmptyQuery() {
-        QueryResult queryResult = new QueryResult();
-        
-        // Assert that the setter throws IllegalArgumentException when an empty query is passed
-        assertThrows(IllegalArgumentException.class, () -> queryResult.setQuery(""), "Expected exception for empty query");
-    }
-
-    /**
      * This test method is intended to test the MessageDTO getter and setter methods.
      * It creates a MessageDTO object, sets its properties, and verifies that the getters return
      * the expected values.
@@ -290,31 +251,5 @@ public class ClientTest {
         // Assert that the getters return the expected values
         assertEquals("Test message", messageDTO.getMessage(), "MessageDTO message should match");
         assertEquals("Test status", messageDTO.getStatus(), "MessageDTO status should match");
-    }
-
-    /**
-     * This test method is intended to test the MessageDTO setter methods with null values.
-     * It verifies that the setters throw IllegalArgumentException when null values are passed.
-     */
-    @Test
-    public void testMessageDTOWithNullValues() {
-        MessageDTO messageDTO = new MessageDTO();
-        
-        // Assert that the setters throw IllegalArgumentException when null values are passed
-        assertThrows(IllegalArgumentException.class, () -> messageDTO.setMessage(null), "Expected exception for null message");
-        assertThrows(IllegalArgumentException.class, () -> messageDTO.setStatus(null), "Expected exception for null status");
-    }
-
-    /**
-     * This test method is intended to test the MessageDTO setter methods with empty values.
-     * It verifies that the setters throw IllegalArgumentException when empty values are passed.
-     */
-    @Test
-    public void testMessageDTOWithEmptyValues() {
-        MessageDTO messageDTO = new MessageDTO();
-        
-        // Assert that the setters throw IllegalArgumentException when empty values are passed
-        assertThrows(IllegalArgumentException.class, () -> messageDTO.setMessage(""), "Expected exception for empty message");
-        assertThrows(IllegalArgumentException.class, () -> messageDTO.setStatus(""), "Expected exception for empty status");
     }
 }

@@ -46,12 +46,8 @@ public class QueryResult {
     /**
      * Sets the query string.
      * @param query the query string to set
-     * @throws IllegalArgumentException if the query is null or empty
      */
     public void setQuery(String query) {
-        if (query == null || query.isEmpty()) {
-            throw new IllegalArgumentException("Query cannot be null or empty");
-        }
         this.query = query;
     }
 
@@ -68,9 +64,6 @@ public class QueryResult {
      * @param topics the list of topics to set
      */
     public void setTopics(List<QueryTopic> topics) {
-        if (topics == null) {
-            throw new IllegalArgumentException("Topics cannot be null");
-        }
         this.topics = topics;
     }
 }

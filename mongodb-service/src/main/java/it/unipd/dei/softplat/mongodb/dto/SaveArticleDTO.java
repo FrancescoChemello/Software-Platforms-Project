@@ -54,12 +54,8 @@ public class SaveArticleDTO {
     /**
      * Sets the list of article to search for.
      * @param articles
-     * @throws IllegalArgumentException if articles is null or empty
      */
     public void setArticles(List<MongoArticle> articles) {
-        if (articles == null || articles.isEmpty()) {
-            throw new IllegalArgumentException("Articles list cannot be null or empty");
-        }
         this.articles = articles;
     }
 
@@ -74,12 +70,8 @@ public class SaveArticleDTO {
     /**
      * Sets the name of the collection in MongoDB.
      * @param collectionName
-     * @throws IllegalArgumentException if the collection name is null or empty
      */
     public void setCollectionName(String collectionName) {
-        if (collectionName == null || collectionName.isEmpty()) {
-            throw new IllegalArgumentException("Collection name cannot be null or empty");
-        }
         this.collectionName = collectionName;
     }
 }

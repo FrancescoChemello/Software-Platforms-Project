@@ -53,12 +53,8 @@ public class SearchArticleDTO {
     /**
      * Sets the search query.
      * @param query The search query to set.
-     * @throws IllegalArgumentException if the query is null or empty
      */
     public void setQuery(String query) {
-        if (query == null || query.isEmpty()) {
-            throw new IllegalArgumentException("Query cannot be null or empty");
-        }
         this.query = query;
     }
 
@@ -73,12 +69,8 @@ public class SearchArticleDTO {
     /**
      * Sets the corpus to search in.
      * @param corpus The corpus to set.
-     * @throws IllegalArgumentException if the corpus is null or empty
      */
     public void setCorpus(String corpus) {
-        if (corpus == null || corpus.isEmpty()) {
-            throw new IllegalArgumentException("Corpus cannot be null or empty");
-        }
         this.corpus = corpus;
     }
 
@@ -95,9 +87,6 @@ public class SearchArticleDTO {
      * @param startDate The start date to set.
      */
     public void setStartDate(Date startDate) {
-        if(this.endDate != null && startDate.compareTo(this.endDate) > 0) {
-            throw new IllegalArgumentException("Start date cannot be after end date.");
-        }
         this.startDate = startDate;
     }
 
@@ -114,9 +103,6 @@ public class SearchArticleDTO {
      * @param endDate The end date to set.
      */
     public void setEndDate(Date endDate) {
-        if(this.startDate != null && this.startDate.compareTo(endDate) > 0) {
-            throw new IllegalArgumentException("End date cannot be before start date.");
-        }
         this.endDate = endDate;
     }
 }

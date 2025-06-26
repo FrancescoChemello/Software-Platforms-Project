@@ -70,12 +70,8 @@ public class ElasticArticle {
     /**
      * Sets the unique identifier of the article.
      * @param id
-     * @throws IllegalArgumentException if the ID is null or empty
      */
     public void setId(String id) {
-        if (id == null || id.isEmpty()) {
-            throw new IllegalArgumentException("ID cannot be null or empty");
-        }
         this.id = id;
     }
 
@@ -92,12 +88,8 @@ public class ElasticArticle {
      * Sets the issue query associated with the article.
      * @param issueString
      * @see it.unipd.dei.softplat.monitoring.model.MonitoringRequest
-     * @throws IllegalArgumentException if the issue string is null or empty
      */
     public void setissueString(String issueString) {
-        if (issueString == null || issueString.isEmpty()) {
-            throw new IllegalArgumentException("Issue string cannot be null or empty");
-        }
         this.issueString = issueString;
     }
 
@@ -114,12 +106,8 @@ public class ElasticArticle {
      * Sets the label of the article.
      * @param label
      * @see it.unipd.dei.softplat.monitoring.model.MonitoringRequest
-     * @throws IllegalArgumentException if the label is null or empty
      */
     public void setLabel(String label) {
-        if (label == null || label.isEmpty()) {
-            throw new IllegalArgumentException("Label cannot be null or empty");
-        }
         this.label = label;
     }
 
@@ -134,12 +122,8 @@ public class ElasticArticle {
     /**
      * Sets the type of the article.
      * @param type
-     * @throws IllegalArgumentException if the type is null or empty
      */
     public void setType(String type) {
-        if (type == null || type.isEmpty()) {
-            throw new IllegalArgumentException("Type cannot be null or empty");
-        }
         this.type = type;
     }
     
@@ -154,12 +138,8 @@ public class ElasticArticle {
     /**
      * Sets the web publication date of the article.
      * @param webPublicationDate
-     * @throws IllegalArgumentException if the web publication date is null
      */
     public void setWebPublicationDate(Date webPublicationDate) {
-        if (webPublicationDate == null) {
-            throw new IllegalArgumentException("Web publication date cannot be null");
-        }
         this.webPublicationDate = webPublicationDate;
     }
     
@@ -174,12 +154,8 @@ public class ElasticArticle {
     /**
      * Sets the web title of the article.
      * @param webTitle
-     * @throws IllegalArgumentException if the web title is null or empty
      */
     public void setWebTitle(String webTitle) {
-        if (webTitle == null || webTitle.isEmpty()) {
-            throw new IllegalArgumentException("Web title cannot be null or empty");
-        }
         this.webTitle = webTitle;
     }
 
@@ -194,12 +170,8 @@ public class ElasticArticle {
     /**
      * Sets the body text of the article.
      * @param bodyText
-     * @throws IllegalArgumentException if the body text is null or empty
      */
     public void setBodyText(String bodyText) {
-        if (bodyText == null || bodyText.isEmpty()) {
-            throw new IllegalArgumentException("Body text cannot be null or empty");
-        }
         this.bodyText = bodyText;
     }
 

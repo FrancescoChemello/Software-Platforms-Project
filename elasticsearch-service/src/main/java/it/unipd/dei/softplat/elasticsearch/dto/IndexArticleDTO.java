@@ -49,12 +49,8 @@ public class IndexArticleDTO {
     /**
      * Sets the list of articles to index.
      * @param articles
-     * @throws IllegalArgumentException if the articles list is null or empty
      */
     public void setArticles(List<ElasticArticle> articles) {
-        if (articles == null || articles.isEmpty()) {
-            throw new IllegalArgumentException("Articles list cannot be null or empty");
-        }
         this.articles = articles;
     }
 
@@ -69,12 +65,8 @@ public class IndexArticleDTO {
     /**
      * Sets the name of the collection in Elasticsearch where the articles should be indexed.
      * @param collectionName
-     * @throws IllegalArgumentException if the collection name is null or empty
      */
     public void setCollectionName(String collectionName) {
-        if (collectionName == null || collectionName.isEmpty()) {
-            throw new IllegalArgumentException("Collection name cannot be null or empty");
-        }
         this.collectionName = collectionName;
     }
 }
