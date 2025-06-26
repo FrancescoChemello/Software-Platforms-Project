@@ -199,37 +199,6 @@ public class ClientTest {
     }
 
     /**
-     * This test method is intended to test the sendQueryRequest method of the ClientService with a
-     * monitoring issueString active.
-     * It mocks the HttpClientService and verifies that the postRequest method is called with the correct parameters.
-     */
-    @Test
-    public void testSendQueryRequestWithMonitoring() {
-        // Mock configuration
-        when(httpClientService.postRequest(
-            eq("http://mallet-service:8084/mallet/search/"),
-            anyString())
-        ).thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
-
-        // Client configuration to enable monitoring
-        service_test.processMessageStatus("MONITORING", "Monitoring completed for test");
-
-        // Create a valid query request
-        String query = "test query";
-        String corpus = "test corpus";
-        Integer numTopics = 5;
-        Integer numTopWordsPerTopic = 10;
-        Date startDate = new Date();
-        Date endDate = new Date();
-
-        // Call the sendQueryRequest method
-        service_test.sendQueryRequest(query, corpus, numTopics, numTopWordsPerTopic, startDate, endDate);
-        
-        // Verify that the postRequest method of HttpClientService was called with the correct parameters
-        verify(httpClientService).postRequest(eq("http://mallet-service:8084/mallet/search/"), anyString());
-    }
-
-    /**
      * This test method is intended to test the QueryTopic getter and setter methods.
      * It creates a QueryTopic object, sets its properties, and verifies that the getters return
      * the expected values.

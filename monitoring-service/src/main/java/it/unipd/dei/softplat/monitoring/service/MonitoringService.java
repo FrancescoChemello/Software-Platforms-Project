@@ -149,15 +149,16 @@ public class MonitoringService {
 
             /**
              * Note: 
-             * The Guardian API has a limit of 5000 requests per day and a maximum of 12 requests per second.
-             * I keep 1000 requests as a buffer to retry some requests in case of errors.
-             * So, the maximum number of requests per day is 4000, and each page has 10 articles.
+             * The Guardian API has a limit of 500 requests per day and a maximum of 1 request per second.
+             * I keep 50 requests as a buffer to retry some requests in case of errors.
+             * So, the maximum number of requests per day is 450, and each page has 10 articles.
              * Therefore, the maximum number of pages is:
-             *      4000 / (10 requests for articles + 1 request for the page) = 363 pages (rounded down). 
+             *      450 / (10 requests for articles + 1 request for the page) = 40 pages (rounded down). 
              */
             // TODO: Change the number of pages to 2 for testing purposes
             // Loop to retrieve articles from all pages
-            // for (int page = 1; page <= (request.getissueString().equals("example issue query") ? Math.min(2, responseTheGuardian.getPages()) : (responseTheGuardian.getTotal() < 4000 ? responseTheGuardian.getPages() : 363)); page++) {
+            // for (int page = 1; page <= (request.getissueString().equals("example issue query") ? Math.min(2, responseTheGuardian.getPages()) : (responseTheGuardian.getTotal() < 450 ? responseTheGuardian.getPages() : 40)); page++) {
+            // for (int page = 1; page <= (request.getissueString().equals("example issue query") ? Math.min(2, responseTheGuardian.getPages()) : responseTheGuardian.getPages()); page++) {
             for (int page = 1; page <= Math.min(2, responseTheGuardian.getPages()); page++) {
                 HttpResponse<JsonNode> response = null;
                 try {

@@ -96,16 +96,18 @@ public class DataManagerTest {
         verify(httpClientService).postRequest(eq("http://elasticsearch-service:8083/elastic/index/"), anyString());
 
         // Example of an invalid ArticleTopics object
-        List<Article> invalid_article_list = new ArrayList<>();
+        List<Article> emptyArticleList = new ArrayList<>();
 
         // Call saveArticles method with an empty list of articles
-        ResponseEntity <?> invalid_response = controller_test.saveArticles(invalid_article_list);
+        ResponseEntity <?> invalid_response = controller_test.saveArticles(emptyArticleList);
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(invalid_response, "Response should not be null");
         assertEquals(HttpStatus.BAD_REQUEST, invalid_response.getStatusCode(), "Response should have status code 400 Bad Request");
 
+        List<Article> nullArticleList = null;
+
         // Call saveArticles with null
-        ResponseEntity <?> null_response = controller_test.saveArticles(null);
+        ResponseEntity <?> null_response = controller_test.saveArticles(nullArticleList);
         // Assert that the response is not null and has a status code of 400 Bad Request
         assertNotNull(null_response, "Response should not be null");
         assertEquals(HttpStatus.BAD_REQUEST, null_response.getStatusCode(), "Response should have status code 400 Bad Request");

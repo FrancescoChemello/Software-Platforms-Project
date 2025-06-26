@@ -172,7 +172,7 @@ public class MalletService {
             
             // Add the articles to the InstanceList
             for (MalletArticle article : this.articles) {
-                Instance instance = new Instance(article.getBodyText(), article.getLabel(), article.getId(), "");
+                Instance instance = new Instance(article.getBodyText(), collectionName, article.getId(), "");
                 instances.addThruPipe(instance);
             }
             logger.info(String.format("Number of instances (docs): %s", instances.size()));

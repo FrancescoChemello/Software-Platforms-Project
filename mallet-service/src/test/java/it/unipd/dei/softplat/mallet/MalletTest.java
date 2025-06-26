@@ -45,6 +45,11 @@ public class MalletTest {
     @Autowired @InjectMocks
     private MalletController malletController;
 
+    /**
+     * Test the search functionality of MalletController.
+     * This test verifies that the search method of MalletController
+     * correctly handles valid and invalid search queries.
+     */
     @Test
     public void testSearchArticles() {
         // Mock configuration
@@ -105,6 +110,11 @@ public class MalletTest {
         assertEquals(HttpStatus.BAD_REQUEST, emptyResponse.getStatusCode(), "Response should have status code 400 Bad Request");
     }
 
+    /**
+     * Test the accumulation and processing of Mallet articles.
+     * This test verifies that the accumulate method of MalletController
+     * correctly accumulates articles and processes the result.
+     */
     @Test
     public void testAccumulationAndProcessResult() {
         // Mock configuration
@@ -116,10 +126,7 @@ public class MalletTest {
 
         MalletArticle article1 = new MalletArticle();
         article1.setId("1");
-        article1.setissueString("issue_query_1");
-        article1.setLabel("label_1");
         article1.setType("type_1");
-        article1.setTopics(List.of("topic1", "topic2"));
         article1.setSectionId("section_id_1");
         article1.setSectionName("section_name_1");
         article1.setWebPublicationDate("2023-10-01T12:00:00Z");
@@ -128,10 +135,7 @@ public class MalletTest {
         article1.setBodyText("Software engineering is a branch of both computer science and engineering focused on designing, developing, testing, and maintaining software applications. It involves applying engineering principles and computer programming expertise to develop software systems that meet user needs. The terms programmer and coder overlap software engineer, but they imply only the construction aspect of a typical software engineer workload. A software engineer applies a software development process, which involves defining, implementing, testing, managing, and maintaining software systems, as well as developing the software development process itself.");
         MalletArticle article2 = new MalletArticle();
         article2.setId("2");
-        article2.setissueString("issue_query_2");
-        article2.setLabel("label_2");
         article2.setType("type_2");
-        article2.setTopics(List.of("topic3", "topic4"));
         article2.setSectionId("section_id_2");
         article2.setSectionName("section_name_2");
         article2.setWebPublicationDate("2023-10-02T12:00:00Z");
@@ -191,7 +195,7 @@ public class MalletTest {
      * and that its properties can be set and retrieved correctly.
      */
     @Test
-    public void testMalletSearch() {
+    public void testMalletSearchGetterSetter() {
         MalletSearch malletSearch = new MalletSearch();
 
         malletSearch.setQuery("test query");
@@ -250,15 +254,12 @@ public class MalletTest {
      * and that its properties can be set and retrieved correctly.
      */
     @Test
-    public void testMalletArticle() {
+    public void testMalletArticleGetterSetter() {
         MalletArticle article = new MalletArticle();
 
         // Set the properties of the article object
         article.setId("test_id");
-        article.setissueString("issue_query_test");
-        article.setLabel("test_label");
         article.setType("test_type");
-        article.setTopics(List.of("topic1", "topic2", "topic3"));
         article.setSectionId("section_id_test");
         article.setSectionName("section_name_test");
         article.setWebPublicationDate("2023-10-01T12:00:00Z");
@@ -268,10 +269,7 @@ public class MalletTest {
 
         // Assertions to verify the properties
         assertEquals("test_id", article.getId());
-        assertEquals("issue_query_test", article.getissueString());
-        assertEquals("test_label", article.getLabel());
         assertEquals("test_type", article.getType());
-        assertEquals(List.of("topic1", "topic2", "topic3"), article.getTopics());
         assertEquals("section_id_test", article.getSectionId());
         assertEquals("section_name_test", article.getSectionName());
         assertEquals("2023-10-01T12:00:00Z", article.getWebPublicationDate());
@@ -291,8 +289,6 @@ public class MalletTest {
     
         // Assert that the setters throw IllegalArgumentException when empty values are passed
         assertThrows(IllegalArgumentException.class, () -> article.setId(""), "Expected exception for empty ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setissueString(""), "Expected exception for empty issue query");
-        assertThrows(IllegalArgumentException.class, () -> article.setLabel(""), "Expected exception for empty label");
         assertThrows(IllegalArgumentException.class, () -> article.setType(""), "Expected exception for empty type");
         assertThrows(IllegalArgumentException.class, () -> article.setSectionId(""), "Expected exception for empty section ID");
         assertThrows(IllegalArgumentException.class, () -> article.setSectionName(""), "Expected exception for empty section name");
@@ -313,10 +309,7 @@ public class MalletTest {
 
         // Assert that the setters throw IllegalArgumentException when null values are passed
         assertThrows(IllegalArgumentException.class, () -> article.setId(null), "Expected exception for null ID");
-        assertThrows(IllegalArgumentException.class, () -> article.setissueString(null), "Expected exception for null issue query");
-        assertThrows(IllegalArgumentException.class, () -> article.setLabel(null), "Expected exception for null label");
         assertThrows(IllegalArgumentException.class, () -> article.setType(null), "Expected exception for null type");
-        assertThrows(IllegalArgumentException.class, () -> article.setTopics(null), "Expected exception for null topics");
         assertThrows(IllegalArgumentException.class, () -> article.setSectionId(null), "Expected exception for null section ID");
         assertThrows(IllegalArgumentException.class, () -> article.setSectionName(null), "Expected exception for null section name");
         assertThrows(IllegalArgumentException.class, () -> article.setWebPublicationDate(null), "Expected exception for null web publication date");
@@ -337,10 +330,7 @@ public class MalletTest {
 
         MalletArticle article1 = new MalletArticle();
         article1.setId("test_id_1");
-        article1.setissueString("issue_query_test");
-        article1.setLabel("test_label");
         article1.setType("test_type_1");
-        article1.setTopics(List.of("topic1", "topic2", "topic3"));
         article1.setSectionId("section_id_test_1");
         article1.setSectionName("section_name_test_1");
         article1.setWebPublicationDate("2023-10-01T12:00:00Z");
@@ -350,10 +340,7 @@ public class MalletTest {
 
         MalletArticle article2 = new MalletArticle();
         article2.setId("test_id_2");
-        article2.setissueString("issue_query_test");
-        article2.setLabel("test_label");
         article2.setType("test_type_2");
-        article2.setTopics(List.of("topic4", "topic5"));
         article2.setSectionId("section_id_test_2");
         article2.setSectionName("section_name_test_2");
         article2.setWebPublicationDate("2023-10-02T12:00:00Z");

@@ -8,8 +8,6 @@
 
 package it.unipd.dei.softplat.mallet.model;
 
-import java.util.List;
-
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -19,13 +17,7 @@ public class MalletArticle {
     @NotNull @NotEmpty
     private String id;
     @NotNull @NotEmpty
-    private String issueString;
-    @NotNull @NotEmpty
-    private String label;
-    @NotNull @NotEmpty
     private String type;
-    @NotNull
-    private List<String> topics;
     @NotNull @NotEmpty
     private String sectionId;
     @NotNull @NotEmpty
@@ -49,10 +41,7 @@ public class MalletArticle {
     /**
      * Constructor for MalletArticle with parameters.
      * @param id
-     * @param issueString
-     * @param label
      * @param type
-     * @param topics
      * @param sectionId
      * @param sectionName
      * @param webPublicationDate
@@ -60,12 +49,9 @@ public class MalletArticle {
      * @param webUrl
      * @param bodyText
      */
-    public MalletArticle (String id, String issueString, String label, String type, List<String> topics, String sectionId, String sectionName, String webPublicationDate, String webTitle, String webUrl, String bodyText) {
+    public MalletArticle (String id, String type, String sectionId, String sectionName, String webPublicationDate, String webTitle, String webUrl, String bodyText) {
         this.id = id;
-        this.issueString = issueString;
-        this.label = label;
         this.type = type;
-        this.topics = topics;
         this.sectionId = sectionId;
         this.sectionName = sectionName;
         this.webPublicationDate = webPublicationDate;
@@ -95,46 +81,6 @@ public class MalletArticle {
     }
 
     /**
-     * Returns the issue query associated with the article.
-     * @return the issue query associated with the article
-     */
-    public String getissueString() {
-        return this.issueString;
-    }
-
-    /**
-     * Sets the issue query associated with the article.
-     * @param issueString
-     * @throws IllegalArgumentException if the issue string is null or empty
-     */
-    public void setissueString(String issueString) {
-        if (issueString == null || issueString.isEmpty()) {
-            throw new IllegalArgumentException("Issue string cannot be null or empty");
-        }
-        this.issueString = issueString;
-    }
-
-    /**
-     * Returns the label of the article.
-     * @return the label of the article
-     */
-    public String getLabel() {
-        return this.label;
-    }
-
-    /**
-     * Sets the label of the article.
-     * @param label
-     * @throws IllegalArgumentException if the label is null or empty
-     */
-    public void setLabel(String label) {
-        if (label == null || label.isEmpty()) {
-            throw new IllegalArgumentException("Label cannot be null or empty");
-        }
-        this.label = label;
-    }
-
-    /**
      * Returns the type of the article.
      * @return the type of the article
      */
@@ -152,26 +98,6 @@ public class MalletArticle {
             throw new IllegalArgumentException("Type cannot be null or empty");
         }
         this.type = type;
-    }
-
-    /**
-     * Returns the list of topics associated with the article.
-     * @return the list of topics associated with the article
-     */
-    public List<String> getTopics() {
-        return this.topics;
-    }
-
-    /**
-     * Sets the list of topics associated with the article.
-     * @param topics
-     * @throws IllegalArgumentException if the topics list is null
-     */
-    public void setTopics(List<String> topics) {
-        if (topics == null) {
-            throw new IllegalArgumentException("Topics cannot be null");
-        }
-        this.topics = topics;
     }
 
     /**
