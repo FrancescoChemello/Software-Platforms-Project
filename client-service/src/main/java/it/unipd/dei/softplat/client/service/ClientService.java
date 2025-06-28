@@ -176,7 +176,7 @@ public class ClientService {
      */
     public void processMessageStatus(String status, String message) {
         if (status.equals("MONITORING")) {
-            if (message.contains("Monitoring completed"))
+            if (message.contains("Monitoring completed")) {
                 // Monitoring is enabled
                 isMonitoringEnabled = true;
                 logger.info("Monitoring is enabled. Message: " + message);
@@ -188,16 +188,17 @@ public class ClientService {
                     Thread.currentThread().interrupt(); // Restore interrupted status
                     logger.error("Thread was interrupted while trying to put the message in the queue.");
                 }
-        } else {
-            if(status.contains("API rate limit exceeded")){
-                logger.error("API rate limit exceeded.");
-                isApiRateLimitExceeded = true;
-                // Unable to continue due to API rate limit
-                try {
-                    ClientApp.monitoringQueue.put("API rate limit exceeded");
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt(); // Restore interrupted status
-                    logger.error("Thread was interrupted while trying to put the message in the queue.");
+            } else {
+                if(message.contains("API rate limit exceeded")) {
+                    logger.error("API rate limit exceeded.");
+                    isApiRateLimitExceeded = true;
+                    // Unable to continue due to API rate limit
+                    try {
+                        ClientApp.monitoringQueue.put("API rate limit exceeded");
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt(); // Restore interrupted status
+                        logger.error("Thread was interrupted while trying to put the message in the queue.");
+                    }
                 }
             }
         }
