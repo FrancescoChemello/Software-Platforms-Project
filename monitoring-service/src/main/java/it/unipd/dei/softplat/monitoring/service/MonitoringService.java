@@ -157,9 +157,9 @@ public class MonitoringService {
              */
             // TODO: Change the number of pages to 2 for testing purposes
             // Loop to retrieve articles from all pages
-            // for (int page = 1; page <= (request.getissueString().equals("example issue query") ? Math.min(2, responseTheGuardian.getPages()) : (responseTheGuardian.getTotal() < 450 ? responseTheGuardian.getPages() : 40)); page++) {
+            for (int page = 1; page <= (request.getissueString().equals("example issue query") ? Math.min(2, responseTheGuardian.getPages()) : (responseTheGuardian.getTotal() <= 400 ? responseTheGuardian.getPages() : 40)); page++) {
             // for (int page = 1; page <= (request.getissueString().equals("example issue query") ? Math.min(2, responseTheGuardian.getPages()) : responseTheGuardian.getPages()); page++) {
-            for (int page = 1; page <= Math.min(2, responseTheGuardian.getPages()); page++) {
+            // for (int page = 1; page <= Math.min(2, responseTheGuardian.getPages()); page++) {
                 HttpResponse<JsonNode> response = null;
                 try {
                     // Query the page [page]
