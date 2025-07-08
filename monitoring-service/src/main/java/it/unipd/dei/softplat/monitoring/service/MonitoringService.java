@@ -155,11 +155,9 @@ public class MonitoringService {
              * Therefore, the maximum number of pages is:
              *      450 / (10 requests for articles + 1 request for the page) = 40 pages (rounded down). 
              */
-            // TODO: Change the number of pages to 2 for testing purposes
             // Loop to retrieve articles from all pages
             for (int page = 1; page <= (request.getissueString().equals("example issue query") ? Math.min(2, responseTheGuardian.getPages()) : (responseTheGuardian.getTotal() <= 400 ? responseTheGuardian.getPages() : 40)); page++) {
             // for (int page = 1; page <= (request.getissueString().equals("example issue query") ? Math.min(2, responseTheGuardian.getPages()) : responseTheGuardian.getPages()); page++) {
-            // for (int page = 1; page <= Math.min(2, responseTheGuardian.getPages()); page++) {
                 HttpResponse<JsonNode> response = null;
                 try {
                     // Query the page [page]
