@@ -50,12 +50,14 @@ public class ElasticArticle {
      * @param type
      * @param webPublicationDate
      */
-    public ElasticArticle(String id, String issueString, String label, String type, Date webPublicationDate) {
+    public ElasticArticle(String id, String issueString, String label, String type, Date webPublicationDate, String webTitle, String bodyText) {
         this.id = id;
         this.issueString = issueString;
         this.label = label;
         this.type = type;
         this.webPublicationDate = webPublicationDate;
+        this.webTitle = webTitle;
+        this.bodyText = bodyText;
     }
 
 
