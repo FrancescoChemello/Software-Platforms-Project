@@ -215,17 +215,28 @@ public class MalletService {
             queryResult.put("query", query);
             ArrayList<JSONObject> articleTopics = new ArrayList<JSONObject>();
             // Extract the top words from each article
-            for (MalletArticle article : this.articles) {
+            for (int i = 0; i < this.articles.size(); i++) {
+                MalletArticle article = this.articles.get(i);
                 JSONObject topwordsArticle = new JSONObject();
+
+                // Get the topic distribution for the article
+                double[] topicDistribution = topicModel.getTopicProbabilities(i);
+
+                // Sort the topics by their distribution
+                List<Integer> sortedTopics = new ArrayList<>();
+                for (int t = 0; t < topicDistribution.length; t++) {
+                    sortedTopics.add(t);
+                }
+                sortedTopics.sort((t1, t2) -> Double.compare(topicDistribution[t2], topicDistribution[t1]));
+
                 // Extract the top words for each topic
                 List<String> topics = new ArrayList<>();
-                for (int t = 0; t < numTopics; t++) {
-                    for (Object obj : topicModel.getTopWords(numTopics)[t]) {
+                for (int t = 0; t < Math.min(numTopics, topicDistribution.length); t++) {
+                    int topicIndex = sortedTopics.get(t);
+                    for (Object obj : topicModel.getTopWords(numTopWordsPerTopic)[topicIndex]) {
                         topics.add((String) obj);
                     }
                 }
-                // Sort topics in alphabetical order
-                topics.sort(String::compareTo);
                 topwordsArticle.put("id", article.getId());
                 topwordsArticle.put("topWords", new JSONArray(topics));
                 // Add the article with its topics to the list
