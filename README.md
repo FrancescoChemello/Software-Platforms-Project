@@ -144,7 +144,7 @@ This platform allows expert users (e.g., journalists or sociologists) to monitor
 3. **Search and analysis:**  
    The user submits a new query (e.g., `"ChatGPT"`) to extract all articles matching that query among those relevant to the issue.
 4. **Theme extraction:**  
-   The platform analyzes the resulting subcorpus and returns a representation of the main themes discussed.
+   The platform analyzes the resulting subcorpus and returns a list of main topics (themes), each described by its most representative keywords.
 
 This workflow helps users study how specific topics are discussed in the media over time.
 
