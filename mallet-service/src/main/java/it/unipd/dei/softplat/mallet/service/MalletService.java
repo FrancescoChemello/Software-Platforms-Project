@@ -213,34 +213,26 @@ public class MalletService {
             
             // Prepare the articles to be sent to the Client Service
             queryResult.put("query", query);
+
             ArrayList<JSONObject> articleTopics = new ArrayList<JSONObject>();
-            // Extract the top words from each article
-            for (int i = 0; i < this.articles.size(); i++) {
-                MalletArticle article = this.articles.get(i);
+
+            for (int t = 0; t < numTopics; t++) {
+
+                // Create a JSON object for each topic
                 JSONObject topwordsArticle = new JSONObject();
 
-                // Get the topic distribution for the article
-                double[] topicDistribution = topicModel.getTopicProbabilities(i);
-
-                // Sort the topics by their distribution
-                List<Integer> sortedTopics = new ArrayList<>();
-                for (int t = 0; t < topicDistribution.length; t++) {
-                    sortedTopics.add(t);
-                }
-                sortedTopics.sort((t1, t2) -> Double.compare(topicDistribution[t2], topicDistribution[t1]));
-
                 // Extract the top words for each topic
-                List<String> topics = new ArrayList<>();
-                for (int t = 0; t < Math.min(numTopics, topicDistribution.length); t++) {
-                    int topicIndex = sortedTopics.get(t);
-                    for (Object obj : topicModel.getTopWords(numTopWordsPerTopic)[topicIndex]) {
-                        topics.add((String) obj);
-                    }
+                List<String> topWords = new ArrayList<>();
+                for (Object obj : topicModel.getTopWords(numTopWordsPerTopic)[t]) {
+                    topWords.add((String) obj);
                 }
-                topwordsArticle.put("id", article.getId());
-                topwordsArticle.put("topWords", new JSONArray(topics));
+
+                // Add the topic ID and top words to the JSON object
+                topwordsArticle.put("id", t);
+                topwordsArticle.put("topWords", new JSONArray(topWords));
                 // Add the article with its topics to the list
                 articleTopics.add(topwordsArticle);
+
             }
             // Add the articles to the query result
             queryResult.put("topics", new JSONArray(articleTopics));

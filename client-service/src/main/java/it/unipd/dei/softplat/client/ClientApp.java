@@ -311,9 +311,9 @@ public class ClientApp {
                             System.out.println("No articles found for the query: " + result.getQuery());
                             System.out.println("Please try a different query.");
                         } else {
-                            System.out.println("Found " + result.getTopics().size() + " articles for the query: " + result.getQuery());
+                            System.out.println("Found " + result.getTopics().size() + " topics for the query: " + result.getQuery());
                             for (QueryTopic topic : result.getTopics()) {
-                                System.out.println("Article ID: " + topic.getId());
+                                System.out.println("Topic ID: " + topic.getId());
                                 System.out.println("Top words: " + String.join(", ", topic.getTopWords()));
                                 System.out.println();
                             }
