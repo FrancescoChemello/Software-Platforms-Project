@@ -5,7 +5,7 @@ The project's objective is to build a platform for obtaining articles from onlin
 
 This project was developed as part of the [Software Platforms](https://stem.elearning.unipd.it/course/view.php?id=8355) course.
 
-*Computers and Networks Security* is a course of the [Master Degree in Computer Engineering](https://degrees.dei.unipd.it/master-degrees/computer-engineering/) of the  [Department of Information Engineering](https://www.dei.unipd.it/en/), [University of Padua](https://www.unipd.it/en/), Italy.
+*Software Platforms* is a course of the [Master Degree in Computer Engineering](https://degrees.dei.unipd.it/master-degrees/computer-engineering/) of the  [Department of Information Engineering](https://www.dei.unipd.it/en/), [University of Padua](https://www.unipd.it/en/), Italy.
 
 ## Dependencies ##
 
